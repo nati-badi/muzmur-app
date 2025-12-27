@@ -10,6 +10,24 @@ const { COLORS, FONTS, SPACING } = require('../constants/theme');
 const { getAllSections } = require('../constants/sections');
 const mezmursData = require('../data/mezmurs.json');
 
+// Skeleton loader for a premium feel during "fetching"
+const SkeletonCard = () => (
+  <YStack 
+    backgroundColor="$background"
+    padding="$4"
+    borderRadius="$4"
+    marginBottom="$3"
+    borderWidth={1}
+    borderColor="$borderColor"
+    opacity={0.5}
+  >
+    <XStack space="$3" alignItems="center">
+      <Circle size={10} backgroundColor="$borderColor" />
+      <YStack backgroundColor="$borderColor" height={16} width="60%" borderRadius="$2" />
+    </XStack>
+  </YStack>
+);
+
 // Memoized list item component to prevent unnecessary re-renders
 const MezmurListItem = memo(({ item, isFavorite, onToggleFavorite, onPress, getStatusColor }) => {
   const calculatedCategory = item.category;
@@ -73,6 +91,7 @@ const HomeScreen = ({ navigation }) => {
   const [selectedSection, setSelectedSection] = useState('All'); // Section filter
   const [sectionModalVisible, setSectionModalVisible] = useState(false);
   const [favorites, setFavorites] = useState([]);
+  const [isLoadingData, setIsLoadingData] = useState(true);
 
   const filters = ['All', 'አጭር', 'ረጅም'];
   const sections = ['All', ...getAllSections()];
@@ -131,21 +150,29 @@ const HomeScreen = ({ navigation }) => {
   }, []);
 
   useEffect(() => {
-    const query = searchQuery.toLowerCase();
-    const filtered = mezmursWithCategory.filter(item => {
-      const matchesSearch =
-        item.title.toLowerCase().includes(query) ||
-        item.lyrics?.toLowerCase().includes(query);
+    setIsLoadingData(true);
+    
+    const timer = setTimeout(() => {
+      const query = searchQuery.toLowerCase();
+      const filtered = mezmursWithCategory.filter(item => {
+        const matchesSearch =
+          item.title.toLowerCase().includes(query) ||
+          item.lyrics?.toLowerCase().includes(query);
 
-      const matchesFilter =
-        selectedFilter === 'All' || item.category === selectedFilter;
+        const matchesFilter =
+          selectedFilter === 'All' || item.category === selectedFilter;
 
-      const matchesSection =
-        selectedSection === 'All' || item.section === selectedSection;
+        const matchesSection =
+          selectedSection === 'All' || item.section === selectedSection;
 
-      return matchesSearch && matchesFilter && matchesSection;
-    });
-    setFilteredMezmurs(filtered);
+        return matchesSearch && matchesFilter && matchesSection;
+      });
+      
+      setFilteredMezmurs(filtered);
+      setIsLoadingData(false);
+    }, 400);
+
+    return () => clearTimeout(timer);
   }, [searchQuery, selectedFilter, selectedSection, mezmursWithCategory]);
 
   const getStatusColor = useCallback((category) => {
@@ -181,7 +208,7 @@ const HomeScreen = ({ navigation }) => {
         paddingVertical="$3"
         marginBottom="$2"
       >
-        <Text fontFamily="$heading" fontSize={28} fontWeight="700" color="$color">{"ቅዱስ ዜማ"}</Text>
+        <Text fontFamily="$heading" fontSize={28} fontWeight="700" color={COLORS.primary}>{"ቅዱስ ዜማ"}</Text>
         <Button
           circular
           size="$5"
@@ -193,9 +220,9 @@ const HomeScreen = ({ navigation }) => {
       </XStack>
 
       <FlatList
-        data={filteredMezmurs}
-        keyExtractor={item => String(item.id)}
-        renderItem={renderItem}
+        data={isLoadingData ? [1, 2, 3, 4, 5, 6] : filteredMezmurs}
+        keyExtractor={(item, index) => isLoadingData ? `skeleton-${index}` : String(item.id)}
+        renderItem={isLoadingData ? () => <SkeletonCard /> : renderItem}
         getItemLayout={getItemLayout}
         removeClippedSubviews={true}
         maxToRenderPerBatch={10}
@@ -259,6 +286,16 @@ const HomeScreen = ({ navigation }) => {
               <Ionicons name="chevron-down" size={20} color={COLORS.primary} />
             </XStack>
           </YStack>
+        }
+        ListEmptyComponent={
+          !isLoadingData && (
+            <YStack py="$10" ai="center" jc="center" space="$4">
+              <Ionicons name="search-outline" size={64} color="$borderColor" />
+              <Text fontFamily="$body" color="$colorSecondary" fontSize="$5" textAlign="center">
+                ምንም መዝሙር አልተገኘም
+              </Text>
+            </YStack>
+          )
         }
       />
 

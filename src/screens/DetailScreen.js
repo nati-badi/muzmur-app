@@ -206,44 +206,54 @@ const DetailScreen = ({ route, navigation }) => {
         left={0} 
         right={0} 
         backgroundColor="rgba(255,255,255,0.98)" 
-        padding="$5" 
+        paddingVertical="$6"
+        paddingHorizontal="$5" 
         borderTopWidth={1} 
         borderTopColor="$borderColor" 
         alignItems="center" 
         paddingBottom={insets.bottom + 20}
         elevation="$5"
       >
-        <XStack space="$8" alignItems="center" marginBottom="$4">
-          <Button
-            circular
-            backgroundColor="transparent"
-            icon={<Ionicons name="play-back-circle-outline" size={44} color="$colorSecondary" />}
-            onPress={() => skip(-30)}
-            pressStyle={{ opacity: 0.7 }}
-          />
+        <XStack alignItems="center" justifyContent="center" space="$8" width="100%">
+          <YStack alignItems="center" space="$1">
+            <Button
+              circular
+              size="$4"
+              backgroundColor="transparent"
+              icon={<Ionicons name="refresh-outline" size={32} color="$colorSecondary" style={{ transform: [{ scaleX: -1 }] }} />}
+              onPress={() => skip(-5)}
+              pressStyle={{ opacity: 0.6 }}
+            />
+            <Text fontFamily="$body" fontSize="$1" color="$colorSecondary" fontWeight="bold">5s</Text>
+          </YStack>
 
           <Button
             circular
-            size="$6"
+            size="$7"
             backgroundColor="$primary"
-            icon={isLoading ? <ActivityIndicator color="white" /> : <Ionicons name={isPlaying ? "pause" : "play"} size={44} color="white" />}
+            icon={isLoading ? <ActivityIndicator color="white" /> : <Ionicons name={isPlaying ? "pause" : "play"} size={48} color="white" />}
             onPress={playPauseAudio}
             disabled={isLoading}
             pressStyle={{ opacity: 0.8 }}
-            elevation="$3"
+            elevation="$4"
           />
 
-          <Button
-            circular
-            backgroundColor="transparent"
-            icon={<Ionicons name="play-forward-circle-outline" size={44} color="$colorSecondary" />}
-            onPress={() => skip(30)}
-            pressStyle={{ opacity: 0.7 }}
-          />
+          <YStack alignItems="center" space="$1">
+            <Button
+              circular
+              size="$4"
+              backgroundColor="transparent"
+              icon={<Ionicons name="refresh-outline" size={32} color="$colorSecondary" />}
+              onPress={() => skip(5)}
+              pressStyle={{ opacity: 0.6 }}
+            />
+            <Text fontFamily="$body" fontSize="$1" color="$colorSecondary" fontWeight="bold">5s</Text>
+          </YStack>
         </XStack>
-        <XStack space="$2" alignItems="center">
-          <Ionicons name="time-outline" size={16} color="$colorSecondary" />
-          <Text fontFamily="$body" fontSize="$3" color="$colorSecondary" fontWeight="600">
+        
+        <XStack space="$2" alignItems="center" marginTop="$4" opacity={0.8}>
+          <Ionicons name="time-outline" size={14} color="$colorSecondary" />
+          <Text fontFamily="$body" fontSize="$2" color="$colorSecondary" fontWeight="bold" letterSpacing={1}>
             {mezmur.duration}
           </Text>
         </XStack>

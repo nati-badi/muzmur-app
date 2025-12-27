@@ -83,7 +83,7 @@ const FavoritesScreen = ({ navigation }) => {
         alignItems="center" 
         paddingHorizontal="$5" 
         paddingVertical="$3"
-        marginBottom="$2"
+        marginBottom="$4"
       >
         <XStack alignItems="center" space="$2" onPress={() => navigation.goBack()} pressStyle={{ opacity: 0.7 }}>
            <Ionicons name="arrow-back" size={24} color="$primary" />
@@ -111,7 +111,7 @@ const FavoritesScreen = ({ navigation }) => {
           data={favoriteMezmurs}
           keyExtractor={item => String(item.id)}
           renderItem={renderItem}
-          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 32 }}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 10, paddingBottom: 32 }}
         />
       )}
     </YStack>
