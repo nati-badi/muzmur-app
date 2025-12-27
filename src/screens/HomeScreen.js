@@ -20,15 +20,25 @@ const MezmurListItem = memo(({ item, isFavorite, onToggleFavorite, onPress, getS
       backgroundColor="$background"
       padding="$4"
       borderRadius="$4"
-      marginBottom="$2"
+      marginBottom="$3"
       onPress={() => onPress(item)}
       pressStyle={{ opacity: 0.7 }}
       elevation="$1"
+      borderWidth={1}
+      borderColor="$borderColor"
     >
       <XStack justifyContent="space-between" alignItems="center">
-        <XStack alignItems="center" space="$2" flex={1}>
+        <XStack alignItems="center" space="$3" flex={1}>
            <Circle size={10} backgroundColor={getStatusColor(calculatedCategory)} />
-           <Text fontSize="$4" fontWeight="600" color="$color" numberOfLines={1}>{item.id}. {item.title}</Text>
+           <Text 
+             fontFamily="$ethiopic" 
+             fontSize="$5" 
+             fontWeight="700" 
+             color="$color" 
+             numberOfLines={1}
+           >
+             {item.id}. {item.title}
+           </Text>
         </XStack>
         
         <Button 
@@ -38,7 +48,7 @@ const MezmurListItem = memo(({ item, isFavorite, onToggleFavorite, onPress, getS
           icon={<Ionicons 
             name={itemIsFavorite ? "heart" : "heart-outline"} 
             size={24} 
-            color={itemIsFavorite ? COLORS.error : COLORS.textSecondary} 
+            color={itemIsFavorite ? COLORS.error : "$colorSecondary"} 
           />}
           onPress={(e) => {
             e.stopPropagation();
@@ -98,7 +108,6 @@ const HomeScreen = ({ navigation }) => {
         ? prevFavorites.filter(fid => fid !== stringId)
         : [...prevFavorites, stringId];
 
-      // Save to storage in the background (DO NOT await)
       AsyncStorage.setItem(
         'favorites',
         JSON.stringify(updatedFavorites)
@@ -108,7 +117,6 @@ const HomeScreen = ({ navigation }) => {
     });
   }, []);
 
-
   const getCategoryByLines = (lyrics = '') => {
     if (!lyrics) return 'አጭር';
     const lineCount = lyrics.split('\n').length;
@@ -116,12 +124,11 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const mezmursWithCategory = useMemo(() => {
-  return mezmursData.map(item => ({
-    ...item,
-    category: getCategoryByLines(item.lyrics || ''),
-  }));
-}, []);
-
+    return mezmursData.map(item => ({
+      ...item,
+      category: getCategoryByLines(item.lyrics || ''),
+    }));
+  }, []);
 
   useEffect(() => {
     const query = searchQuery.toLowerCase();
@@ -159,10 +166,9 @@ const HomeScreen = ({ navigation }) => {
     />
   ), [isFavorite, toggleFavorite, handleItemPress, getStatusColor]);
 
-  // Performance optimization: tell FlatList the exact height of each item
   const getItemLayout = useCallback((data, index) => ({
-    length: 72, // Approximate height of each card (padding + content)
-    offset: 72 * index,
+    length: 80,
+    offset: 80 * index,
     index,
   }), []);
 
@@ -171,17 +177,18 @@ const HomeScreen = ({ navigation }) => {
       <XStack 
         justifyContent="space-between" 
         alignItems="center" 
-        paddingHorizontal="$4" 
-        paddingVertical="$2"
+        paddingHorizontal="$5" 
+        paddingVertical="$3"
         marginBottom="$2"
       >
-        <Text fontSize={24} fontWeight="bold" color="$color">{"ቅዱስ ዜማ"}</Text>
+        <Text fontFamily="$heading" fontSize={28} fontWeight="700" color="$color">{"ቅዱስ ዜማ"}</Text>
         <Button
           circular
-          size="$4"
+          size="$5"
           backgroundColor="transparent"
           icon={<Ionicons name="heart-circle-outline" size={32} color={COLORS.primary} />}
           onPress={() => navigation.navigate('Favorites')}
+          pressStyle={{ opacity: 0.7 }}
         />
       </XStack>
 
@@ -193,36 +200,40 @@ const HomeScreen = ({ navigation }) => {
         removeClippedSubviews={true}
         maxToRenderPerBatch={10}
         windowSize={21}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 40 }}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40 }}
         ListHeaderComponent={
-          <YStack paddingHorizontal="$1" paddingBottom="$4" space="$3">
+          <YStack paddingBottom="$5" space="$4">
             <Input
-              size="$4"
+              size="$5"
+              fontFamily="$body"
               backgroundColor="$background"
-              placeholder="Search by title or lyrics..."
+              placeholder="በመዝሙር ርዕስ ወይም ግጥም ይፈልጉ..."
               value={searchQuery}
               onChangeText={setSearchQuery}
-              placeholderTextColor="$color"
-              borderRadius="$2"
+              placeholderTextColor="$colorSecondary"
+              borderRadius="$4"
               borderWidth={1}
               borderColor="$borderColor"
+              focusStyle={{ borderColor: "$primary" }}
             />
 
-            <XStack space="$2">
+            <XStack space="$2" flexWrap="wrap">
               {filters.map(filter => (
                 <Button
                   key={filter}
                   size="$3"
-                  borderRadius={20}
-                  backgroundColor={selectedFilter === filter ? "$color" : "$background"}
-                  borderColor="$borderColor"
+                  borderRadius={10}
+                  backgroundColor={selectedFilter === filter ? "$primary" : "$background"}
+                  borderColor={selectedFilter === filter ? "$primary" : "$borderColor"}
                   borderWidth={1}
                   onPress={() => setSelectedFilter(filter)}
+                  pressStyle={{ opacity: 0.8 }}
                 >
                   <Text 
+                    fontFamily="$body"
                     fontSize="$3" 
-                    fontWeight={selectedFilter === filter ? "bold" : "400"}
-                    color={selectedFilter === filter ? "$background" : "$color"}
+                    fontWeight={selectedFilter === filter ? "700" : "400"}
+                    color={selectedFilter === filter ? "white" : "$color"}
                   >
                     {filter}
                   </Text>
@@ -233,16 +244,17 @@ const HomeScreen = ({ navigation }) => {
             <XStack 
               onPress={() => setSectionModalVisible(true)}
               backgroundColor="$background"
-              padding="$3"
-              borderRadius="$2"
+              paddingHorizontal="$4"
+              paddingVertical="$3"
+              borderRadius="$4"
               borderWidth={1}
               borderColor="$borderColor"
               justifyContent="space-between"
               alignItems="center"
-              pressStyle={{ opacity: 0.8 }}
+              pressStyle={{ opacity: 0.8, backgroundColor: "$borderColor" }}
             >
-              <Text fontSize="$4" color="$color">
-                {selectedSection === 'All' ? 'All Sections' : selectedSection}
+              <Text fontFamily="$body" fontSize="$4" color="$color" fontWeight="600">
+                {selectedSection === 'All' ? 'ክፍላትን ይምረጡ' : selectedSection}
               </Text>
               <Ionicons name="chevron-down" size={20} color={COLORS.primary} />
             </XStack>
@@ -256,51 +268,63 @@ const HomeScreen = ({ navigation }) => {
         animationType="slide"
         onRequestClose={() => setSectionModalVisible(false)}
       >
-        <YStack f={1} backgroundColor="rgba(0, 0, 0, 0.5)" justifyContent="flex-end">
-          <YStack 
-            backgroundColor="$background" 
-            borderTopLeftRadius={20} 
-            borderTopRightRadius={20} 
-            maxHeight="70%" 
-            paddingBottom={insets.bottom + 20}
-          >
-            <XStack justifyContent="space-between" alignItems="center" padding="$4" borderBottomWidth={1} borderBottomColor="$borderColor">
-              <Text fontSize="$6" fontWeight="bold" color="$color">Select Section</Text>
-              <Button 
-                circular 
-                size="$3" 
-                backgroundColor="transparent" 
-                icon={<Ionicons name="close" size={24} color="$color" />} 
-                onPress={() => setSectionModalVisible(false)} 
-              />
-            </XStack>
-            <ScrollView style={{ paddingHorizontal: 16 }}>
-              {sections.map((section, index) => (
-                <XStack
-                  key={`${section}-${index}`}
-                  paddingVertical="$4"
-                  borderBottomWidth={1}
-                  borderBottomColor="$borderColor"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  onPress={() => {
-                    setSelectedSection(section);
-                    setSectionModalVisible(false);
-                  }}
-                  backgroundColor={selectedSection === section ? "$accentColor" : "transparent"}
-                  pressStyle={{ opacity: 0.7 }}
-                >
-                  <Text fontSize="$4" color={selectedSection === section ? COLORS.primary : "$color"} fontWeight={selectedSection === section ? "bold" : "400"} flex={1}>
-                    {section === 'All' ? 'All Sections' : section}
-                  </Text>
-                  {selectedSection === section && (
-                    <Ionicons name="checkmark" size={20} color={COLORS.primary} />
-                  )}
-                </XStack>
-              ))}
-            </ScrollView>
+        <Theme name="light">
+          <YStack f={1} backgroundColor="rgba(0, 0, 0, 0.5)" justifyContent="flex-end">
+            <YStack 
+              backgroundColor="$background" 
+              borderTopLeftRadius={24} 
+              borderTopRightRadius={24} 
+              maxHeight="80%" 
+              paddingBottom={insets.bottom + 20}
+              elevation="$5"
+            >
+              <XStack justifyContent="space-between" alignItems="center" padding="$5" borderBottomWidth={1} borderBottomColor="$borderColor">
+                <Text fontFamily="$heading" fontSize="$6" fontWeight="700" color="$color">ክፍላትን ይምረጡ</Text>
+                <Button 
+                  circular 
+                  size="$4" 
+                  backgroundColor="transparent" 
+                  icon={<Ionicons name="close" size={24} color="$color" />} 
+                  onPress={() => setSectionModalVisible(false)} 
+                />
+              </XStack>
+              <ScrollView style={{ paddingHorizontal: 20 }}>
+                {sections.map((section, index) => (
+                  <XStack
+                    key={`${section}-${index}`}
+                    paddingVertical="$4"
+                    borderBottomWidth={1}
+                    borderBottomColor="$borderColor"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    onPress={() => {
+                      setSelectedSection(section);
+                      setSectionModalVisible(false);
+                    }}
+                    backgroundColor={selectedSection === section ? "$accentColor" : "transparent"}
+                    borderRadius="$3"
+                    paddingHorizontal="$3"
+                    marginVertical="$1"
+                    pressStyle={{ opacity: 0.7 }}
+                  >
+                    <Text 
+                      fontFamily="$ethiopic" 
+                      fontSize="$4" 
+                      color={selectedSection === section ? COLORS.primary : "$color"} 
+                      fontWeight={selectedSection === section ? "700" : "400"} 
+                      flex={1}
+                    >
+                      {section === 'All' ? 'ሁሉንም ክፍላት' : section}
+                    </Text>
+                    {selectedSection === section && (
+                      <Ionicons name="checkmark" size={22} color={COLORS.primary} />
+                    )}
+                  </XStack>
+                ))}
+              </ScrollView>
+            </YStack>
           </YStack>
-        </YStack>
+        </Theme>
       </Modal>
     </YStack>
   );

@@ -53,14 +53,24 @@ const FavoritesScreen = ({ navigation }) => {
         backgroundColor="$background"
         padding="$4"
         borderRadius="$4"
-        marginBottom="$2"
+        marginBottom="$3"
         onPress={() => navigation.navigate('Detail', { mezmur: item })}
         pressStyle={{ opacity: 0.7 }}
         elevation="$1"
+        borderWidth={1}
+        borderColor="$borderColor"
       >
-        <XStack alignItems="center" space="$2">
+        <XStack alignItems="center" space="$3">
            <Circle size={10} backgroundColor={getStatusColor(calculatedCategory)} />
-           <Text fontSize="$4" fontWeight="600" color="$color">{item.id}. {item.title}</Text>
+           <Text 
+             fontFamily="$ethiopic" 
+             fontSize="$5" 
+             fontWeight="700" 
+             color="$color" 
+             numberOfLines={1}
+           >
+             {item.id}. {item.title}
+           </Text>
         </XStack>
       </YStack>
     );
@@ -71,28 +81,37 @@ const FavoritesScreen = ({ navigation }) => {
       <XStack 
         justifyContent="space-between" 
         alignItems="center" 
-        paddingHorizontal="$4" 
-        paddingVertical="$2"
+        paddingHorizontal="$5" 
+        paddingVertical="$3"
         marginBottom="$2"
       >
         <XStack alignItems="center" space="$2" onPress={() => navigation.goBack()} pressStyle={{ opacity: 0.7 }}>
-           <Ionicons name="arrow-back" size={24} color={COLORS.primary} />
-           <Text fontSize="$4" color={COLORS.primary}>Back</Text>
+           <Ionicons name="arrow-back" size={24} color="$primary" />
+           <Text fontFamily="$body" fontSize="$4" color="$primary" fontWeight="600">ተመለስ</Text>
         </XStack>
-        <Text fontSize="$5" fontWeight="bold" color="$color">Favorites</Text>
+        <Text fontFamily="$heading" fontSize={24} fontWeight="700" color="$color">ተወዳጆች</Text>
         <XStack width={60} /> 
       </XStack>
 
       {favoriteMezmurs.length === 0 ? (
-        <YStack f={1} justifyContent="center" alignItems="center">
-          <Text color="$colorSecondary" fontSize="$4">No favorites yet.</Text>
+        <YStack f={1} justifyContent="center" alignItems="center" padding="$10">
+          <Ionicons name="heart-dislike-outline" size={80} color="$borderColor" />
+          <Text 
+            fontFamily="$body" 
+            color="$colorSecondary" 
+            fontSize="$5" 
+            textAlign="center" 
+            marginTop="$4"
+          >
+            ምንም የተመረጡ መዝሙራት የሉም።
+          </Text>
         </YStack>
       ) : (
         <FlatList
           data={favoriteMezmurs}
           keyExtractor={item => String(item.id)}
           renderItem={renderItem}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32 }}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 32 }}
         />
       )}
     </YStack>
