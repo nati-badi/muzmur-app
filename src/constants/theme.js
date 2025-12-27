@@ -1,4 +1,4 @@
-export const COLORS = {
+const COLORS = {
   background: '#F9F9F7',
   surface: '#FFFFFF',
   text: '#2C2C2C',
@@ -10,7 +10,7 @@ export const COLORS = {
   success: '#2ECC71',
 };
 
-export const TEXT = {
+const TEXT = {
   title: {
     fontWeight: '600'
   },
@@ -20,7 +20,7 @@ export const TEXT = {
   }
 };
 
-export const FONTS = {
+const FONTS = {
   regular: 'System',
   bold: 'System',
   size: {
@@ -32,10 +32,17 @@ export const FONTS = {
   },
 };
 
-export const SPACING = {
+const SPACING = {
   xs: 4,
   s: 8,
   m: 16,
   l: 24,
   xl: 32,
+};
+
+module.exports = {
+  COLORS,
+  TEXT,
+  FONTS,
+  SPACING,
 };

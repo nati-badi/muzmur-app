@@ -1,12 +1,14 @@
-import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
-import { View, Text, FlatList, StyleSheet, TextInput, TouchableOpacity, Modal, ScrollView } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from '@react-navigation/native';
-import { COLORS, FONTS, SPACING } from '../constants/theme';
-import { getAllSections } from '../constants/sections';
-import mezmursData from '../data/mezmurs.json';
+const React = require('react');
+const { useState, useEffect, useCallback, useMemo, memo } = React;
+const { FlatList, Modal, ScrollView, StyleSheet } = require('react-native');
+const { YStack, XStack, Text, Input, Button, Circle, Theme } = require('tamagui');
+const { useSafeAreaInsets } = require('react-native-safe-area-context');
+const { Ionicons } = require('@expo/vector-icons');
+const AsyncStorage = require('@react-native-async-storage/async-storage').default || require('@react-native-async-storage/async-storage');
+const { useFocusEffect } = require('@react-navigation/native');
+const { COLORS, FONTS, SPACING } = require('../constants/theme');
+const { getAllSections } = require('../constants/sections');
+const mezmursData = require('../data/mezmurs.json');
 
 // Memoized list item component to prevent unnecessary re-renders
 const MezmurListItem = memo(({ item, isFavorite, onToggleFavorite, onPress, getStatusColor }) => {
@@ -14,28 +16,39 @@ const MezmurListItem = memo(({ item, isFavorite, onToggleFavorite, onPress, getS
   const itemIsFavorite = isFavorite(item.id);
 
   return (
-    <TouchableOpacity 
-      style={styles.card} 
+    <YStack 
+      backgroundColor="$background"
+      padding="$4"
+      borderRadius="$4"
+      marginBottom="$2"
       onPress={() => onPress(item)}
+      pressStyle={{ opacity: 0.7 }}
+      elevation="$1"
     >
-      <View style={styles.cardContent}>
-        <View style={styles.cardLeft}>
-           <View style={[styles.statusDot, { backgroundColor: getStatusColor(calculatedCategory) }]} />
-           <Text style={styles.cardTitle}>{item.id}. {item.title}</Text>
-        </View>
+      <XStack justifyContent="space-between" alignItems="center">
+        <XStack alignItems="center" space="$2" flex={1}>
+           <Circle size={10} backgroundColor={getStatusColor(calculatedCategory)} />
+           <Text fontSize="$4" fontWeight="600" color="$color" numberOfLines={1}>{item.id}. {item.title}</Text>
+        </XStack>
         
-        <TouchableOpacity onPress={() => onToggleFavorite(item.id)}>
-          <Ionicons 
+        <Button 
+          circular
+          size="$3"
+          backgroundColor="transparent"
+          icon={<Ionicons 
             name={itemIsFavorite ? "heart" : "heart-outline"} 
             size={24} 
             color={itemIsFavorite ? COLORS.error : COLORS.textSecondary} 
-          />
-        </TouchableOpacity>
-      </View>
-    </TouchableOpacity>
+          />}
+          onPress={(e) => {
+            e.stopPropagation();
+            onToggleFavorite(item.id);
+          }}
+        />
+      </XStack>
+    </YStack>
   );
 }, (prevProps, nextProps) => {
-  // Custom comparison: only re-render if item ID changed or favorite status changed
   return (
     prevProps.item.id === nextProps.item.id &&
     prevProps.isFavorite(prevProps.item.id) === nextProps.isFavorite(nextProps.item.id)
@@ -46,7 +59,7 @@ const HomeScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredMezmurs, setFilteredMezmurs] = useState(mezmursData);
-  const [selectedFilter, setSelectedFilter] = useState('All'); // 'All', 'Short', 'Long'
+  const [selectedFilter, setSelectedFilter] = useState('All'); // 'All', 'አጭር', 'ረጅም'
   const [selectedSection, setSelectedSection] = useState('All'); // Section filter
   const [sectionModalVisible, setSectionModalVisible] = useState(false);
   const [favorites, setFavorites] = useState([]);
@@ -154,13 +167,23 @@ const HomeScreen = ({ navigation }) => {
   }), []);
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>{"ቅዱስ ዜማ"}</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Favorites')} style={styles.favButton}>
-           <Ionicons name="heart-circle-outline" size={32} color={COLORS.primary} />
-        </TouchableOpacity>
-      </View>
+    <YStack f={1} backgroundColor="$background" paddingTop={insets.top}>
+      <XStack 
+        justifyContent="space-between" 
+        alignItems="center" 
+        paddingHorizontal="$4" 
+        paddingVertical="$2"
+        marginBottom="$2"
+      >
+        <Text fontSize={24} fontWeight="bold" color="$color">{"ቅዱስ ዜማ"}</Text>
+        <Button
+          circular
+          size="$4"
+          backgroundColor="transparent"
+          icon={<Ionicons name="heart-circle-outline" size={32} color={COLORS.primary} />}
+          onPress={() => navigation.navigate('Favorites')}
+        />
+      </XStack>
 
       <FlatList
         data={filteredMezmurs}
@@ -170,45 +193,60 @@ const HomeScreen = ({ navigation }) => {
         removeClippedSubviews={true}
         maxToRenderPerBatch={10}
         windowSize={21}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 40 }}
         ListHeaderComponent={
-          <View style={styles.listHeaderContainer}>
-            <TextInput
-              style={styles.searchInput}
+          <YStack paddingHorizontal="$1" paddingBottom="$4" space="$3">
+            <Input
+              size="$4"
+              backgroundColor="$background"
               placeholder="Search by title or lyrics..."
               value={searchQuery}
               onChangeText={setSearchQuery}
-              placeholderTextColor={COLORS.textSecondary}
+              placeholderTextColor="$color"
+              borderRadius="$2"
+              borderWidth={1}
+              borderColor="$borderColor"
             />
 
-            <View style={styles.filterContainer}>
+            <XStack space="$2">
               {filters.map(filter => (
-                <TouchableOpacity
+                <Button
                   key={filter}
-                  style={[
-                    styles.filterChip,
-                    selectedFilter === filter && styles.filterChipActive
-                  ]}
+                  size="$3"
+                  borderRadius={20}
+                  backgroundColor={selectedFilter === filter ? "$color" : "$background"}
+                  borderColor="$borderColor"
+                  borderWidth={1}
                   onPress={() => setSelectedFilter(filter)}
                 >
-                  <Text style={[
-                    styles.filterText,
-                    selectedFilter === filter && styles.filterTextActive
-                  ]}>{filter}</Text>
-                </TouchableOpacity>
+                  <Text 
+                    fontSize="$3" 
+                    fontWeight={selectedFilter === filter ? "bold" : "400"}
+                    color={selectedFilter === filter ? "$background" : "$color"}
+                  >
+                    {filter}
+                  </Text>
+                </Button>
               ))}
-            </View>
+            </XStack>
 
-            <TouchableOpacity 
-              style={styles.sectionDropdown}
+            <XStack 
               onPress={() => setSectionModalVisible(true)}
+              backgroundColor="$background"
+              padding="$3"
+              borderRadius="$2"
+              borderWidth={1}
+              borderColor="$borderColor"
+              justifyContent="space-between"
+              alignItems="center"
+              pressStyle={{ opacity: 0.8 }}
             >
-              <Text style={styles.sectionDropdownText}>
+              <Text fontSize="$4" color="$color">
                 {selectedSection === 'All' ? 'All Sections' : selectedSection}
               </Text>
               <Ionicons name="chevron-down" size={20} color={COLORS.primary} />
-            </TouchableOpacity>
-          </View>
+            </XStack>
+          </YStack>
         }
       />
 
@@ -218,208 +256,56 @@ const HomeScreen = ({ navigation }) => {
         animationType="slide"
         onRequestClose={() => setSectionModalVisible(false)}
       >
-        <TouchableOpacity 
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => setSectionModalVisible(false)}
-        >
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Select Section</Text>
-              <TouchableOpacity onPress={() => setSectionModalVisible(false)}>
-                <Ionicons name="close" size={24} color={COLORS.text} />
-              </TouchableOpacity>
-            </View>
-            <ScrollView style={styles.sectionList}>
+        <YStack f={1} backgroundColor="rgba(0, 0, 0, 0.5)" justifyContent="flex-end">
+          <YStack 
+            backgroundColor="$background" 
+            borderTopLeftRadius={20} 
+            borderTopRightRadius={20} 
+            maxHeight="70%" 
+            paddingBottom={insets.bottom + 20}
+          >
+            <XStack justifyContent="space-between" alignItems="center" padding="$4" borderBottomWidth={1} borderBottomColor="$borderColor">
+              <Text fontSize="$6" fontWeight="bold" color="$color">Select Section</Text>
+              <Button 
+                circular 
+                size="$3" 
+                backgroundColor="transparent" 
+                icon={<Ionicons name="close" size={24} color="$color" />} 
+                onPress={() => setSectionModalVisible(false)} 
+              />
+            </XStack>
+            <ScrollView style={{ paddingHorizontal: 16 }}>
               {sections.map((section, index) => (
-                <TouchableOpacity
+                <XStack
                   key={`${section}-${index}`}
-                  style={[
-                    styles.sectionItem,
-                    selectedSection === section && styles.sectionItemActive
-                  ]}
+                  paddingVertical="$4"
+                  borderBottomWidth={1}
+                  borderBottomColor="$borderColor"
+                  justifyContent="space-between"
+                  alignItems="center"
                   onPress={() => {
                     setSelectedSection(section);
                     setSectionModalVisible(false);
                   }}
+                  backgroundColor={selectedSection === section ? "$accentColor" : "transparent"}
+                  pressStyle={{ opacity: 0.7 }}
                 >
-                  <Text style={[
-                    styles.sectionItemText,
-                    selectedSection === section && styles.sectionItemTextActive
-                  ]}>
+                  <Text fontSize="$4" color={selectedSection === section ? COLORS.primary : "$color"} fontWeight={selectedSection === section ? "bold" : "400"} flex={1}>
                     {section === 'All' ? 'All Sections' : section}
                   </Text>
                   {selectedSection === section && (
                     <Ionicons name="checkmark" size={20} color={COLORS.primary} />
                   )}
-                </TouchableOpacity>
+                </XStack>
               ))}
             </ScrollView>
-          </View>
-        </TouchableOpacity>
+          </YStack>
+        </YStack>
       </Modal>
-    </View>
+    </YStack>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.m,
-    paddingVertical: SPACING.s,
-    marginBottom: SPACING.m,
-  },
-  headerTitle: {
-    fontSize: FONTS.size.xlarge,
-    fontWeight: 'bold',
-    color: COLORS.primary,
-  },
-  favButton: {
-    padding: SPACING.s,
-  },
-  searchInput: {
-  backgroundColor: COLORS.surface,
-  padding: SPACING.m,
-  borderRadius: 8,
-  borderWidth: 1,
-  borderColor: COLORS.border,
-  fontSize: FONTS.size.medium,
-  marginBottom: SPACING.m,
-  },
-  filterContainer: {
-  flexDirection: 'row',
-  marginBottom: SPACING.m,
-  },
-  filterChip: {
-    paddingHorizontal: SPACING.m,
-    paddingVertical: SPACING.xs,
-    borderRadius: 16,
-    backgroundColor: COLORS.surface,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    marginRight: SPACING.s,
-  },
-  filterChipActive: {
-    backgroundColor: COLORS.primary,
-    borderColor: COLORS.primary,
-  },
-  filterText: {
-    color: COLORS.textSecondary,
-    fontSize: FONTS.size.small,
-  },
-  filterTextActive: {
-    color: COLORS.surface,
-    fontWeight: 'bold',
-  },
-  listContent: {
-    paddingHorizontal: SPACING.m,
-    paddingBottom: SPACING.xl,
-  },
-  card: {
-    backgroundColor: COLORS.surface,
-    padding: SPACING.m,
-    borderRadius: 12,
-    marginBottom: SPACING.s,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  cardContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  cardLeft: {
-     flexDirection: 'row',
-     alignItems: 'center',
-  },
-  statusDot: {
-      width: 10,
-      height: 10,
-      borderRadius: 5,
-      marginRight: SPACING.s,
-  },
-  cardTitle: {
-    fontSize: FONTS.size.medium,
-    fontWeight: '600',
-    color: COLORS.text,
-  },
-  sectionDropdown: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  backgroundColor: COLORS.surface,
-  marginBottom: SPACING.m,
-  padding: SPACING.m,
-  borderRadius: 8,
-  borderWidth: 1,
-  borderColor: COLORS.border,
-  },
-  sectionDropdownText: {
-    fontSize: FONTS.size.medium,
-    color: COLORS.text,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: COLORS.surface,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: '70%',
-    paddingBottom: SPACING.xl,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: SPACING.m,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-  },
-  modalTitle: {
-    fontSize: FONTS.size.large,
-    fontWeight: 'bold',
-    color: COLORS.text,
-  },
-  sectionList: {
-    paddingHorizontal: SPACING.m,
-  },
-  sectionItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: SPACING.m,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-  },
-  sectionItemActive: {
-    backgroundColor: COLORS.primary + '10',
-  },
-  sectionItemText: {
-    fontSize: FONTS.size.medium,
-    color: COLORS.text,
-    flex: 1,
-  },
-  sectionItemTextActive: {
-    color: COLORS.primary,
-    fontWeight: 'bold',
-  },
-  listHeaderContainer: {
-  paddingHorizontal: SPACING.m,
-  paddingBottom: SPACING.m,
-},
+const styles = StyleSheet.create({});
 
-});
-
-export default HomeScreen;
+module.exports = HomeScreen;

@@ -1,8 +1,8 @@
-import { createStackNavigator } from '@react-navigation/stack';
-import { NavigationContainer } from '@react-navigation/native';
-import HomeScreen from '../screens/HomeScreen';
-import DetailScreen from '../screens/DetailScreen';
-import FavoritesScreen from '../screens/FavoritesScreen';
+const { createStackNavigator } = require('@react-navigation/stack');
+const { NavigationContainer } = require('@react-navigation/native');
+const HomeScreen = require('../screens/HomeScreen').default || require('../screens/HomeScreen');
+const DetailScreen = require('../screens/DetailScreen').default || require('../screens/DetailScreen');
+const FavoritesScreen = require('../screens/FavoritesScreen').default || require('../screens/FavoritesScreen');
 
 const Stack = createStackNavigator();
 
@@ -23,4 +23,4 @@ const AppNavigator = () => {
   );
 };
 
-export default AppNavigator;
+module.exports = AppNavigator;

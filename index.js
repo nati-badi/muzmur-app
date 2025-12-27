@@ -1,6 +1,6 @@
-import { registerRootComponent } from 'expo';
+const { registerRootComponent } = require('expo');
 
-import App from './App';
+const App = require('./App').default || require('./App');
 
 // registerRootComponent calls AppRegistry.registerComponent('main', () => App);
 // It also ensures that whether you load the app in Expo Go or in a native build,

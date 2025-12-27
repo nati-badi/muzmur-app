@@ -1,11 +1,13 @@
-import React, { useState, useCallback } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from '@react-navigation/native';
-import { COLORS, FONTS, SPACING } from '../constants/theme';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import mezmursData from '../data/mezmurs.json';
+const React = require('react');
+const { useState, useCallback } = React;
+const { FlatList, StyleSheet } = require('react-native');
+const { YStack, XStack, Text, Button, Circle } = require('tamagui');
+const AsyncStorage = require('@react-native-async-storage/async-storage').default || require('@react-native-async-storage/async-storage');
+const { useFocusEffect } = require('@react-navigation/native');
+const { COLORS, FONTS, SPACING } = require('../constants/theme');
+const { useSafeAreaInsets } = require('react-native-safe-area-context');
+const { Ionicons } = require('@expo/vector-icons');
+const mezmursData = require('../data/mezmurs.json');
 
 const FavoritesScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
@@ -47,117 +49,56 @@ const FavoritesScreen = ({ navigation }) => {
   const renderItem = ({ item }) => {
     const calculatedCategory = getCategoryByLines(item.lyrics);
     return (
-      <TouchableOpacity 
-        style={styles.card} 
+      <YStack
+        backgroundColor="$background"
+        padding="$4"
+        borderRadius="$4"
+        marginBottom="$2"
         onPress={() => navigation.navigate('Detail', { mezmur: item })}
+        pressStyle={{ opacity: 0.7 }}
+        elevation="$1"
       >
-        <View style={styles.cardContent}>
-            <View style={styles.cardLeft}>
-                 <View style={[styles.statusDot, { backgroundColor: getStatusColor(calculatedCategory) }]} />
-                 <Text style={styles.cardTitle}>{item.id}. {item.title}</Text>
-            </View>
-        </View>
-      </TouchableOpacity>
+        <XStack alignItems="center" space="$2">
+           <Circle size={10} backgroundColor={getStatusColor(calculatedCategory)} />
+           <Text fontSize="$4" fontWeight="600" color="$color">{item.id}. {item.title}</Text>
+        </XStack>
+      </YStack>
     );
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+    <YStack f={1} backgroundColor="$background" paddingTop={insets.top}>
+      <XStack 
+        justifyContent="space-between" 
+        alignItems="center" 
+        paddingHorizontal="$4" 
+        paddingVertical="$2"
+        marginBottom="$2"
+      >
+        <XStack alignItems="center" space="$2" onPress={() => navigation.goBack()} pressStyle={{ opacity: 0.7 }}>
            <Ionicons name="arrow-back" size={24} color={COLORS.primary} />
-           <Text style={styles.backText}>Back</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Favorites</Text>
-        <View style={{ width: 60 }} /> 
-      </View>
+           <Text fontSize="$4" color={COLORS.primary}>Back</Text>
+        </XStack>
+        <Text fontSize="$5" fontWeight="bold" color="$color">Favorites</Text>
+        <XStack width={60} /> 
+      </XStack>
 
       {favoriteMezmurs.length === 0 ? (
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyText}>No favorites yet.</Text>
-        </View>
+        <YStack f={1} justifyContent="center" alignItems="center">
+          <Text color="$colorSecondary" fontSize="$4">No favorites yet.</Text>
+        </YStack>
       ) : (
         <FlatList
           data={favoriteMezmurs}
           keyExtractor={item => String(item.id)}
           renderItem={renderItem}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32 }}
         />
       )}
-    </View>
+    </YStack>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.m,
-    paddingVertical: SPACING.s,
-    marginBottom: SPACING.m,
-  },
-  headerTitle: {
-    fontSize: FONTS.size.large,
-    fontWeight: 'bold',
-    color: COLORS.primary,
-  },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  backText: {
-    fontSize: FONTS.size.medium,
-    color: COLORS.primary,
-    marginLeft: 4,
-  },
-  listContent: {
-    paddingHorizontal: SPACING.m,
-    paddingBottom: SPACING.xl,
-  },
-  card: {
-    backgroundColor: COLORS.surface,
-    padding: SPACING.m,
-    borderRadius: 12,
-    marginBottom: SPACING.s,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  cardContent: {
-      flexDirection: 'row',
-      alignItems: 'center',
-  },
-  cardLeft: {
-      flexDirection: 'row',
-      alignItems: 'center',
-  },
-  statusDot: {
-      width: 10,
-      height: 10,
-      borderRadius: 5,
-      marginRight: SPACING.s,
-  },
-  cardTitle: {
-    fontSize: FONTS.size.medium,
-    fontWeight: '600',
-    color: COLORS.text,
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emptyText: {
-    color: COLORS.textSecondary,
-    fontSize: FONTS.size.medium,
-  },
-});
+const styles = StyleSheet.create({});
 
-export default FavoritesScreen;
+module.exports = FavoritesScreen;
