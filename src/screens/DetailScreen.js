@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Audio } from 'expo-av';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -38,25 +38,30 @@ const DetailScreen = ({ route, navigation }) => {
 
   const isFavorite = (id) => favorites.includes(String(id));
 
-  const toggleFavorite = async () => {
-    try {
+  const toggleFavorite = useCallback(() => {
+    setFavorites(prevFavorites => {
       const id = String(mezmur.id);
-      const newFavorites = isFavorite(id)
-        ? favorites.filter(fid => fid !== id)
-        : [...favorites, id];
-      
-      setFavorites(newFavorites);
-      await AsyncStorage.setItem('favorites', JSON.stringify(newFavorites));
-    } catch (e) {
-      console.error(e);
-    }
-  };
+      const updatedFavorites = prevFavorites.includes(id)
+        ? prevFavorites.filter(fid => fid !== id)
+        : [...prevFavorites, id];
+
+      AsyncStorage.setItem('favorites', JSON.stringify(updatedFavorites));
+      return updatedFavorites;
+    });
+  }, [mezmur.id]);
 
   const getCategoryByLines = (lyrics = '') => {
     if (!lyrics) return 'Short';
     const lineCount = lyrics.split('\n').length;
     return lineCount > 8 ? 'Long' : 'Short';
   };
+
+  const getStatusColor = (category) => {
+    return category === 'Long' ? COLORS.error : COLORS.success;
+  };
+
+  const category = getCategoryByLines(mezmur.lyrics);
+  const statusColor = getStatusColor(category);
 
   const playPauseAudio = async () => {
     try {
@@ -121,7 +126,10 @@ const DetailScreen = ({ route, navigation }) => {
 
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>{mezmur.title}</Text>
-        <Text style={styles.category}>{getCategoryByLines(mezmur.lyrics)}</Text>
+        <View style={styles.statusBadge}>
+          <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
+          <Text style={[styles.statusText, { color: statusColor }]}>{category}</Text>
+        </View>
         
         <View style={styles.divider} />
         
@@ -192,11 +200,29 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: SPACING.s,
   },
-  category: {
-    fontSize: FONTS.size.medium,
-    color: COLORS.textSecondary,
-    textAlign: 'center',
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: SPACING.l,
+    backgroundColor: COLORS.surface,
+    paddingHorizontal: SPACING.m,
+    paddingVertical: SPACING.xs,
+    borderRadius: 20,
+    alignSelf: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: SPACING.s,
+  },
+  statusText: {
+    fontSize: FONTS.size.small,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
   },
   divider: {
     height: 1,
