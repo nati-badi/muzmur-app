@@ -18,9 +18,9 @@ const FavoritesScreen = ({ navigation }) => {
   );
 
   const getCategoryByLines = (lyrics = '') => {
-    if (!lyrics) return 'Short';
+    if (!lyrics) return 'አጭር';
     const lineCount = lyrics.split('\n').length;
-    return lineCount > 8 ? 'Long' : 'Short';
+    return lineCount > 8 ? 'ረጅም' : 'አጭር';
   };
 
   const loadFavorites = async () => {
@@ -41,7 +41,7 @@ const FavoritesScreen = ({ navigation }) => {
   };
 
   const getStatusColor = (category) => {
-    return category === 'Long' ? COLORS.error : COLORS.success;
+    return category === 'ረጅም' ? COLORS.error : COLORS.success;
   };
 
   const renderItem = ({ item }) => {

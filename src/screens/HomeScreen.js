@@ -51,7 +51,7 @@ const HomeScreen = ({ navigation }) => {
   const [sectionModalVisible, setSectionModalVisible] = useState(false);
   const [favorites, setFavorites] = useState([]);
 
-  const filters = ['All', 'Short', 'Long'];
+  const filters = ['All', 'አጭር', 'ረጅም'];
   const sections = ['All', ...getAllSections()];
   
   const isFavorite = useCallback((id) => {
@@ -97,9 +97,9 @@ const HomeScreen = ({ navigation }) => {
 
 
   const getCategoryByLines = (lyrics = '') => {
-    if (!lyrics) return 'Short';
+    if (!lyrics) return 'አጭር';
     const lineCount = lyrics.split('\n').length;
-    return lineCount > 8 ? 'Long' : 'Short';
+    return lineCount > 8 ? 'ረጅም' : 'አጭር';
   };
 
   const mezmursWithCategory = useMemo(() => {
@@ -129,7 +129,7 @@ const HomeScreen = ({ navigation }) => {
   }, [searchQuery, selectedFilter, selectedSection, mezmursWithCategory]);
 
   const getStatusColor = useCallback((category) => {
-    return category === 'Long' ? COLORS.error : COLORS.success;
+    return category === 'ረጅም' ? COLORS.error : COLORS.success;
   }, []);
 
   const handleItemPress = useCallback((item) => {

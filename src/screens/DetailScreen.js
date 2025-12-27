@@ -51,13 +51,13 @@ const DetailScreen = ({ route, navigation }) => {
   }, [mezmur.id]);
 
   const getCategoryByLines = (lyrics = '') => {
-    if (!lyrics) return 'Short';
+    if (!lyrics) return 'አጭር';
     const lineCount = lyrics.split('\n').length;
-    return lineCount > 8 ? 'Long' : 'Short';
+    return lineCount > 8 ? 'ረጅም' : 'አጭር';
   };
 
   const getStatusColor = (category) => {
-    return category === 'Long' ? COLORS.error : COLORS.success;
+    return category === 'ረጅም' ? COLORS.error : COLORS.success;
   };
 
   const category = getCategoryByLines(mezmur.lyrics);
