@@ -9,9 +9,34 @@ const { useSafeAreaInsets } = require('react-native-safe-area-context');
 const { Ionicons } = require('@expo/vector-icons');
 const mezmursData = require('../data/mezmurs.json');
 
+const MezmurListCard = require('../components/MezmurListCard');
+
 const FavoritesScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const [favoriteMezmurs, setFavoriteMezmurs] = useState([]);
+  
+  // Reuse the logic from Home or pass it down if needed, but for now simple re-implementation
+  const favorites = favoriteMezmurs.map(m => String(m.id)); 
+  const isFavorite = useCallback(() => true, []); // Always true on favorites screen
+  
+  const toggleFavorite = useCallback(async (id) => {
+      // Remove from list logic
+      const idStr = String(id);
+      const newFavorites = favoriteMezmurs.filter(m => String(m.id) !== idStr);
+      setFavoriteMezmurs(newFavorites);
+      
+      try {
+          const stored = await AsyncStorage.getItem('favorites');
+          if (stored) {
+              const currentIds = JSON.parse(stored);
+              const updatedIds = currentIds.filter(fid => fid !== idStr);
+              await AsyncStorage.setItem('favorites', JSON.stringify(updatedIds));
+          }
+      } catch (e) {
+          console.error(e);
+      }
+  }, [favoriteMezmurs]);
+
 
   useFocusEffect(
     useCallback(() => {
@@ -32,7 +57,10 @@ const FavoritesScreen = ({ navigation }) => {
         const favoriteIds = JSON.parse(stored);
         const mappedMezmurs = favoriteIds
           .map(id => mezmursData.find(m => String(m.id) === String(id)))
-          .filter(Boolean);
+          .filter(Boolean)
+          // Calc category for each
+          .map(m => ({...m, category: getCategoryByLines(m.lyrics)}));
+          
         setFavoriteMezmurs(mappedMezmurs);
       } else {
         setFavoriteMezmurs([]);
@@ -46,35 +74,15 @@ const FavoritesScreen = ({ navigation }) => {
     return category === 'ረጅም' ? COLORS.error : COLORS.success;
   };
 
-  const renderItem = ({ item }) => {
-    const calculatedCategory = getCategoryByLines(item.lyrics);
-    return (
-      <YStack
-        backgroundColor="$background"
-        padding="$4"
-        borderRadius="$4"
-        marginBottom="$3"
-        onPress={() => navigation.navigate('Detail', { mezmur: item })}
-        pressStyle={{ opacity: 0.7 }}
-        elevation="$1"
-        borderWidth={1}
-        borderColor="$borderColor"
-      >
-        <XStack alignItems="center" space="$3">
-           <Circle size={10} backgroundColor={getStatusColor(calculatedCategory)} />
-           <Text 
-             fontFamily="$ethiopic" 
-             fontSize="$5" 
-             fontWeight="700" 
-             color="$color" 
-             numberOfLines={1}
-           >
-             {item.id}. {item.title}
-           </Text>
-        </XStack>
-      </YStack>
-    );
-  };
+  const renderItem = useCallback(({ item }) => (
+      <MezmurListCard
+        item={item}
+        isFavorite={isFavorite}
+        onToggleFavorite={toggleFavorite}
+        onPress={(item) => navigation.navigate('Detail', { mezmur: item })}
+        getStatusColor={getStatusColor}
+      />
+    ), [isFavorite, toggleFavorite, navigation]);
 
   return (
     <YStack f={1} backgroundColor="$background" paddingTop={insets.top}>
@@ -87,9 +95,9 @@ const FavoritesScreen = ({ navigation }) => {
       >
         <XStack alignItems="center" space="$2" onPress={() => navigation.goBack()} pressStyle={{ opacity: 0.7 }}>
            <Ionicons name="arrow-back" size={24} color="$primary" />
-           <Text fontFamily="$body" fontSize="$4" color="$primary" fontWeight="600">ተመለስ</Text>
+           <Text fontFamily="$ethiopicSerif" fontSize="$4" color="$primary" fontWeight="700">ተመለስ</Text>
         </XStack>
-        <Text fontFamily="$heading" fontSize={24} fontWeight="700" color="$color">ተወዳጆች</Text>
+        <Text fontFamily="$ethiopicSerif" fontSize={24} fontWeight="800" color="$primary">ተወዳጆች</Text>
         <XStack width={60} /> 
       </XStack>
 
@@ -97,11 +105,12 @@ const FavoritesScreen = ({ navigation }) => {
         <YStack f={1} justifyContent="center" alignItems="center" padding="$10">
           <Ionicons name="heart-dislike-outline" size={80} color="$borderColor" />
           <Text 
-            fontFamily="$body" 
+            fontFamily="$ethiopicSerif" 
             color="$colorSecondary" 
             fontSize="$5" 
             textAlign="center" 
             marginTop="$4"
+            fontStyle="italic"
           >
             ምንም የተመረጡ መዝሙራት የሉም።
           </Text>

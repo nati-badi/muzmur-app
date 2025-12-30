@@ -1,6 +1,6 @@
 const React = require('react');
 const { useState, useEffect, useCallback, useMemo, memo } = React;
-const { FlatList, Modal, ScrollView, StyleSheet } = require('react-native');
+const { FlatList, Modal, ScrollView, StyleSheet, ActivityIndicator, useWindowDimensions } = require('react-native');
 const { YStack, XStack, Text, Input, Button, Circle, Theme } = require('tamagui');
 const { useSafeAreaInsets } = require('react-native-safe-area-context');
 const { Ionicons } = require('@expo/vector-icons');
@@ -29,175 +29,146 @@ const SkeletonCard = () => (
 );
 
 // Memoized list item component to prevent unnecessary re-renders
-const MezmurListItem = memo(({ item, isFavorite, onToggleFavorite, onPress, getStatusColor }) => {
-  const calculatedCategory = item.category;
-  const itemIsFavorite = isFavorite(item.id);
+const MezmurListCard = require('../components/MezmurListCard');
 
-  return (
-    <YStack 
-      backgroundColor="$background"
-      padding="$4"
-      borderRadius="$4"
-      marginBottom="$3"
-      onPress={() => onPress(item)}
-      pressStyle={{ opacity: 0.7 }}
-      elevation="$1"
-      borderWidth={1}
-      borderColor="$borderColor"
-    >
-      <XStack justifyContent="space-between" alignItems="center">
-        <XStack alignItems="center" space="$3" flex={1}>
-           <Circle size={10} backgroundColor={getStatusColor(calculatedCategory)} />
-           <Text 
-             fontFamily="$ethiopic" 
-             fontSize="$5" 
-             fontWeight="700" 
-             color="$color" 
-             numberOfLines={1}
-           >
-             {item.id}. {item.title}
-           </Text>
-        </XStack>
-        
-        <Button 
-          circular
-          size="$3"
-          backgroundColor="transparent"
-          icon={<Ionicons 
-            name={itemIsFavorite ? "heart" : "heart-outline"} 
-            size={24} 
-            color={itemIsFavorite ? COLORS.error : "$colorSecondary"} 
-          />}
-          onPress={(e) => {
-            e.stopPropagation();
-            onToggleFavorite(item.id);
-          }}
-        />
-      </XStack>
-    </YStack>
-  );
-}, (prevProps, nextProps) => {
-  return (
-    prevProps.item.id === nextProps.item.id &&
-    prevProps.isFavorite(prevProps.item.id) === nextProps.isFavorite(nextProps.item.id)
-  );
-});
+const LOAD_INCREMENT = 10;
 
 const HomeScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
+  const { height } = useWindowDimensions();
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredMezmurs, setFilteredMezmurs] = useState(mezmursData);
-  const [selectedFilter, setSelectedFilter] = useState('All'); // 'All', 'አጭር', 'ረጅም'
-  const [selectedSection, setSelectedSection] = useState('All'); // Section filter
+  
+  // Estimate how many cards fit the screen initially
+  // Header + Search + Tabs + Spacing = ~280px
+  // Card height = 140px
+  const calculatedInitialCount = useMemo(() => {
+    return Math.max(2, Math.floor((height - 280 - insets.top) / 140));
+  }, [height, insets.top]);
+
+  const [selectedFilter, setSelectedFilter] = useState('All'); 
+  const [selectedSection, setSelectedSection] = useState('All'); 
   const [sectionModalVisible, setSectionModalVisible] = useState(false);
   const [favorites, setFavorites] = useState([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
-
-  const filters = ['All', 'አጭር', 'ረጅም'];
-  const sections = ['All', ...getAllSections()];
   
-  const isFavorite = useCallback((id) => {
-    return favorites.includes(String(id));
-  }, [favorites]);
+  // Pagination State
+  const [visibleCount, setVisibleCount] = useState(calculatedInitialCount);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  useFocusEffect(
-    useCallback(() => {
-      loadFavorites();
-    }, [])
-  );
+  const filters = ['All', 'ረጅም', 'አጭር'];
+  const sections = ['All', ...new Set(mezmursData.map(item => item.section))];
+
+  useEffect(() => {
+    loadFavorites();
+    setTimeout(() => setIsLoadingData(false), 800); 
+  }, []);
+
+  // Update visibleCount if screen height changes or calculatedInitialCount changes
+  useEffect(() => {
+    if (visibleCount < calculatedInitialCount) {
+        setVisibleCount(calculatedInitialCount);
+    }
+  }, [calculatedInitialCount]);
+
+  // Reset visibleCount when filters change
+  useEffect(() => {
+    setVisibleCount(calculatedInitialCount);
+  }, [searchQuery, selectedFilter, selectedSection, calculatedInitialCount]);
 
   const loadFavorites = async () => {
     try {
       const stored = await AsyncStorage.getItem('favorites');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        const sanitized = parsed.map(String).filter(id => id && id !== 'undefined');
-        setFavorites(sanitized);
-      }
+      if (stored) setFavorites(JSON.parse(stored));
     } catch (e) {
       console.error(e);
     }
   };
 
-  const toggleFavorite = useCallback((id) => {
-    setFavorites(prevFavorites => {
-      const stringId = String(id);
+  const toggleFavorite = useCallback(async (id) => {
+    try {
+      const idStr = String(id);
+      let newFavorites;
+      if (favorites.includes(idStr)) {
+        newFavorites = favorites.filter(fid => fid !== idStr);
+      } else {
+        newFavorites = [...favorites, idStr];
+      }
+      setFavorites(newFavorites);
+      await AsyncStorage.setItem('favorites', JSON.stringify(newFavorites));
+    } catch (e) {
+      console.error(e);
+    }
+  }, [favorites]);
 
-      const updatedFavorites = prevFavorites.includes(stringId)
-        ? prevFavorites.filter(fid => fid !== stringId)
-        : [...prevFavorites, stringId];
+  const isFavorite = useCallback((id) => favorites.includes(String(id)), [favorites]);
 
-      AsyncStorage.setItem(
-        'favorites',
-        JSON.stringify(updatedFavorites)
-      );
-
-      return updatedFavorites;
-    });
-  }, []);
-
-  const getCategoryByLines = (lyrics = '') => {
-    if (!lyrics) return 'አጭር';
-    const lineCount = lyrics.split('\n').length;
-    return lineCount > 8 ? 'ረጅም' : 'አጭር';
+  const getStatusColor = (category) => {
+    return category === 'ረጅም' ? COLORS.error : COLORS.success;
   };
 
-  const mezmursWithCategory = useMemo(() => {
-    return mezmursData.map(item => ({
-      ...item,
-      category: getCategoryByLines(item.lyrics || ''),
-    }));
-  }, []);
-
-  useEffect(() => {
-    setIsLoadingData(true);
-    
-    const timer = setTimeout(() => {
-      const query = searchQuery.toLowerCase();
-      const filtered = mezmursWithCategory.filter(item => {
-        const matchesSearch =
-          item.title.toLowerCase().includes(query) ||
-          item.lyrics?.toLowerCase().includes(query);
-
-        const matchesFilter =
-          selectedFilter === 'All' || item.category === selectedFilter;
-
-        const matchesSection =
-          selectedSection === 'All' || item.section === selectedSection;
-
-        return matchesSearch && matchesFilter && matchesSection;
-      });
-      
-      setFilteredMezmurs(filtered);
-      setIsLoadingData(false);
-    }, 400);
-
-    return () => clearTimeout(timer);
-  }, [searchQuery, selectedFilter, selectedSection, mezmursWithCategory]);
-
-  const getStatusColor = useCallback((category) => {
-    return category === 'ረጅም' ? COLORS.error : COLORS.success;
-  }, []);
-
-  const handleItemPress = useCallback((item) => {
+  const handlePress = useCallback((item) => {
     navigation.navigate('Detail', { mezmur: item });
   }, [navigation]);
 
+  const handleLoadMore = () => {
+    setIsLoadingMore(true);
+    // Simulate network delay for effect
+    setTimeout(() => {
+      setVisibleCount(prev => prev + LOAD_INCREMENT);
+      setIsLoadingMore(false);
+    }, 500);
+  };
+
+  const filteredMezmurs = useMemo(() => {
+    let result = mezmursData;
+
+    if (selectedSection !== 'All') {
+      result = result.filter(item => item.section === selectedSection);
+    }
+
+    if (selectedFilter !== 'All') {
+      const filterFunction = (lyrics) => {
+         if (!lyrics) return 'አጭር';
+         const lineCount = lyrics.split('\n').length;
+         return lineCount > 8 ? 'ረጅም' : 'አጭር';
+      };
+      
+      result = result.filter(item => {
+        const cat = filterFunction(item.lyrics);
+        return cat === selectedFilter;
+      });
+    }
+
+    if (searchQuery) {
+      const lowerQuery = searchQuery.toLowerCase();
+      result = result.filter(item => 
+        (item.title && item.title.toLowerCase().includes(lowerQuery)) ||
+        (item.lyrics && item.lyrics.toLowerCase().includes(lowerQuery)) ||
+        String(item.id).includes(lowerQuery)
+      );
+    }
+
+    return result;
+  }, [searchQuery, selectedFilter, selectedSection]);
+
+  // Paginated Data
+  const paginatedData = useMemo(() => {
+    return filteredMezmurs.slice(0, visibleCount);
+  }, [filteredMezmurs, visibleCount]);
+
   const renderItem = useCallback(({ item }) => (
-    <MezmurListItem
+    <MezmurListCard
       item={item}
       isFavorite={isFavorite}
       onToggleFavorite={toggleFavorite}
-      onPress={handleItemPress}
+      onPress={handlePress}
       getStatusColor={getStatusColor}
     />
-  ), [isFavorite, toggleFavorite, handleItemPress, getStatusColor]);
+  ), [isFavorite, toggleFavorite, handlePress, getStatusColor]);
 
-  const getItemLayout = useCallback((data, index) => ({
-    length: 80,
-    offset: 80 * index,
-    index,
-  }), []);
+  const getItemLayout = useCallback((data, index) => (
+    { length: 140, offset: 140 * index, index }
+  ), []);
 
   return (
     <YStack f={1} backgroundColor="$background" paddingTop={insets.top}>
@@ -206,21 +177,22 @@ const HomeScreen = ({ navigation }) => {
         alignItems="center" 
         paddingHorizontal="$5" 
         paddingVertical="$3"
-        marginBottom="$2"
       >
-        <Text fontFamily="$heading" fontSize={28} fontWeight="700" color={COLORS.primary}>{"ቅዱስ ዜማ"}</Text>
-        <Button
-          circular
-          size="$5"
+        <Text fontFamily="$ethiopicSerif" fontSize={28} fontWeight="800" color="$primary" letterSpacing={-0.5}>
+          ቅዱስ ዜማ
+        </Text>
+        <Button 
+          circular 
+          size="$3" 
           backgroundColor="transparent"
-          icon={<Ionicons name="heart-circle-outline" size={32} color={COLORS.primary} />}
-          onPress={() => navigation.navigate('Favorites')}
-          pressStyle={{ opacity: 0.7 }}
+          icon={<Ionicons name="menu-outline" size={28} color="$primary" />}
+          onPress={() => navigation.toggleDrawer()}
+          pressStyle={{ opacity: 0.6 }}
         />
       </XStack>
 
       <FlatList
-        data={isLoadingData ? [1, 2, 3, 4, 5, 6] : filteredMezmurs}
+        data={isLoadingData ? [1, 2, 3, 4, 5, 6] : paginatedData}
         keyExtractor={(item, index) => isLoadingData ? `skeleton-${index}` : String(item.id)}
         renderItem={isLoadingData ? () => <SkeletonCard /> : renderItem}
         getItemLayout={getItemLayout}
@@ -228,39 +200,71 @@ const HomeScreen = ({ navigation }) => {
         maxToRenderPerBatch={10}
         windowSize={21}
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40 }}
+        ListFooterComponent={
+           !isLoadingData && filteredMezmurs.length > visibleCount && (
+             <YStack alignItems="center" marginTop="$4" marginBottom="$6">
+               <Button
+                 size="$4"
+                 theme="active"
+                 backgroundColor="transparent"
+                 borderColor="$primary"
+                 borderWidth={1}
+                 borderRadius="$10"
+                 onPress={handleLoadMore}
+                 disabled={isLoadingMore}
+                 opacity={isLoadingMore ? 0.6 : 1}
+                 icon={isLoadingMore ? <ActivityIndicator color={COLORS.primary} size="small" /> : undefined}
+               >
+                 <Text fontFamily="$ethiopicSerif" color="$primary" fontWeight="700">
+                   ተጨማሪ አሳይ (Load More)
+                 </Text>
+               </Button>
+               <Text fontFamily="$body" fontSize={10} color="$colorSecondary" marginTop="$2" opacity={0.6}>
+                 {visibleCount} / {filteredMezmurs.length}
+               </Text>
+             </YStack>
+           )
+        }
         ListHeaderComponent={
           <YStack paddingBottom="$5" space="$4">
+            {/* Traditional Search Input */}
             <Input
               size="$5"
-              fontFamily="$body"
-              backgroundColor="$background"
+              fontFamily="$ethiopicSerif"
+              backgroundColor="transparent"
               placeholder="በመዝሙር ርዕስ ወይም ግጥም ይፈልጉ..."
               value={searchQuery}
               onChangeText={setSearchQuery}
               placeholderTextColor="$colorSecondary"
-              borderRadius="$4"
-              borderWidth={1}
-              borderColor="$borderColor"
-              focusStyle={{ borderColor: "$primary" }}
+              borderWidth={0}
+              borderBottomWidth={2}
+              borderColor="$primary"
+              borderRadius={0}
+              paddingHorizontal={0}
+              focusStyle={{ borderColor: "$accent", borderBottomWidth: 3 }}
+              opacity={0.8}
             />
 
-            <XStack space="$2" flexWrap="wrap">
+            {/* Length Filters (Classic Pills) */}
+            <XStack space="$3" justifyContent="center">
               {filters.map(filter => (
                 <Button
                   key={filter}
                   size="$3"
-                  borderRadius={10}
-                  backgroundColor={selectedFilter === filter ? "$primary" : "$background"}
-                  borderColor={selectedFilter === filter ? "$primary" : "$borderColor"}
+                  borderRadius="$10"
+                  backgroundColor={selectedFilter === filter ? "$primary" : "transparent"}
+                  borderColor="$primary"
                   borderWidth={1}
                   onPress={() => setSelectedFilter(filter)}
                   pressStyle={{ opacity: 0.8 }}
+                  paddingHorizontal="$4"
+                  elevation={selectedFilter === filter ? "$2" : "$0"}
                 >
                   <Text 
-                    fontFamily="$body"
+                    fontFamily="$ethiopic"
                     fontSize="$3" 
-                    fontWeight={selectedFilter === filter ? "700" : "400"}
-                    color={selectedFilter === filter ? "white" : "$color"}
+                    fontWeight={selectedFilter === filter ? "800" : "600"}
+                    color={selectedFilter === filter ? "white" : "$primary"}
                   >
                     {filter}
                   </Text>
@@ -268,30 +272,44 @@ const HomeScreen = ({ navigation }) => {
               ))}
             </XStack>
 
-            <XStack 
-              onPress={() => setSectionModalVisible(true)}
-              backgroundColor="$background"
-              paddingHorizontal="$4"
-              paddingVertical="$3"
-              borderRadius="$4"
-              borderWidth={1}
-              borderColor="$borderColor"
-              justifyContent="space-between"
-              alignItems="center"
-              pressStyle={{ opacity: 0.8, backgroundColor: "$borderColor" }}
-            >
-              <Text fontFamily="$body" fontSize="$4" color="$color" fontWeight="600">
-                {selectedSection === 'All' ? 'ክፍላትን ይምረጡ' : selectedSection}
-              </Text>
-              <Ionicons name="chevron-down" size={20} color={COLORS.primary} />
-            </XStack>
+            {/* Section Tabs (Horizontal Scroll - Parchment Style) */}
+            <YStack space="$2">
+               <Text fontFamily="$ethiopicSerif" fontSize="$3" color="$colorSecondary" opacity={0.7} marginLeft="$2">
+                 ክፍላት (Sections)
+               </Text>
+               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingRight: 20 }}>
+                  {sections.map((section, index) => (
+                    <YStack
+                      key={`${section}-${index}`}
+                      onPress={() => setSelectedSection(section)}
+                      marginRight="$3"
+                      paddingVertical="$2"
+                      paddingHorizontal="$3"
+                      borderBottomWidth={selectedSection === section ? 3 : 0}
+                      borderColor="$accent"
+                      opacity={selectedSection === section ? 1 : 0.6}
+                      pressStyle={{ opacity: 0.8 }}
+                    >
+                      <Text 
+                        fontFamily="$ethiopicSerif" 
+                        fontSize="$4" 
+                        color={selectedSection === section ? "$primary" : "$color"} 
+                        fontWeight={selectedSection === section ? "800" : "500"} 
+                      >
+                        {section === 'All' ? 'ሁሉንም' : section}
+                      </Text>
+                    </YStack>
+                  ))}
+               </ScrollView>
+               <YStack height={1} backgroundColor="$borderColor" opacity={0.5} marginTop="$-2" zIndex={-1} />
+            </YStack>
           </YStack>
         }
         ListEmptyComponent={
           !isLoadingData && (
             <YStack py="$10" ai="center" jc="center" space="$4">
-              <Ionicons name="search-outline" size={64} color="$borderColor" />
-              <Text fontFamily="$body" color="$colorSecondary" fontSize="$5" textAlign="center">
+              <Ionicons name="musical-notes-outline" size={64} color="$colorSecondary" opacity={0.3} />
+              <Text fontFamily="$ethiopicSerif" color="$colorSecondary" fontSize="$5" textAlign="center" fontStyle="italic">
                 ምንም መዝሙር አልተገኘም
               </Text>
             </YStack>

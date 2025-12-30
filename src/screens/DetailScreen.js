@@ -115,7 +115,7 @@ const DetailScreen = ({ route, navigation }) => {
       <XStack justifyContent="space-between" alignItems="center" paddingHorizontal="$4" paddingVertical="$2">
         <XStack alignItems="center" space="$2" onPress={() => navigation.goBack()} pressStyle={{ opacity: 0.7 }}>
           <Ionicons name="arrow-back" size={24} color="$primary" />
-          <Text fontFamily="$body" fontSize="$4" color="$primary" fontWeight="600">ተመለስ</Text>
+          <Text fontFamily="$ethiopicSerif" fontSize="$4" color="$primary" fontWeight="700">ተመለስ</Text>
         </XStack>
         <Button
           circular
@@ -133,12 +133,13 @@ const DetailScreen = ({ route, navigation }) => {
 
       <ScrollView contentContainerStyle={{ padding: 24, paddingBottom: 220 }}>
         <Text 
-          fontFamily="$heading" 
-          fontSize="$9" 
-          fontWeight="700" 
-          color="$color" 
+          fontFamily="$ethiopicSerif" 
+          fontSize={32} 
+          fontWeight="800" 
+          color="$primary" 
           textAlign="center" 
           marginBottom="$3"
+          lineHeight={40}
         >
           {mezmur.title}
         </Text>
@@ -150,24 +151,27 @@ const DetailScreen = ({ route, navigation }) => {
           borderRadius={20} 
           alignSelf="center" 
           borderWidth={1} 
-          borderColor="$borderColor" 
+          borderColor="$accent" 
           alignItems="center" 
           space="$2"
           marginBottom="$6"
         >
           <Circle size={8} backgroundColor={statusColor} />
-          <Text fontFamily="$body" fontSize="$2" fontWeight="bold" color={statusColor} textTransform="uppercase">
+          <Text fontFamily="$ethiopicSerif" fontSize="$3" fontWeight="bold" color={statusColor} textTransform="uppercase">
             {category}
           </Text>
         </XStack>
         
-        <YStack height={1} backgroundColor="$borderColor" width="60%" alignSelf="center" marginBottom="$6" />
+        {/* Ornamental Divider */}
+        <YStack alignItems="center" marginBottom="$6">
+            <Text color="$accent" fontSize="$4" opacity={0.6}>✤ ✤ ✤</Text>
+        </YStack>
         
         <Text 
           fontFamily="$ethiopic" 
           fontSize="$6" 
           color="$color" 
-          lineHeight={36} 
+          lineHeight={40} 
           textAlign="center"
         >
           {mezmur.lyrics}
@@ -175,6 +179,7 @@ const DetailScreen = ({ route, navigation }) => {
         
         {mezmur.translation && (
           <YStack marginTop="$8">
+            <YStack height={1} backgroundColor="$accent" width="40%" alignSelf="center" marginBottom="$6" opacity={0.3} />
             <Text 
               fontFamily="$ethiopicSerif" 
               fontSize="$5" 
@@ -200,16 +205,17 @@ const DetailScreen = ({ route, navigation }) => {
         )}
       </ScrollView>
 
+      {/* Player Controls (Gold/Parchment Style) */}
       <YStack 
         position="absolute" 
         bottom={0} 
         left={0} 
         right={0} 
-        backgroundColor="rgba(255,255,255,0.98)" 
+        backgroundColor="$background" 
         paddingVertical="$6"
         paddingHorizontal="$5" 
-        borderTopWidth={1} 
-        borderTopColor="$borderColor" 
+        borderTopWidth={3} 
+        borderTopColor="$accent" 
         alignItems="center" 
         paddingBottom={insets.bottom + 20}
         elevation="$5"
@@ -220,17 +226,19 @@ const DetailScreen = ({ route, navigation }) => {
               circular
               size="$4"
               backgroundColor="transparent"
-              icon={<Ionicons name="refresh-outline" size={32} color="$colorSecondary" style={{ transform: [{ scaleX: -1 }] }} />}
+              icon={<Ionicons name="refresh-outline" size={32} color="$primary" style={{ transform: [{ scaleX: -1 }] }} />}
               onPress={() => skip(-5)}
               pressStyle={{ opacity: 0.6 }}
             />
-            <Text fontFamily="$body" fontSize="$1" color="$colorSecondary" fontWeight="bold">5s</Text>
+            <Text fontFamily="$body" fontSize="$1" color="$primary" fontWeight="bold">5s</Text>
           </YStack>
 
           <Button
             circular
             size="$7"
             backgroundColor="$primary"
+            borderColor="$accent"
+            borderWidth={2}
             icon={isLoading ? <ActivityIndicator color="white" /> : <Ionicons name={isPlaying ? "pause" : "play"} size={48} color="white" />}
             onPress={playPauseAudio}
             disabled={isLoading}
@@ -243,17 +251,17 @@ const DetailScreen = ({ route, navigation }) => {
               circular
               size="$4"
               backgroundColor="transparent"
-              icon={<Ionicons name="refresh-outline" size={32} color="$colorSecondary" />}
+              icon={<Ionicons name="refresh-outline" size={32} color="$primary" />}
               onPress={() => skip(5)}
               pressStyle={{ opacity: 0.6 }}
             />
-            <Text fontFamily="$body" fontSize="$1" color="$colorSecondary" fontWeight="bold">5s</Text>
+            <Text fontFamily="$body" fontSize="$1" color="$primary" fontWeight="bold">5s</Text>
           </YStack>
         </XStack>
         
         <XStack space="$2" alignItems="center" marginTop="$4" opacity={0.8}>
-          <Ionicons name="time-outline" size={14} color="$colorSecondary" />
-          <Text fontFamily="$body" fontSize="$2" color="$colorSecondary" fontWeight="bold" letterSpacing={1}>
+          <Ionicons name="time-outline" size={14} color="$primary" />
+          <Text fontFamily="$body" fontSize="$2" color="$primary" fontWeight="bold" letterSpacing={1}>
             {mezmur.duration}
           </Text>
         </XStack>
