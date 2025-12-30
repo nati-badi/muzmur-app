@@ -5,11 +5,14 @@ const { useSafeAreaInsets } = require('react-native-safe-area-context');
 const { Ionicons } = require('@expo/vector-icons');
 const { useAppTheme } = require('../context/ThemeContext');
 const { useLanguage } = require('../context/LanguageContext');
+const { useFavorites } = require('../context/FavoritesContext');
+const mezmursData = require('../data/mezmurs.json');
 
 const ProfileScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const { theme } = useAppTheme();
   const { t } = useLanguage();
+  const { favoritesCount } = useFavorites();
 
   return (
     <YStack f={1} backgroundColor={theme.background || '#F5F5F5'} paddingTop={insets.top}>
@@ -88,7 +91,7 @@ const ProfileScreen = ({ navigation }) => {
                 color: theme.error,
                 marginBottom: 4
               }}>
-                12
+                {favoritesCount}
               </Text>
               <Text style={{ 
                 fontFamily: 'Inter_400Regular', 
@@ -117,7 +120,7 @@ const ProfileScreen = ({ navigation }) => {
                 color: theme.accent,
                 marginBottom: 4
               }}>
-                247
+                {mezmursData.length}
               </Text>
               <Text style={{ 
                 fontFamily: 'Inter_400Regular', 

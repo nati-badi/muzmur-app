@@ -10,6 +10,7 @@ const { NotoSansEthiopic_400Regular, NotoSansEthiopic_700Bold } = require('@expo
 const { NotoSerifEthiopic_400Regular, NotoSerifEthiopic_700Bold } = require('@expo-google-fonts/noto-serif-ethiopic');
 const { ThemeProvider } = require('./src/context/ThemeContext');
 const { LanguageProvider } = require('./src/context/LanguageContext');
+const { FavoritesProvider } = require('./src/context/FavoritesContext');
 const SplashScreen = require('expo-splash-screen');
 
 // Prevent splash screen from auto-hiding
@@ -40,10 +41,12 @@ function App() {
     <TamaguiProvider config={config} defaultTheme="light">
       <ThemeProvider>
         <LanguageProvider>
-          <SafeAreaProvider onLayout={onLayoutRootView}>
-            <StatusBar style="dark" />
-            <AppNavigator />
-          </SafeAreaProvider>
+          <FavoritesProvider>
+            <SafeAreaProvider onLayout={onLayoutRootView}>
+              <StatusBar style="dark" />
+              <AppNavigator />
+            </SafeAreaProvider>
+          </FavoritesProvider>
         </LanguageProvider>
       </ThemeProvider>
     </TamaguiProvider>

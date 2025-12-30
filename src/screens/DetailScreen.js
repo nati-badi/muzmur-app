@@ -6,6 +6,7 @@ const { Audio } = require('expo-audio');
 const AsyncStorage = require('@react-native-async-storage/async-storage').default || require('@react-native-async-storage/async-storage');
 const { useAppTheme } = require('../context/ThemeContext');
 const { useLanguage } = require('../context/LanguageContext');
+const { useFavorites } = require('../context/FavoritesContext');
 const { Ionicons } = require('@expo/vector-icons');
 const { useSafeAreaInsets } = require('react-native-safe-area-context');
 
@@ -20,43 +21,15 @@ const DetailScreen = ({ route, navigation }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [sound, setSound] = useState(null);
 
-  const [favorites, setFavorites] = useState([]);
+  const { isFavorite, toggleFavorite } = useFavorites();
 
   useEffect(() => {
-    loadFavorites();
     return () => {
       if (sound) {
         sound.unloadAsync();
       }
     };
   }, []);
-
-  const loadFavorites = async () => {
-    try {
-      const stored = await AsyncStorage.getItem('favorites');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        const sanitized = parsed.map(String).filter(id => id && id !== 'undefined');
-        setFavorites(sanitized);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const isFavorite = (id) => favorites.includes(String(id));
-
-  const toggleFavorite = useCallback(() => {
-    setFavorites(prevFavorites => {
-      const id = String(mezmur.id);
-      const updatedFavorites = prevFavorites.includes(id)
-        ? prevFavorites.filter(fid => fid !== id)
-        : [...prevFavorites, id];
-
-      AsyncStorage.setItem('favorites', JSON.stringify(updatedFavorites));
-      return updatedFavorites;
-    });
-  }, [mezmur.id]);
 
   const getCategoryByLines = (lyrics = '') => {
     if (!lyrics) return 'አጭር';
@@ -144,7 +117,7 @@ const DetailScreen = ({ route, navigation }) => {
             size={28} 
             color={isFavorite(mezmur.id) ? theme.error : theme.primary} 
           />}
-          onPress={toggleFavorite}
+          onPress={() => toggleFavorite(mezmur.id)}
           pressStyle={{ opacity: 0.7 }}
         />
       </XStack>
@@ -261,7 +234,7 @@ const DetailScreen = ({ route, navigation }) => {
                     {mezmur.title}
                 </Text>
                 <Text color={theme.playerAccent} fontFamily="$ethiopicSerif" fontSize="$2" fontWeight="600" opacity={0.9}>
-                    በዓለ {mezmur.title.split(' ').slice(0, 2).join(' ')}
+                    {mezmur.section}
                 </Text>
             </YStack>
           </XStack>
@@ -274,7 +247,7 @@ const DetailScreen = ({ route, navigation }) => {
                 size={24} 
                 color="white" 
             />}
-            onPress={toggleFavorite}
+            onPress={() => toggleFavorite(mezmur.id)}
           />
         </XStack>
 

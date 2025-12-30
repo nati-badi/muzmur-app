@@ -18,7 +18,7 @@ const translations = {
     appearance: 'Appearance',
     language: 'Language',
     notifications: 'Notifications',
-    helpSupport: 'Help & Support',
+    helpSupport: 'About Us',
     logout: 'Logout',
     
     // Settings labels

@@ -11,9 +11,21 @@ const { useLanguage } = require('../context/LanguageContext');
 const { getAllSections } = require('../constants/sections');
 const mezmursData = require('../data/mezmurs.json');
 const { COLORS } = require('../constants/theme');
+const MezmurListCard = require('../components/MezmurListCard');
+const { useFavorites } = require('../context/FavoritesContext');
+
+// Constants
+const FILTER_IDS = {
+  ALL: 'ALL_FILTER',
+  LONG: 'LONG_FILTER',
+  SHORT: 'SHORT_FILTER'
+};
+
+const SECTION_ALL_ID = 'ALL_SECTIONS';
+const LOAD_INCREMENT = 10;
 
 // Skeleton loader for a premium feel during "fetching"
-const SkeletonCard = () => (
+const SkeletonCard = memo(() => (
   <YStack 
     backgroundColor="$background"
     padding="$4"
@@ -28,87 +40,65 @@ const SkeletonCard = () => (
       <YStack backgroundColor="$borderColor" height={16} width="60%" borderRadius="$2" />
     </XStack>
   </YStack>
-);
-
-// Memoized list item component to prevent unnecessary re-renders
-const MezmurListCard = require('../components/MezmurListCard');
-
-const LOAD_INCREMENT = 10;
+));
 
 const HomeScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
   const { theme } = useAppTheme();
   const { t } = useLanguage();
+  const { isFavorite, toggleFavorite } = useFavorites();
   const [searchQuery, setSearchQuery] = useState('');
   
+  // State uses IDs for stable logic
+  const [selectedFilterId, setSelectedFilterId] = useState(FILTER_IDS.ALL); 
+  const [selectedSectionId, setSelectedSectionId] = useState(SECTION_ALL_ID); 
+  
+  const [isLoadingData, setIsLoadingData] = useState(true);
+  
+  
   // Estimate how many cards fit the screen initially
-  // Header + Search + Tabs + Spacing = ~280px
-  // Card height = 140px
   const calculatedInitialCount = useMemo(() => {
     return Math.max(2, Math.floor((height - 280 - insets.top) / 140));
   }, [height, insets.top]);
 
-  const [selectedFilter, setSelectedFilter] = useState('All'); 
-  const [selectedSection, setSelectedSection] = useState('All'); 
-  const [sectionModalVisible, setSectionModalVisible] = useState(false);
-  const [favorites, setFavorites] = useState([]);
-  const [isLoadingData, setIsLoadingData] = useState(true);
-  
-  // Pagination State
   const [visibleCount, setVisibleCount] = useState(calculatedInitialCount);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  const filters = [t('all'), t('long'), t('short')];
-  const sections = [t('all'), ...new Set(mezmursData.map(item => item.section))];
+  // Memoized Options for UI display
+  const filterOptions = useMemo(() => [
+    { id: FILTER_IDS.ALL, label: t('all') },
+    { id: FILTER_IDS.LONG, label: t('long') },
+    { id: FILTER_IDS.SHORT, label: t('short') }
+  ], [t]);
+
+  const sectionOptions = useMemo(() => {
+    const uniqueSections = [...new Set(mezmursData.map(item => item.section))].filter(Boolean);
+    return [
+      { id: SECTION_ALL_ID, label: t('all') },
+      ...uniqueSections.map(s => ({ id: s, label: s }))
+    ];
+  }, [t]);
 
   useEffect(() => {
-    loadFavorites();
     setTimeout(() => setIsLoadingData(false), 800); 
   }, []);
 
-  // Update visibleCount if screen height changes or calculatedInitialCount changes
+  // Update visibleCount if screen height changes
   useEffect(() => {
     if (visibleCount < calculatedInitialCount) {
         setVisibleCount(calculatedInitialCount);
     }
   }, [calculatedInitialCount]);
 
-  // Reset visibleCount when filters change
+  // Reset pagination when filters change
   useEffect(() => {
     setVisibleCount(calculatedInitialCount);
-  }, [searchQuery, selectedFilter, selectedSection, calculatedInitialCount]);
+  }, [searchQuery, selectedFilterId, selectedSectionId, calculatedInitialCount]);
 
-  const loadFavorites = async () => {
-    try {
-      const stored = await AsyncStorage.getItem('favorites');
-      if (stored) setFavorites(JSON.parse(stored));
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const toggleFavorite = useCallback(async (id) => {
-    try {
-      const idStr = String(id);
-      let newFavorites;
-      if (favorites.includes(idStr)) {
-        newFavorites = favorites.filter(fid => fid !== idStr);
-      } else {
-        newFavorites = [...favorites, idStr];
-      }
-      setFavorites(newFavorites);
-      await AsyncStorage.setItem('favorites', JSON.stringify(newFavorites));
-    } catch (e) {
-      console.error(e);
-    }
-  }, [favorites]);
-
-  const isFavorite = useCallback((id) => favorites.includes(String(id)), [favorites]);
-
-  const getStatusColor = (category) => {
+  const getStatusColor = useCallback((category) => {
     return category === 'ረጅም' ? theme.error : theme.success;
-  };
+  }, [theme]);
 
   const handlePress = useCallback((item) => {
     navigation.navigate('Detail', { mezmur: item });
@@ -116,7 +106,6 @@ const HomeScreen = ({ navigation }) => {
 
   const handleLoadMore = () => {
     setIsLoadingMore(true);
-    // Simulate network delay for effect
     setTimeout(() => {
       setVisibleCount(prev => prev + LOAD_INCREMENT);
       setIsLoadingMore(false);
@@ -126,23 +115,26 @@ const HomeScreen = ({ navigation }) => {
   const filteredMezmurs = useMemo(() => {
     let result = mezmursData;
 
-    if (selectedSection !== 'All') {
-      result = result.filter(item => item.section === selectedSection);
+    // 1. Filter by Section
+    if (selectedSectionId !== SECTION_ALL_ID) {
+      result = result.filter(item => item.section === selectedSectionId);
     }
 
-    if (selectedFilter !== 'All') {
-      const filterFunction = (lyrics) => {
-         if (!lyrics) return 'አጭር';
+    // 2. Filter by Length
+    if (selectedFilterId !== FILTER_IDS.ALL) {
+      const determineLengthId = (lyrics) => {
+         if (!lyrics) return FILTER_IDS.SHORT;
          const lineCount = lyrics.split('\n').length;
-         return lineCount > 8 ? 'ረጅም' : 'አጭር';
+         return lineCount > 8 ? FILTER_IDS.LONG : FILTER_IDS.SHORT;
       };
       
       result = result.filter(item => {
-        const cat = filterFunction(item.lyrics);
-        return cat === selectedFilter;
+        const lengthId = determineLengthId(item.lyrics);
+        return lengthId === selectedFilterId;
       });
     }
 
+    // 3. Search
     if (searchQuery) {
       const lowerQuery = searchQuery.toLowerCase();
       result = result.filter(item => 
@@ -153,7 +145,7 @@ const HomeScreen = ({ navigation }) => {
     }
 
     return result;
-  }, [searchQuery, selectedFilter, selectedSection]);
+  }, [searchQuery, selectedFilterId, selectedSectionId]);
 
   // Paginated Data
   const paginatedData = useMemo(() => {
@@ -195,7 +187,6 @@ const HomeScreen = ({ navigation }) => {
         <Text fontFamily="$ethiopicSerif" fontSize={28} fontWeight="800" color={theme.primary} letterSpacing={-0.5}>
           ቅዱስ ዜማ
         </Text>
-        {/* User Avatar - Right Side */}
         <Button 
           position="absolute"
           right="$4"
@@ -245,7 +236,6 @@ const HomeScreen = ({ navigation }) => {
         }
         ListHeaderComponent={
           <YStack paddingBottom="$5" space="$4">
-            {/* Traditional Search Input */}
             <Input
               size="$5"
               fontFamily="$ethiopicSerif"
@@ -263,58 +253,56 @@ const HomeScreen = ({ navigation }) => {
               opacity={0.8}
             />
 
-            {/* Length Filters (Classic Pills) */}
             <XStack space="$3" justifyContent="center">
-              {filters.map(filter => (
+              {filterOptions.map(option => (
                 <Button
-                  key={filter}
+                  key={option.id}
                   size="$3"
                   borderRadius="$10"
-                  backgroundColor={selectedFilter === filter ? theme.primary : "transparent"}
+                  backgroundColor={selectedFilterId === option.id ? theme.primary : "transparent"}
                   borderColor={theme.primary}
                   borderWidth={1}
-                  onPress={() => setSelectedFilter(filter)}
+                  onPress={() => setSelectedFilterId(option.id)}
                   pressStyle={{ opacity: 0.8 }}
                   paddingHorizontal="$4"
-                  elevation={selectedFilter === filter ? "$2" : "$0"}
+                  elevation={selectedFilterId === option.id ? "$2" : "$0"}
                 >
                   <Text 
                     fontFamily="$ethiopic"
                     fontSize="$3" 
-                    fontWeight={selectedFilter === filter ? "800" : "600"}
-                    color={selectedFilter === filter ? "white" : theme.primary}
+                    fontWeight={selectedFilterId === option.id ? "800" : "600"}
+                    color={selectedFilterId === option.id ? "white" : theme.primary}
                   >
-                    {filter}
+                    {option.label}
                   </Text>
                 </Button>
               ))}
             </XStack>
 
-            {/* Section Tabs (Horizontal Scroll - Parchment Style) */}
             <YStack space="$2">
                <Text fontFamily="$ethiopicSerif" fontSize="$3" color="$colorSecondary" opacity={0.7} marginLeft="$2">
                  {t('sections')}
                </Text>
                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingRight: 20 }}>
-                  {sections.map((section, index) => (
+                  {sectionOptions.map((option) => (
                     <YStack
-                      key={`${section}-${index}`}
-                      onPress={() => setSelectedSection(section)}
+                      key={option.id}
+                      onPress={() => setSelectedSectionId(option.id)}
                       marginRight="$3"
                       paddingVertical="$2"
                       paddingHorizontal="$3"
-                      borderBottomWidth={selectedSection === section ? 3 : 0}
+                      borderBottomWidth={selectedSectionId === option.id ? 3 : 0}
                       borderColor={theme.accent}
-                      opacity={selectedSection === section ? 1 : 0.6}
+                      opacity={selectedSectionId === option.id ? 1 : 0.6}
                       pressStyle={{ opacity: 0.8 }}
                     >
                       <Text 
                         fontFamily="$ethiopicSerif" 
                         fontSize="$4" 
-                        color={selectedSection === section ? theme.primary : theme.text} 
-                        fontWeight={selectedSection === section ? "800" : "500"} 
+                        color={selectedSectionId === option.id ? theme.primary : theme.text} 
+                        fontWeight={selectedSectionId === option.id ? "800" : "500"} 
                       >
-                        {section}
+                        {option.label}
                       </Text>
                     </YStack>
                   ))}
@@ -334,71 +322,6 @@ const HomeScreen = ({ navigation }) => {
           )
         }
       />
-
-      <Modal
-        visible={sectionModalVisible}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setSectionModalVisible(false)}
-      >
-        <Theme name="light">
-          <YStack f={1} backgroundColor="rgba(0, 0, 0, 0.5)" justifyContent="flex-end">
-            <YStack 
-              backgroundColor="$background" 
-              borderTopLeftRadius={24} 
-              borderTopRightRadius={24} 
-              maxHeight="80%" 
-              paddingBottom={insets.bottom + 20}
-              elevation="$5"
-            >
-              <XStack justifyContent="space-between" alignItems="center" padding="$5" borderBottomWidth={1} borderBottomColor="$borderColor">
-                <Text fontFamily="$heading" fontSize="$6" fontWeight="700" color="$color">ክፍላትን ይምረጡ</Text>
-                <Button 
-                  circular 
-                  size="$4" 
-                  backgroundColor="transparent" 
-                  icon={<Ionicons name="close" size={24} color="$color" />} 
-                  onPress={() => setSectionModalVisible(false)} 
-                />
-              </XStack>
-              <ScrollView style={{ paddingHorizontal: 20 }}>
-                {sections.map((section, index) => (
-                  <XStack
-                    key={`${section}-${index}`}
-                    paddingVertical="$4"
-                    borderBottomWidth={1}
-                    borderBottomColor="$borderColor"
-                    justifyContent="space-between"
-                    alignItems="center"
-                    onPress={() => {
-                      setSelectedSection(section);
-                      setSectionModalVisible(false);
-                    }}
-                    backgroundColor={selectedSection === section ? "$accentColor" : "transparent"}
-                    borderRadius="$3"
-                    paddingHorizontal="$3"
-                    marginVertical="$1"
-                    pressStyle={{ opacity: 0.7 }}
-                  >
-                    <Text 
-                      fontFamily="$ethiopic" 
-                      fontSize="$4" 
-                      color={selectedSection === section ? COLORS.primary : "$color"} 
-                      fontWeight={selectedSection === section ? "700" : "400"} 
-                      flex={1}
-                    >
-                      {section === 'All' ? 'ሁሉንም ክፍላት' : section}
-                    </Text>
-                    {selectedSection === section && (
-                      <Ionicons name="checkmark" size={22} color={COLORS.primary} />
-                    )}
-                  </XStack>
-                ))}
-              </ScrollView>
-            </YStack>
-          </YStack>
-        </Theme>
-      </Modal>
     </YStack>
   );
 };
