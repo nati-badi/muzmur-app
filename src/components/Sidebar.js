@@ -31,8 +31,9 @@ const Sidebar = (props) => {
     return (
       <Button
         backgroundColor="transparent"
-        paddingVertical="$3"
+        paddingVertical="$4"
         paddingHorizontal="$4"
+        minHeight={60}
         borderRadius="$4"
         justifyContent="flex-start"
         onPress={() => {
@@ -111,18 +112,18 @@ const Sidebar = (props) => {
             fontSize={11} 
             color={theme.textSecondary} 
             opacity={0.5} 
-            marginLeft="$4" 
             marginBottom="$2" 
             fontWeight="700" 
             textTransform="uppercase"
             letterSpacing={1.5}
+            marginLeft="$4"
           >
             Menu
           </Text>
           {menuItems.map((item) => <MenuItem key={item.id} item={item} />)}
         </YStack>
 
-        <YStack height={30} />
+        <YStack height={60} />
 
         {/* 3. Secondary Navigation */}
         <YStack paddingHorizontal="$4" space="$1">
@@ -131,11 +132,11 @@ const Sidebar = (props) => {
             fontSize={11} 
             color={theme.textSecondary} 
             opacity={0.5} 
-            marginLeft="$4" 
             marginBottom="$2" 
             fontWeight="700" 
             textTransform="uppercase"
             letterSpacing={1.5}
+            marginLeft="$4"
           >
             Preferences
           </Text>

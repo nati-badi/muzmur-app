@@ -49,37 +49,37 @@ const MezmurListCard = memo(({ item, isFavorite, onToggleFavorite, onPress, getS
       <XStack padding="$4" paddingLeft="$5" justifyContent="space-between" alignItems="flex-start">
         <YStack flex={1} space="$2">
            {/* Top Metadata Row */}
-           <XStack alignItems="center" space="$2" marginBottom="$1">
-             <Text 
-               fontFamily="$body" 
-               fontSize={10} 
-               color="$colorSecondary" 
-               opacity={0.5}
-               letterSpacing={1}
-             >
-               MEZMUR #{item.id}
-             </Text>
-             {/* Refined Badge: Just Text, No "Circle/Pill" */}
-             <YStack 
-               opacity={0.7}
-             >
-                <Text 
-                 fontFamily="$body" 
-                 fontSize={10} 
-                 color={statusColor}
-                 fontWeight="700"
-                 letterSpacing={0.5}
-                 textTransform="uppercase"
-               >
-                 {calculatedCategory}
-               </Text>
-             </YStack>
-          </XStack>
+            <XStack alignItems="center" space="$2" marginBottom="$1">
+              <Text 
+                fontFamily="$body" 
+                fontSize="$1" 
+                color="$colorSecondary" 
+                opacity={0.5}
+                letterSpacing={1}
+              >
+                MEZMUR #{item.id}
+              </Text>
+              {/* Refined Badge: Just Text, No "Circle/Pill" */}
+              <YStack 
+                opacity={0.7}
+              >
+                 <Text 
+                  fontFamily="$body" 
+                  fontSize="$1" 
+                  color={statusColor}
+                  fontWeight="700"
+                  letterSpacing={0.5}
+                  textTransform="uppercase"
+                >
+                  {calculatedCategory}
+                </Text>
+              </YStack>
+           </XStack>
           
           {/* Title */}
           <Text 
              fontFamily="$ethiopic" 
-             fontSize="$5" 
+             fontSize="$6" 
              fontWeight="800" 
              color="$color" 
              numberOfLines={1}
@@ -91,10 +91,10 @@ const MezmurListCard = memo(({ item, isFavorite, onToggleFavorite, onPress, getS
            {/* Lyric Preview (Serif for Songbook feel) */}
            <Text 
              fontFamily="$ethiopicSerif" 
-             fontSize="$3" 
+             fontSize="$4" 
              color="$colorSecondary" 
              numberOfLines={2} 
-             lineHeight={22}
+             lineHeight={24}
              opacity={0.7}
              fontStyle="italic"
            >

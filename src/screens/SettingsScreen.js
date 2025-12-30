@@ -29,22 +29,22 @@ const SettingsScreen = ({ navigation }) => {
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Ionicons name={icon} size={24} color={theme.primary} style={{ marginRight: 16 }} />
           <View style={{ flex: 1 }}>
-            <Text style={{ 
-              fontFamily: 'NotoSansEthiopic_400Regular',
-              fontSize: 16, 
-              color: theme.text || '#000000', 
-              fontWeight: '600',
-              marginBottom: sublabel ? 4 : 0
-            }}>
+            <Text 
+              fontFamily="$ethiopic" 
+              fontSize="$5" 
+              color={theme.color} 
+              fontWeight="600"
+              marginBottom={sublabel ? 4 : 0}
+            >
               {label}
             </Text>
             {sublabel && (
-              <Text style={{ 
-                fontFamily: 'Inter_400Regular',
-                fontSize: 12, 
-                color: theme.textSecondary || '#666666',
-                opacity: 0.8
-              }}>
+              <Text 
+                fontFamily="$body" 
+                fontSize="$2" 
+                color={theme.colorSecondary}
+                opacity={0.8}
+              >
                 {sublabel}
               </Text>
             )}
@@ -65,7 +65,7 @@ const SettingsScreen = ({ navigation }) => {
         >
           <Ionicons name="arrow-back" size={28} color={theme.primary} />
         </TouchableOpacity>
-        <Text fontFamily="$ethiopicSerif" fontSize={22} fontWeight="800" color={theme.primary}>
+        <Text fontFamily="$ethiopicSerif" fontSize="$7" fontWeight="800" color={theme.primary}>
           {t('settings')}
         </Text>
       </XStack>
@@ -76,17 +76,6 @@ const SettingsScreen = ({ navigation }) => {
         contentContainerStyle={{ paddingBottom: 120 }}
       >
         <YStack padding="$6" space="$4">
-          <Text 
-            fontFamily="$ethiopicSerif" 
-            fontSize="$5" 
-            fontWeight="800" 
-            color={theme.primary} 
-            marginLeft="$2" 
-            marginBottom="$2"
-          >
-            {t('settings')}
-          </Text>
-
           <SettingRow 
             icon="color-palette-outline" 
             label={t('appearance')}
@@ -120,12 +109,12 @@ const SettingsScreen = ({ navigation }) => {
                       borderColor: opt.accent,
                     }}>
                       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Text style={{ 
-                          color: 'white', 
-                          fontFamily: 'NotoSansEthiopic_400Regular',
-                          fontSize: 12, 
-                          fontWeight: '700' 
-                        }}>
+                        <Text 
+                          color="white" 
+                          fontFamily="$ethiopic"
+                          fontSize="$2" 
+                          fontWeight="700" 
+                        >
                           {opt.name}
                         </Text>
                         {theme.id === opt.id && (

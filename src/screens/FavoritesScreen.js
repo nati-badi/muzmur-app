@@ -8,6 +8,7 @@ const { useLanguage } = require('../context/LanguageContext');
 const { useFavorites } = require('../context/FavoritesContext');
 const { Ionicons } = require('@expo/vector-icons');
 const mezmursData = require('../data/mezmurs.json');
+const { TouchableOpacity } = require('react-native');
 
 const MezmurListCard = require('../components/MezmurListCard');
 
@@ -51,11 +52,10 @@ const FavoritesScreen = ({ navigation }) => {
         paddingVertical="$3"
         marginBottom="$4"
       >
-        <XStack alignItems="center" space="$2" onPress={() => navigation.goBack()} pressStyle={{ opacity: 0.7 }}>
-           <Ionicons name="arrow-back" size={24} color={theme.primary} />
-           <Text fontFamily="$ethiopicSerif" fontSize="$4" color={theme.primary} fontWeight="700">{t('back')}</Text>
-        </XStack>
-        <Text fontFamily="$ethiopicSerif" fontSize={24} fontWeight="800" color={theme.primary}>{t('favorites')}</Text>
+        <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.7} style={{ padding: 8 }}>
+           <Ionicons name="arrow-back" size={28} color={theme.primary} />
+        </TouchableOpacity>
+        <Text fontFamily="$ethiopicSerif" fontSize="$7" fontWeight="800" color={theme.primary}>{t('favorites')}</Text>
         <XStack width={60} /> 
       </XStack>
 

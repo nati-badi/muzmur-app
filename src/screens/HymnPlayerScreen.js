@@ -108,7 +108,7 @@ const HymnPlayerScreen = ({ navigation }) => {
           onPress={() => navigation.toggleDrawer()}
           pressStyle={{ opacity: 0.6 }}
         />
-        <Text fontFamily="$ethiopicSerif" fontSize={28} fontWeight="800" color={theme.primary} letterSpacing={-0.5}>
+        <Text fontFamily="$ethiopicSerif" fontSize="$8" fontWeight="800" color={theme.primary} letterSpacing={-0.5}>
           ቅዱስ ዜማ
         </Text>
       </XStack>
@@ -121,7 +121,7 @@ const HymnPlayerScreen = ({ navigation }) => {
         
         <Text 
           fontFamily="$ethiopicSerif" 
-          fontSize={24} 
+          fontSize="$7" 
           fontWeight="800" 
           color={theme.primary} 
           textAlign="center"
@@ -132,7 +132,7 @@ const HymnPlayerScreen = ({ navigation }) => {
         
         <Text 
           fontFamily="$ethiopic" 
-          fontSize="$3" 
+          fontSize="$4" 
           color={theme.textSecondary}
           opacity={0.8}
         >
@@ -159,10 +159,10 @@ const HymnPlayerScreen = ({ navigation }) => {
             />
           </YStack>
           <XStack justifyContent="space-between">
-            <Text color={theme.textSecondary} fontFamily="$body" fontSize={12} fontWeight="600">
+            <Text color={theme.textSecondary} fontFamily="$body" fontSize="$1" fontWeight="600">
               {formatTime(position)}
             </Text>
-            <Text color={theme.textSecondary} fontFamily="$body" fontSize={12} fontWeight="600">
+            <Text color={theme.textSecondary} fontFamily="$body" fontSize="$1" fontWeight="600">
               {formatTime(duration || 300000)}
             </Text>
           </XStack>

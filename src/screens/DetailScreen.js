@@ -9,6 +9,7 @@ const { useLanguage } = require('../context/LanguageContext');
 const { useFavorites } = require('../context/FavoritesContext');
 const { Ionicons } = require('@expo/vector-icons');
 const { useSafeAreaInsets } = require('react-native-safe-area-context');
+const { TouchableOpacity } = require('react-native');
 
 const DetailScreen = ({ route, navigation }) => {
   const insets = useSafeAreaInsets();
@@ -104,10 +105,9 @@ const DetailScreen = ({ route, navigation }) => {
   return (
     <YStack f={1} backgroundColor="$background" paddingTop={insets.top}>
       <XStack justifyContent="space-between" alignItems="center" paddingHorizontal="$4" paddingVertical="$2">
-        <XStack alignItems="center" space="$2" onPress={() => navigation.goBack()} pressStyle={{ opacity: 0.7 }}>
-          <Ionicons name="arrow-back" size={24} color={theme.primary} />
-          <Text fontFamily="$ethiopicSerif" fontSize="$4" color={theme.primary} fontWeight="700">{t('back')}</Text>
-        </XStack>
+        <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.7} style={{ padding: 8 }}>
+          <Ionicons name="arrow-back" size={28} color={theme.primary} />
+        </TouchableOpacity>
         <Button
           circular
           size="$4"
@@ -125,12 +125,12 @@ const DetailScreen = ({ route, navigation }) => {
       <ScrollView contentContainerStyle={{ padding: 24, paddingBottom: 280 }}>
         <Text 
           fontFamily="$ethiopicSerif" 
-          fontSize={32} 
+          fontSize="$8" 
           fontWeight="800" 
           color={theme.primary} 
           textAlign="center" 
           marginBottom="$3"
-          lineHeight={40}
+          lineHeight={36}
         >
           {mezmur.title}
         </Text>
@@ -148,7 +148,7 @@ const DetailScreen = ({ route, navigation }) => {
           marginBottom="$6"
         >
           <Circle size={8} backgroundColor={statusColor} />
-          <Text fontFamily="$ethiopicSerif" fontSize="$3" fontWeight="bold" color={statusColor} textTransform="uppercase">
+          <Text fontFamily="$ethiopicSerif" fontSize="$2" fontWeight="bold" color={statusColor} textTransform="uppercase">
             {category}
           </Text>
         </XStack>
@@ -160,9 +160,9 @@ const DetailScreen = ({ route, navigation }) => {
         
         <Text 
           fontFamily="$ethiopic" 
-          fontSize="$6" 
+          fontSize="$5" 
           color="$color" 
-          lineHeight={40} 
+          lineHeight={32} 
           textAlign="center"
         >
           {mezmur.lyrics}
@@ -185,9 +185,9 @@ const DetailScreen = ({ route, navigation }) => {
             </Text>
             <Text 
               fontFamily="$ethiopicSerif" 
-              fontSize="$6" 
+              fontSize="$5" 
               color="$colorSecondary" 
-              lineHeight={34} 
+              lineHeight={30} 
               textAlign="center" 
               fontStyle="italic"
             >
@@ -261,11 +261,11 @@ const DetailScreen = ({ route, navigation }) => {
                 />
             </YStack>
             <XStack justifyContent="space-between">
-                <Text color={theme.playerAccent} fontFamily="$body" fontSize={11} fontWeight="bold">
+                <Text color={theme.playerAccent} fontFamily="$body" fontSize="$1" fontWeight="bold">
                     {formatTime(position)}
                 </Text>
-                <Text color={theme.playerAccent} fontFamily="$body" fontSize={11} fontWeight="bold">
-                    {formatTime(duration || 332000)} {/* Default fallback for mockup feel */}
+                <Text color={theme.playerAccent} fontFamily="$body" fontSize="$1" fontWeight="bold">
+                    {formatTime(duration || 332000)}
                 </Text>
             </XStack>
         </YStack>

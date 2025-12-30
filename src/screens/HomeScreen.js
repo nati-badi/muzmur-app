@@ -184,7 +184,7 @@ const HomeScreen = ({ navigation }) => {
           onPress={() => navigation.toggleDrawer()}
           pressStyle={{ opacity: 0.6 }}
         />
-        <Text fontFamily="$ethiopicSerif" fontSize={28} fontWeight="800" color={theme.primary} letterSpacing={-0.5}>
+        <Text fontFamily="$ethiopicSerif" fontSize="$8" fontWeight="800" color={theme.primary} letterSpacing={-0.5}>
           ቅዱስ ዜማ
         </Text>
         <Button 
@@ -228,7 +228,7 @@ const HomeScreen = ({ navigation }) => {
                    {t('loadMore')}
                  </Text>
                </Button>
-               <Text fontFamily="$body" fontSize={10} color="$colorSecondary" marginTop="$2" opacity={0.6}>
+               <Text fontFamily="$body" fontSize="$1" color="$colorSecondary" marginTop="$2" opacity={0.6}>
                  {visibleCount} / {filteredMezmurs.length}
                </Text>
              </YStack>

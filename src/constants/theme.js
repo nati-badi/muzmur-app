@@ -2,83 +2,95 @@ const THEMES = {
   classic: {
     id: 'classic',
     name: 'ክላሲክ',
-    primary: '#4E2416', // Deep Brown
-    accent: '#D4AF37',  // Gold
+    primary: '#45271E', // Heritage Mahogany
+    accent: '#C5A028',  // Antique Gold
     background: '#F9F9F7',
     surface: '#FFFFFF',
-    text: '#2C2C2C',
-    textSecondary: '#666666',
-    playerBackground: '#4E2416',
+    text: '#2C2B2A',
+    textSecondary: '#6D6A66',
+    playerBackground: '#45271E',
     playerText: '#FFFFFF',
-    playerAccent: '#D4AF37',
-    swatches: ['#8B4513', '#4E2416', '#D4AF37'],
-    error: '#B00020',
-    success: '#2ECC71',
-    borderColor: 'rgba(78, 36, 22, 0.1)'
+    playerAccent: '#C5A028',
+    swatches: ['#45271E', '#734D41', '#C5A028'],
+    error: '#B03A2E',
+    success: '#27AE60',
+    borderColor: 'rgba(69, 39, 30, 0.08)'
   },
-  green: {
-    id: 'green',
+  forest: {
+    id: 'forest',
     name: 'አረንጓዴ',
-    primary: '#0B4D2C', // Deep Forest Green
-    accent: '#2ECC71',  // Emerald Green
-    background: '#F7F9F8',
+    primary: '#1B3B2B', // Evergreen
+    accent: '#4A8B6F',  // Sage Emerald
+    background: '#F5F7F6',
     surface: '#FFFFFF',
-    text: '#1A2F25',
+    text: '#1A2922',
     textSecondary: '#5A7366',
-    playerBackground: '#0B4D2C',
+    playerBackground: '#1B3B2B',
     playerText: '#FFFFFF',
-    playerAccent: '#2ECC71',
-    swatches: ['#1A5D3B', '#0B4D2C', '#2ECC71'],
-    error: '#B00020',
-    success: '#2ECC71',
-    borderColor: 'rgba(11, 77, 44, 0.1)'
+    playerAccent: '#4A8B6F',
+    swatches: ['#1B3B2B', '#345E49', '#4A8B6F'],
+    error: '#B03A2E',
+    success: '#27AE60',
+    borderColor: 'rgba(27, 59, 43, 0.08)'
   },
-  blue: {
-    id: 'blue',
+  serene: {
+    id: 'serene',
     name: 'ሰማያዊ',
-    primary: '#1A237E', // Spiritual Navy
-    accent: '#2979FF',  // Digital Blue
-    background: '#F7F8F9',
+    primary: '#2C3E50', // Slate Navy
+    accent: '#5D80A6',  // Muted Steel Blue
+    background: '#F4F7F9',
     surface: '#FFFFFF',
-    text: '#1A1C2E',
-    textSecondary: '#575A7A',
-    playerBackground: '#1A237E',
+    text: '#1C2833',
+    textSecondary: '#5D6D7E',
+    playerBackground: '#2C3E50',
     playerText: '#FFFFFF',
-    playerAccent: '#2979FF',
-    swatches: ['#283593', '#1A237E', '#2979FF'],
-    error: '#B00020',
-    success: '#2ECC71',
-    borderColor: 'rgba(26, 35, 126, 0.1)'
+    playerAccent: '#5D80A6',
+    swatches: ['#2C3E50', '#4A647E', '#5D80A6'],
+    error: '#B03A2E',
+    success: '#27AE60',
+    borderColor: 'rgba(44, 62, 80, 0.08)'
   },
-  purple: {
-    id: 'purple',
+  royal: {
+    id: 'royal',
     name: 'ወይን ጠጅ',
-    primary: '#4A148C', // Deep Royal Purple
-    accent: '#AA00FF',  // Electric Purple
-    background: '#F9F7F9',
+    primary: '#3B1E54', // Byzantine Purple
+    accent: '#8E6F9F',  // Muted Mauve
+    background: '#F7F4F9',
     surface: '#FFFFFF',
-    text: '#2E1A2F',
-    textSecondary: '#7A577C',
-    playerBackground: '#4A148C',
+    text: '#24142E',
+    textSecondary: '#6D5D7E',
+    playerBackground: '#3B1E54',
     playerText: '#FFFFFF',
-    playerAccent: '#AA00FF',
-    swatches: ['#6A1B9A', '#4A148C', '#AA00FF'],
-    error: '#B00020',
-    success: '#2ECC71',
-    borderColor: 'rgba(74, 20, 140, 0.1)'
+    playerAccent: '#8E6F9F',
+    swatches: ['#3B1E54', '#5D3B73', '#8E6F9F'],
+    error: '#B03A2E',
+    success: '#27AE60',
+    borderColor: 'rgba(59, 30, 84, 0.08)'
+  },
+  rose: {
+    id: 'rose',
+    name: 'ሮዝ',
+    primary: '#5D2E46', // Burgundy
+    accent: '#E098AD',  // Dusty Rose
+    background: '#F9F5F6',
+    surface: '#FFFFFF',
+    text: '#3D1F2E',
+    textSecondary: '#7A5C6B',
+    playerBackground: '#5D2E46',
+    playerText: '#FFFFFF',
+    playerAccent: '#E098AD',
+    swatches: ['#5D2E46', '#8E4A6F', '#E098AD'],
+    error: '#B03A2E',
+    success: '#27AE60',
+    borderColor: 'rgba(93, 46, 70, 0.08)'
   }
 };
 
-const COLORS = THEMES.classic; // Default fallback
+const COLORS = THEMES.classic;
 
 const TEXT = {
-  title: {
-    fontWeight: '600'
-  },
-  lyric: {
-    fontWeight: '400',
-    fontSize: 16
-  }
+  title: { fontWeight: '600' },
+  lyric: { fontWeight: '400', fontSize: 16 }
 };
 
 const FONTS = {

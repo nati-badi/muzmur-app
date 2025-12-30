@@ -31,7 +31,7 @@ const ProfileScreen = ({ navigation }) => {
             <Ionicons name="arrow-back" size={28} color={theme.primary} />
           </Circle>
         </TouchableOpacity>
-        <Text fontFamily="$ethiopicSerif" fontSize={28} fontWeight="800" color={theme.primary} letterSpacing={-0.5}>
+        <Text fontFamily="$ethiopicSerif" fontSize="$8" fontWeight="800" color={theme.primary} letterSpacing={-0.5}>
           {t('profile')}
         </Text>
       </XStack>
@@ -52,21 +52,21 @@ const ProfileScreen = ({ navigation }) => {
                 <Ionicons name="person" size={40} color="white" />
               </Circle>
               <View style={{ flex: 1, marginLeft: 16 }}>
-                <Text style={{ 
-                  fontFamily: 'NotoSerifEthiopic_700Bold', 
-                  fontSize: 20, 
-                  fontWeight: '800', 
-                  color: theme.primary,
-                  marginBottom: 4
-                }}>
+                <Text 
+                  fontFamily="$ethiopicSerif" 
+                  fontSize="$6" 
+                  fontWeight="800" 
+                  color={theme.primary}
+                  marginBottom={4}
+                >
                   {t('user')}
                 </Text>
-                <Text style={{ 
-                  fontFamily: 'Inter_400Regular', 
-                  fontSize: 13, 
-                  color: theme.textSecondary,
-                  opacity: 0.7
-                }}>
+                <Text 
+                  fontFamily="$body" 
+                  fontSize="$2" 
+                  color={theme.textSecondary}
+                  opacity={0.7}
+                >
                   user@example.com
                 </Text>
               </View>
@@ -84,22 +84,22 @@ const ProfileScreen = ({ navigation }) => {
               borderWidth: 1,
               borderColor: theme.borderColor,
             }}>
-              <Text style={{ 
-                fontFamily: 'NotoSansEthiopic_400Regular', 
-                fontSize: 28, 
-                fontWeight: '800', 
-                color: theme.error,
-                marginBottom: 4
-              }}>
+              <Text 
+                fontFamily="$ethiopic" 
+                fontSize="$8" 
+                fontWeight="800" 
+                color={theme.error}
+                marginBottom={4}
+              >
                 {favoritesCount}
               </Text>
-              <Text style={{ 
-                fontFamily: 'Inter_400Regular', 
-                fontSize: 11, 
-                color: theme.textSecondary,
-                opacity: 0.7,
-                textTransform: 'uppercase'
-              }}>
+              <Text 
+                fontFamily="$body" 
+                fontSize="$1" 
+                color={theme.textSecondary}
+                opacity={0.7}
+                textTransform="uppercase"
+              >
                 {t('favorites')}
               </Text>
             </View>
@@ -113,22 +113,22 @@ const ProfileScreen = ({ navigation }) => {
               borderWidth: 1,
               borderColor: theme.borderColor,
             }}>
-              <Text style={{ 
-                fontFamily: 'NotoSansEthiopic_400Regular', 
-                fontSize: 28, 
-                fontWeight: '800', 
-                color: theme.accent,
-                marginBottom: 4
-              }}>
+              <Text 
+                fontFamily="$ethiopic" 
+                fontSize="$8" 
+                fontWeight="800" 
+                color={theme.accent}
+                marginBottom={4}
+              >
                 {mezmursData.length}
               </Text>
-              <Text style={{ 
-                fontFamily: 'Inter_400Regular', 
-                fontSize: 11, 
-                color: theme.textSecondary,
-                opacity: 0.7,
-                textTransform: 'uppercase'
-              }}>
+              <Text 
+                fontFamily="$body" 
+                fontSize="$1" 
+                color={theme.textSecondary}
+                opacity={0.7}
+                textTransform="uppercase"
+              >
                 Hymns
               </Text>
             </View>
@@ -153,14 +153,14 @@ const ProfileScreen = ({ navigation }) => {
                 <Circle size={40} backgroundColor={`${theme.error}15`}>
                   <Ionicons name="heart" size={20} color={theme.error} />
                 </Circle>
-                <Text style={{ 
-                  fontFamily: 'NotoSansEthiopic_400Regular', 
-                  fontSize: 15, 
-                  fontWeight: '600', 
-                  color: theme.text,
-                  flex: 1,
-                  marginLeft: 16
-                }}>
+                <Text 
+                  fontFamily="$ethiopic" 
+                  fontSize="$4" 
+                  fontWeight="600" 
+                  color={theme.text}
+                  f={1}
+                  marginLeft={16}
+                >
                   My {t('favorites')}
                 </Text>
                 <Ionicons name="chevron-forward" size={18} color={theme.textSecondary} style={{ opacity: 0.3 }} />
@@ -183,14 +183,14 @@ const ProfileScreen = ({ navigation }) => {
                 <Circle size={40} backgroundColor={`${theme.primary}15`}>
                   <Ionicons name="settings" size={20} color={theme.primary} />
                 </Circle>
-                <Text style={{ 
-                  fontFamily: 'NotoSansEthiopic_400Regular', 
-                  fontSize: 15, 
-                  fontWeight: '600', 
-                  color: theme.text,
-                  flex: 1,
-                  marginLeft: 16
-                }}>
+                <Text 
+                  fontFamily="$ethiopic" 
+                  fontSize="$4" 
+                  fontWeight="600" 
+                  color={theme.text}
+                  f={1}
+                  marginLeft={16}
+                >
                   {t('settings')}
                 </Text>
                 <Ionicons name="chevron-forward" size={18} color={theme.textSecondary} style={{ opacity: 0.3 }} />
@@ -212,14 +212,14 @@ const ProfileScreen = ({ navigation }) => {
                 <Circle size={40} backgroundColor={`${theme.accent}15`}>
                   <Ionicons name="help-circle" size={20} color={theme.accent} />
                 </Circle>
-                <Text style={{ 
-                  fontFamily: 'NotoSansEthiopic_400Regular', 
-                  fontSize: 15, 
-                  fontWeight: '600', 
-                  color: theme.text,
-                  flex: 1,
-                  marginLeft: 16
-                }}>
+                <Text 
+                  fontFamily="$ethiopic" 
+                  fontSize="$4" 
+                  fontWeight="600" 
+                  color={theme.text}
+                  f={1}
+                  marginLeft={16}
+                >
                   {t('helpSupport')}
                 </Text>
                 <Ionicons name="chevron-forward" size={18} color={theme.textSecondary} style={{ opacity: 0.3 }} />
@@ -240,12 +240,12 @@ const ProfileScreen = ({ navigation }) => {
                 justifyContent: 'center',
               }}>
                 <Ionicons name="log-out" size={20} color={theme.error} style={{ marginRight: 12 }} />
-                <Text style={{ 
-                  fontFamily: 'NotoSansEthiopic_400Regular', 
-                  fontSize: 15, 
-                  fontWeight: '600', 
-                  color: theme.error
-                }}>
+                <Text 
+                  fontFamily="$ethiopic" 
+                  fontSize="$4" 
+                  fontWeight="600" 
+                  color={theme.error}
+                >
                   {t('logout')}
                 </Text>
               </View>
