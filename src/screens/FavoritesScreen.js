@@ -4,8 +4,9 @@ const { FlatList, StyleSheet } = require('react-native');
 const { YStack, XStack, Text, Button, Circle } = require('tamagui');
 const AsyncStorage = require('@react-native-async-storage/async-storage').default || require('@react-native-async-storage/async-storage');
 const { useFocusEffect } = require('@react-navigation/native');
-const { COLORS, FONTS, SPACING } = require('../constants/theme');
 const { useSafeAreaInsets } = require('react-native-safe-area-context');
+const { useAppTheme } = require('../context/ThemeContext');
+const { useLanguage } = require('../context/LanguageContext');
 const { Ionicons } = require('@expo/vector-icons');
 const mezmursData = require('../data/mezmurs.json');
 
@@ -13,6 +14,8 @@ const MezmurListCard = require('../components/MezmurListCard');
 
 const FavoritesScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
+  const { theme } = useAppTheme();
+  const { t } = useLanguage();
   const [favoriteMezmurs, setFavoriteMezmurs] = useState([]);
   
   // Reuse the logic from Home or pass it down if needed, but for now simple re-implementation
@@ -71,7 +74,9 @@ const FavoritesScreen = ({ navigation }) => {
   };
 
   const getStatusColor = (category) => {
-    return category === 'ረጅም' ? COLORS.error : COLORS.success;
+  const getStatusColor = (category) => {
+    return category === 'ረጅም' ? theme.error : theme.success;
+  };
   };
 
   const renderItem = useCallback(({ item }) => (
@@ -94,10 +99,10 @@ const FavoritesScreen = ({ navigation }) => {
         marginBottom="$4"
       >
         <XStack alignItems="center" space="$2" onPress={() => navigation.goBack()} pressStyle={{ opacity: 0.7 }}>
-           <Ionicons name="arrow-back" size={24} color="$primary" />
-           <Text fontFamily="$ethiopicSerif" fontSize="$4" color="$primary" fontWeight="700">ተመለስ</Text>
+           <Ionicons name="arrow-back" size={24} color={theme.primary} />
+           <Text fontFamily="$ethiopicSerif" fontSize="$4" color={theme.primary} fontWeight="700">{t('back')}</Text>
         </XStack>
-        <Text fontFamily="$ethiopicSerif" fontSize={24} fontWeight="800" color="$primary">ተወዳጆች</Text>
+        <Text fontFamily="$ethiopicSerif" fontSize={24} fontWeight="800" color={theme.primary}>{t('favorites')}</Text>
         <XStack width={60} /> 
       </XStack>
 

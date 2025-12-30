@@ -2,18 +2,24 @@ const React = require('react');
 const { useState, useEffect, useCallback } = React;
 const { ScrollView, StyleSheet, ActivityIndicator } = require('react-native');
 const { YStack, XStack, Text, Button, Circle, Theme } = require('tamagui');
-const { Audio } = require('expo-av');
+const { Audio } = require('expo-audio');
 const AsyncStorage = require('@react-native-async-storage/async-storage').default || require('@react-native-async-storage/async-storage');
-const { COLORS, FONTS, SPACING } = require('../constants/theme');
+const { useAppTheme } = require('../context/ThemeContext');
+const { useLanguage } = require('../context/LanguageContext');
 const { Ionicons } = require('@expo/vector-icons');
 const { useSafeAreaInsets } = require('react-native-safe-area-context');
 
 const DetailScreen = ({ route, navigation }) => {
   const insets = useSafeAreaInsets();
+  const { theme } = useAppTheme();
+  const { t } = useLanguage();
   const { mezmur } = route.params;
-  const [sound, setSound] = useState();
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [position, setPosition] = useState(0);
+  const [duration, setDuration] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [sound, setSound] = useState(null);
+
   const [favorites, setFavorites] = useState([]);
 
   useEffect(() => {
@@ -59,11 +65,19 @@ const DetailScreen = ({ route, navigation }) => {
   };
 
   const getStatusColor = (category) => {
-    return category === 'ረጅም' ? COLORS.error : COLORS.success;
+    return category === 'ረጅም' ? theme.error : theme.success;
   };
 
   const category = getCategoryByLines(mezmur.lyrics);
   const statusColor = getStatusColor(category);
+
+  const formatTime = (millis) => {
+    if (!millis || isNaN(millis)) return '0:00';
+    const totalSeconds = millis / 1000;
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = Math.floor(totalSeconds % 60);
+    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+  };
 
   const playPauseAudio = async () => {
     try {
@@ -86,9 +100,13 @@ const DetailScreen = ({ route, navigation }) => {
         setIsLoading(false);
         
         newSound.setOnPlaybackStatusUpdate((status) => {
-            if (status.didJustFinish) {
-                setIsPlaying(false);
-                newSound.setPositionAsync(0);
+            if (status.isLoaded) {
+                setPosition(status.positionMillis);
+                setDuration(status.durationMillis || 0);
+                if (status.didJustFinish) {
+                    setIsPlaying(false);
+                    newSound.setPositionAsync(0);
+                }
             }
         });
       }
@@ -114,8 +132,8 @@ const DetailScreen = ({ route, navigation }) => {
     <YStack f={1} backgroundColor="$background" paddingTop={insets.top}>
       <XStack justifyContent="space-between" alignItems="center" paddingHorizontal="$4" paddingVertical="$2">
         <XStack alignItems="center" space="$2" onPress={() => navigation.goBack()} pressStyle={{ opacity: 0.7 }}>
-          <Ionicons name="arrow-back" size={24} color="$primary" />
-          <Text fontFamily="$ethiopicSerif" fontSize="$4" color="$primary" fontWeight="700">ተመለስ</Text>
+          <Ionicons name="arrow-back" size={24} color={theme.primary} />
+          <Text fontFamily="$ethiopicSerif" fontSize="$4" color={theme.primary} fontWeight="700">{t('back')}</Text>
         </XStack>
         <Button
           circular
@@ -124,19 +142,19 @@ const DetailScreen = ({ route, navigation }) => {
           icon={<Ionicons 
             name={isFavorite(mezmur.id) ? "heart" : "heart-outline"} 
             size={28} 
-            color={isFavorite(mezmur.id) ? COLORS.error : "$primary"} 
+            color={isFavorite(mezmur.id) ? theme.error : theme.primary} 
           />}
           onPress={toggleFavorite}
           pressStyle={{ opacity: 0.7 }}
         />
       </XStack>
 
-      <ScrollView contentContainerStyle={{ padding: 24, paddingBottom: 220 }}>
+      <ScrollView contentContainerStyle={{ padding: 24, paddingBottom: 280 }}>
         <Text 
           fontFamily="$ethiopicSerif" 
           fontSize={32} 
           fontWeight="800" 
-          color="$primary" 
+          color={theme.primary} 
           textAlign="center" 
           marginBottom="$3"
           lineHeight={40}
@@ -151,7 +169,7 @@ const DetailScreen = ({ route, navigation }) => {
           borderRadius={20} 
           alignSelf="center" 
           borderWidth={1} 
-          borderColor="$accent" 
+          borderColor={theme.accent} 
           alignItems="center" 
           space="$2"
           marginBottom="$6"
@@ -164,7 +182,7 @@ const DetailScreen = ({ route, navigation }) => {
         
         {/* Ornamental Divider */}
         <YStack alignItems="center" marginBottom="$6">
-            <Text color="$accent" fontSize="$4" opacity={0.6}>✤ ✤ ✤</Text>
+            <Text color={theme.accent} fontSize="$4" opacity={0.6}>✤ ✤ ✤</Text>
         </YStack>
         
         <Text 
@@ -179,17 +197,18 @@ const DetailScreen = ({ route, navigation }) => {
         
         {mezmur.translation && (
           <YStack marginTop="$8">
-            <YStack height={1} backgroundColor="$accent" width="40%" alignSelf="center" marginBottom="$6" opacity={0.3} />
+            <YStack height={1} backgroundColor={theme.accent} width="40%" alignSelf="center" marginBottom="$6" opacity={0.3} />
             <Text 
               fontFamily="$ethiopicSerif" 
               fontSize="$5" 
               fontWeight="700" 
-              color="$primary" 
+              color={theme.primary} 
               textAlign="center" 
               marginBottom="$4"
               fontStyle="italic"
+              opacity={0.9}
             >
-              ትርጉም
+              {t('translation')}
             </Text>
             <Text 
               fontFamily="$ethiopicSerif" 
@@ -205,65 +224,127 @@ const DetailScreen = ({ route, navigation }) => {
         )}
       </ScrollView>
 
-      {/* Player Controls (Gold/Parchment Style) */}
+      {/* Premium Player UI (Image-Matched Design) */}
       <YStack 
         position="absolute" 
         bottom={0} 
         left={0} 
         right={0} 
-        backgroundColor="$background" 
-        paddingVertical="$6"
-        paddingHorizontal="$5" 
-        borderTopWidth={3} 
-        borderTopColor="$accent" 
-        alignItems="center" 
+        backgroundColor={theme.playerBackground} 
+        borderTopLeftRadius={24}
+        borderTopRightRadius={24}
+        paddingTop="$5"
         paddingBottom={insets.bottom + 20}
         elevation="$5"
+        shadowColor="black"
+        shadowOffset={{ width: 0, height: -10 }}
+        shadowOpacity={0.3}
+        shadowRadius={15}
       >
-        <XStack alignItems="center" justifyContent="center" space="$8" width="100%">
-          <YStack alignItems="center" space="$1">
-            <Button
-              circular
-              size="$4"
-              backgroundColor="transparent"
-              icon={<Ionicons name="refresh-outline" size={32} color="$primary" style={{ transform: [{ scaleX: -1 }] }} />}
-              onPress={() => skip(-5)}
-              pressStyle={{ opacity: 0.6 }}
-            />
-            <Text fontFamily="$body" fontSize="$1" color="$primary" fontWeight="bold">5s</Text>
-          </YStack>
-
+        {/* Top Info Row */}
+        <XStack paddingHorizontal="$5" alignItems="center" justifyContent="space-between" marginBottom="$4">
+          <XStack space="$4" alignItems="center" f={1}>
+            {/* Album Art Placeholder */}
+            <YStack 
+                backgroundColor={theme.playerAccent} 
+                width={50} 
+                height={50} 
+                borderRadius={12} 
+                alignItems="center" 
+                justifyContent="center"
+                elevation="$2"
+            >
+                <Ionicons name="musical-notes" size={24} color={theme.playerBackground} />
+            </YStack>
+            <YStack space="$1" f={1}>
+                <Text color="white" fontFamily="$ethiopicSerif" fontSize="$4" fontWeight="800" numberOfLines={1}>
+                    {mezmur.title}
+                </Text>
+                <Text color={theme.playerAccent} fontFamily="$ethiopicSerif" fontSize="$2" fontWeight="600" opacity={0.9}>
+                    በዓለ {mezmur.title.split(' ').slice(0, 2).join(' ')}
+                </Text>
+            </YStack>
+          </XStack>
           <Button
             circular
-            size="$7"
-            backgroundColor="$primary"
-            borderColor="$accent"
-            borderWidth={2}
-            icon={isLoading ? <ActivityIndicator color="white" /> : <Ionicons name={isPlaying ? "pause" : "play"} size={48} color="white" />}
-            onPress={playPauseAudio}
-            disabled={isLoading}
-            pressStyle={{ opacity: 0.8 }}
-            elevation="$4"
+            size="$3"
+            backgroundColor="transparent"
+            icon={<Ionicons 
+                name={isFavorite(mezmur.id) ? "heart" : "heart-outline"} 
+                size={24} 
+                color="white" 
+            />}
+            onPress={toggleFavorite}
           />
+        </XStack>
 
-          <YStack alignItems="center" space="$1">
-            <Button
+        {/* Progress Bar Container */}
+        <YStack paddingHorizontal="$5" space="$1" marginBottom="$4">
+            <YStack backgroundColor="rgba(255,255,255,0.1)" height={6} borderRadius={3} overflow="hidden">
+                <YStack 
+                    backgroundColor={theme.playerAccent} 
+                    height="100%" 
+                    width={`${duration > 0 ? (position / duration) * 100 : 0}%`} 
+                />
+            </YStack>
+            <XStack justifyContent="space-between">
+                <Text color={theme.playerAccent} fontFamily="$body" fontSize={11} fontWeight="bold">
+                    {formatTime(position)}
+                </Text>
+                <Text color={theme.playerAccent} fontFamily="$body" fontSize={11} fontWeight="bold">
+                    {formatTime(duration || 332000)} {/* Default fallback for mockup feel */}
+                </Text>
+            </XStack>
+        </YStack>
+
+        {/* Control Row */}
+        <XStack alignItems="center" justifyContent="space-between" paddingHorizontal="$6">
+           <Button
               circular
-              size="$4"
+              size="$3"
               backgroundColor="transparent"
-              icon={<Ionicons name="refresh-outline" size={32} color="$primary" />}
-              onPress={() => skip(5)}
+              icon={<Ionicons name="shuffle" size={20} color="white" opacity={0.6} />}
               pressStyle={{ opacity: 0.6 }}
             />
-            <Text fontFamily="$body" fontSize="$1" color="$primary" fontWeight="bold">5s</Text>
-          </YStack>
-        </XStack>
-        
-        <XStack space="$2" alignItems="center" marginTop="$4" opacity={0.8}>
-          <Ionicons name="time-outline" size={14} color="$primary" />
-          <Text fontFamily="$body" fontSize="$2" color="$primary" fontWeight="bold" letterSpacing={1}>
-            {mezmur.duration}
-          </Text>
+            
+            <XStack space="$5" alignItems="center">
+                <Button
+                    circular
+                    size="$4"
+                    backgroundColor="transparent"
+                    icon={<Ionicons name="play-skip-back" size={28} color="white" />}
+                    onPress={() => skip(-10)}
+                    pressStyle={{ opacity: 0.6 }}
+                />
+
+                <Button
+                    circular
+                    size="$6"
+                    backgroundColor={theme.playerAccent}
+                    icon={isLoading ? <ActivityIndicator color={theme.playerBackground} /> : <Ionicons name={isPlaying ? "pause" : "play"} size={32} color={theme.playerBackground} />}
+                    onPress={playPauseAudio}
+                    disabled={isLoading}
+                    pressStyle={{ scale: 0.95 }}
+                    elevation="$4"
+                />
+
+                <Button
+                    circular
+                    size="$4"
+                    backgroundColor="transparent"
+                    icon={<Ionicons name="play-skip-forward" size={28} color="white" />}
+                    onPress={() => skip(10)}
+                    pressStyle={{ opacity: 0.6 }}
+                />
+            </XStack>
+
+            <Button
+              circular
+              size="$3"
+              backgroundColor="transparent"
+              icon={<Ionicons name="repeat" size={20} color="white" opacity={0.6} />}
+              pressStyle={{ opacity: 0.6 }}
+            />
         </XStack>
       </YStack>
     </YStack>

@@ -8,6 +8,8 @@ const config = require('./src/tamagui.config').default || require('./src/tamagui
 const { useFonts, Inter_400Regular, Inter_600SemiBold, Inter_700Bold } = require('@expo-google-fonts/inter');
 const { NotoSansEthiopic_400Regular, NotoSansEthiopic_700Bold } = require('@expo-google-fonts/noto-sans-ethiopic');
 const { NotoSerifEthiopic_400Regular, NotoSerifEthiopic_700Bold } = require('@expo-google-fonts/noto-serif-ethiopic');
+const { ThemeProvider } = require('./src/context/ThemeContext');
+const { LanguageProvider } = require('./src/context/LanguageContext');
 const SplashScreen = require('expo-splash-screen');
 
 // Prevent splash screen from auto-hiding
@@ -36,10 +38,14 @@ function App() {
 
   return (
     <TamaguiProvider config={config} defaultTheme="light">
-      <SafeAreaProvider onLayout={onLayoutRootView}>
-        <StatusBar style="dark" />
-        <AppNavigator />
-      </SafeAreaProvider>
+      <ThemeProvider>
+        <LanguageProvider>
+          <SafeAreaProvider onLayout={onLayoutRootView}>
+            <StatusBar style="dark" />
+            <AppNavigator />
+          </SafeAreaProvider>
+        </LanguageProvider>
+      </ThemeProvider>
     </TamaguiProvider>
   );
 }

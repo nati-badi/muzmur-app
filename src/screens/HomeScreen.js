@@ -6,9 +6,11 @@ const { useSafeAreaInsets } = require('react-native-safe-area-context');
 const { Ionicons } = require('@expo/vector-icons');
 const AsyncStorage = require('@react-native-async-storage/async-storage').default || require('@react-native-async-storage/async-storage');
 const { useFocusEffect } = require('@react-navigation/native');
-const { COLORS, FONTS, SPACING } = require('../constants/theme');
+const { useAppTheme } = require('../context/ThemeContext');
+const { useLanguage } = require('../context/LanguageContext');
 const { getAllSections } = require('../constants/sections');
 const mezmursData = require('../data/mezmurs.json');
+const { COLORS } = require('../constants/theme');
 
 // Skeleton loader for a premium feel during "fetching"
 const SkeletonCard = () => (
@@ -36,6 +38,8 @@ const LOAD_INCREMENT = 10;
 const HomeScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
+  const { theme } = useAppTheme();
+  const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   
   // Estimate how many cards fit the screen initially
@@ -55,8 +59,8 @@ const HomeScreen = ({ navigation }) => {
   const [visibleCount, setVisibleCount] = useState(calculatedInitialCount);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  const filters = ['All', 'ረጅም', 'አጭር'];
-  const sections = ['All', ...new Set(mezmursData.map(item => item.section))];
+  const filters = [t('all'), t('long'), t('short')];
+  const sections = [t('all'), ...new Set(mezmursData.map(item => item.section))];
 
   useEffect(() => {
     loadFavorites();
@@ -103,7 +107,7 @@ const HomeScreen = ({ navigation }) => {
   const isFavorite = useCallback((id) => favorites.includes(String(id)), [favorites]);
 
   const getStatusColor = (category) => {
-    return category === 'ረጅም' ? COLORS.error : COLORS.success;
+    return category === 'ረጅም' ? theme.error : theme.success;
   };
 
   const handlePress = useCallback((item) => {
@@ -171,23 +175,37 @@ const HomeScreen = ({ navigation }) => {
   ), []);
 
   return (
-    <YStack f={1} backgroundColor="$background" paddingTop={insets.top}>
+    <YStack f={1} backgroundColor={theme.background || '#F5F5F5'} paddingTop={insets.top}>
       <XStack 
-        justifyContent="space-between" 
-        alignItems="center" 
         paddingHorizontal="$5" 
         paddingVertical="$3"
+        alignItems="center"
+        justifyContent="center"
       >
-        <Text fontFamily="$ethiopicSerif" fontSize={28} fontWeight="800" color="$primary" letterSpacing={-0.5}>
-          ቅዱስ ዜማ
-        </Text>
         <Button 
+          position="absolute"
+          left="$4"
           circular 
           size="$3" 
           backgroundColor="transparent"
-          icon={<Ionicons name="menu-outline" size={28} color="$primary" />}
+          icon={<Ionicons name="menu-outline" size={28} color={theme.primary} />}
           onPress={() => navigation.toggleDrawer()}
           pressStyle={{ opacity: 0.6 }}
+        />
+        <Text fontFamily="$ethiopicSerif" fontSize={28} fontWeight="800" color={theme.primary} letterSpacing={-0.5}>
+          ቅዱስ ዜማ
+        </Text>
+        {/* User Avatar - Right Side */}
+        <Button 
+          position="absolute"
+          right="$4"
+          circular 
+          size="$3" 
+          backgroundColor={theme.accent}
+          icon={<Ionicons name="person" size={20} color="white" />}
+          onPress={() => navigation.navigate('Tabs', { screen: 'Profile' })}
+          pressStyle={{ opacity: 0.8 }}
+          elevation="$2"
         />
       </XStack>
 
@@ -213,10 +231,10 @@ const HomeScreen = ({ navigation }) => {
                  onPress={handleLoadMore}
                  disabled={isLoadingMore}
                  opacity={isLoadingMore ? 0.6 : 1}
-                 icon={isLoadingMore ? <ActivityIndicator color={COLORS.primary} size="small" /> : undefined}
+                 icon={isLoadingMore ? <ActivityIndicator color={theme.primary} size="small" /> : undefined}
                >
                  <Text fontFamily="$ethiopicSerif" color="$primary" fontWeight="700">
-                   ተጨማሪ አሳይ (Load More)
+                   {t('loadMore')}
                  </Text>
                </Button>
                <Text fontFamily="$body" fontSize={10} color="$colorSecondary" marginTop="$2" opacity={0.6}>
@@ -232,16 +250,16 @@ const HomeScreen = ({ navigation }) => {
               size="$5"
               fontFamily="$ethiopicSerif"
               backgroundColor="transparent"
-              placeholder="በመዝሙር ርዕስ ወይም ግጥም ይፈልጉ..."
+              placeholder={t('searchPlaceholder')}
               value={searchQuery}
               onChangeText={setSearchQuery}
               placeholderTextColor="$colorSecondary"
               borderWidth={0}
               borderBottomWidth={2}
-              borderColor="$primary"
+              borderColor={theme.primary}
               borderRadius={0}
               paddingHorizontal={0}
-              focusStyle={{ borderColor: "$accent", borderBottomWidth: 3 }}
+              focusStyle={{ borderColor: theme.accent, borderBottomWidth: 3 }}
               opacity={0.8}
             />
 
@@ -252,8 +270,8 @@ const HomeScreen = ({ navigation }) => {
                   key={filter}
                   size="$3"
                   borderRadius="$10"
-                  backgroundColor={selectedFilter === filter ? "$primary" : "transparent"}
-                  borderColor="$primary"
+                  backgroundColor={selectedFilter === filter ? theme.primary : "transparent"}
+                  borderColor={theme.primary}
                   borderWidth={1}
                   onPress={() => setSelectedFilter(filter)}
                   pressStyle={{ opacity: 0.8 }}
@@ -264,7 +282,7 @@ const HomeScreen = ({ navigation }) => {
                     fontFamily="$ethiopic"
                     fontSize="$3" 
                     fontWeight={selectedFilter === filter ? "800" : "600"}
-                    color={selectedFilter === filter ? "white" : "$primary"}
+                    color={selectedFilter === filter ? "white" : theme.primary}
                   >
                     {filter}
                   </Text>
@@ -275,7 +293,7 @@ const HomeScreen = ({ navigation }) => {
             {/* Section Tabs (Horizontal Scroll - Parchment Style) */}
             <YStack space="$2">
                <Text fontFamily="$ethiopicSerif" fontSize="$3" color="$colorSecondary" opacity={0.7} marginLeft="$2">
-                 ክፍላት (Sections)
+                 {t('sections')}
                </Text>
                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingRight: 20 }}>
                   {sections.map((section, index) => (
@@ -286,17 +304,17 @@ const HomeScreen = ({ navigation }) => {
                       paddingVertical="$2"
                       paddingHorizontal="$3"
                       borderBottomWidth={selectedSection === section ? 3 : 0}
-                      borderColor="$accent"
+                      borderColor={theme.accent}
                       opacity={selectedSection === section ? 1 : 0.6}
                       pressStyle={{ opacity: 0.8 }}
                     >
                       <Text 
                         fontFamily="$ethiopicSerif" 
                         fontSize="$4" 
-                        color={selectedSection === section ? "$primary" : "$color"} 
+                        color={selectedSection === section ? theme.primary : theme.text} 
                         fontWeight={selectedSection === section ? "800" : "500"} 
                       >
-                        {section === 'All' ? 'ሁሉንም' : section}
+                        {section}
                       </Text>
                     </YStack>
                   ))}
@@ -310,7 +328,7 @@ const HomeScreen = ({ navigation }) => {
             <YStack py="$10" ai="center" jc="center" space="$4">
               <Ionicons name="musical-notes-outline" size={64} color="$colorSecondary" opacity={0.3} />
               <Text fontFamily="$ethiopicSerif" color="$colorSecondary" fontSize="$5" textAlign="center" fontStyle="italic">
-                ምንም መዝሙር አልተገኘም
+                {t('noResults')}
               </Text>
             </YStack>
           )

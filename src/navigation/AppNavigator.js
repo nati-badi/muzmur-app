@@ -4,6 +4,9 @@ const { NavigationContainer } = require('@react-navigation/native');
 const HomeScreen = require('../screens/HomeScreen').default || require('../screens/HomeScreen');
 const DetailScreen = require('../screens/DetailScreen').default || require('../screens/DetailScreen');
 const FavoritesScreen = require('../screens/FavoritesScreen').default || require('../screens/FavoritesScreen');
+const ProfileScreen = require('../screens/ProfileScreen').default || require('../screens/ProfileScreen');
+const SettingsScreen = require('../screens/SettingsScreen').default || require('../screens/SettingsScreen');
+const TabNavigator = require('./TabNavigator').default || require('./TabNavigator');
 const Sidebar = require('../components/Sidebar').default || require('../components/Sidebar');
 
 const Stack = createStackNavigator();
@@ -21,7 +24,7 @@ const DrawerNavigator = () => {
         },
       }}
     >
-      <Drawer.Screen name="HomeMain" component={HomeScreen} />
+      <Drawer.Screen name="Tabs" component={TabNavigator} />
     </Drawer.Navigator>
   );
 };
@@ -38,6 +41,8 @@ const AppNavigator = () => {
         <Stack.Screen name="Drawer" component={DrawerNavigator} />
         <Stack.Screen name="Detail" component={DetailScreen} />
         <Stack.Screen name="Favorites" component={FavoritesScreen} />
+        <Stack.Screen name="Profile" component={ProfileScreen} />
+        <Stack.Screen name="Settings" component={SettingsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
