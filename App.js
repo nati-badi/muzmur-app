@@ -11,10 +11,29 @@ const { NotoSerifEthiopic_400Regular, NotoSerifEthiopic_700Bold } = require('@ex
 const { ThemeProvider } = require('./src/context/ThemeContext');
 const { LanguageProvider } = require('./src/context/LanguageContext');
 const { FavoritesProvider } = require('./src/context/FavoritesContext');
+const { AuthProvider, useAuth } = require('./src/context/AuthContext');
 const SplashScreen = require('expo-splash-screen');
 
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync().catch(() => {});
+
+// Wrapper to pass userId to FavoritesProvider
+const AppContent = ({ onLayoutRootView }) => {
+  const { user, isAnonymous } = useAuth();
+  
+  return (
+    <ThemeProvider>
+      <LanguageProvider>
+        <FavoritesProvider userId={user?.uid} isAnonymous={isAnonymous}>
+          <SafeAreaProvider onLayout={onLayoutRootView}>
+            <StatusBar style="dark" />
+            <AppNavigator />
+          </SafeAreaProvider>
+        </FavoritesProvider>
+      </LanguageProvider>
+    </ThemeProvider>
+  );
+};
 
 function App() {
   const [fontsLoaded, fontError] = useFonts({
@@ -39,16 +58,9 @@ function App() {
 
   return (
     <TamaguiProvider config={config} defaultTheme="light">
-      <ThemeProvider>
-        <LanguageProvider>
-          <FavoritesProvider>
-            <SafeAreaProvider onLayout={onLayoutRootView}>
-              <StatusBar style="dark" />
-              <AppNavigator />
-            </SafeAreaProvider>
-          </FavoritesProvider>
-        </LanguageProvider>
-      </ThemeProvider>
+      <AuthProvider>
+        <AppContent onLayoutRootView={onLayoutRootView} />
+      </AuthProvider>
     </TamaguiProvider>
   );
 }

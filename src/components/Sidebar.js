@@ -4,12 +4,14 @@ const { Ionicons } = require('@expo/vector-icons');
 const { DrawerContentScrollView } = require('@react-navigation/drawer');
 const { useAppTheme } = require('../context/ThemeContext');
 const { useLanguage } = require('../context/LanguageContext');
+const { useAuth } = require('../context/AuthContext');
 const { useSafeAreaInsets } = require('react-native-safe-area-context');
 const { View } = require('react-native');
 
 const Sidebar = (props) => {
   const { theme } = useAppTheme();
   const { t } = useLanguage();
+  const { user, isAuthenticated, isAnonymous } = useAuth();
   const insets = useSafeAreaInsets();
   
   // Determine active route to style the selected item
@@ -26,6 +28,28 @@ const Sidebar = (props) => {
     { id: 4, label: t('settings'), icon: 'settings-outline', activeIcon: 'settings', screen: 'Settings' },
     { id: 5, label: t('helpSupport'), icon: 'help-circle-outline', activeIcon: 'help-circle', screen: null }, // Placeholder
   ];
+
+  // Get user display name and subtitle
+  const getUserInfo = () => {
+    if (isAuthenticated && user?.displayName) {
+      return {
+        name: user.displayName,
+        subtitle: user.email || 'View Profile'
+      };
+    } else if (isAnonymous) {
+      return {
+        name: 'Guest User',
+        subtitle: 'Sign in to sync'
+      };
+    } else {
+      return {
+        name: t('user'),
+        subtitle: 'View Profile'
+      };
+    }
+  };
+
+  const userInfo = getUserInfo();
 
   const MenuItem = ({ item }) => {
     return (
@@ -167,11 +191,11 @@ const Sidebar = (props) => {
               <Ionicons name="person" size={24} color="white" />
             </Circle>
             <YStack f={1} space="$1">
-              <Text fontFamily="$ethiopic" fontSize={16} fontWeight="700" color={theme.text}>
-                {t('user')}
+              <Text fontFamily="$ethiopic" fontSize={16} fontWeight="700" color={theme.text} numberOfLines={1}>
+                {userInfo.name}
               </Text>
-              <Text fontFamily="$body" fontSize={11} color={theme.primary} opacity={0.8} fontWeight="600">
-                View Profile
+              <Text fontFamily="$body" fontSize={11} color={theme.primary} opacity={0.8} fontWeight="600" numberOfLines={1}>
+                {userInfo.subtitle}
               </Text>
             </YStack>
             <Circle size={36} backgroundColor={theme.background} borderWidth={1} borderColor={theme.borderColor}>

@@ -7,12 +7,19 @@ const { Ionicons } = require('@expo/vector-icons');
 const { THEMES } = require('../constants/theme');
 const { useAppTheme } = require('../context/ThemeContext');
 const { useLanguage } = require('../context/LanguageContext');
+const { useAuth } = require('../context/AuthContext');
 
 const SettingsScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const { theme, setTheme } = useAppTheme();
   const { language, changeLanguage, t } = useLanguage();
+  const { isAuthenticated, logOut } = useAuth();
   const [showThemes, setShowThemes] = useState(false);
+
+  const handleLogout = async () => {
+    await logOut();
+    navigation.replace('Auth');
+  };
 
   const themeOptions = Object.values(THEMES);
 
@@ -149,11 +156,13 @@ const SettingsScreen = ({ navigation }) => {
             onPress={() => {}}
           />
 
-          <SettingRow 
-            icon="log-out-outline" 
-            label={t('logout')}
-            onPress={() => {}}
-          />
+          {isAuthenticated && (
+            <SettingRow 
+              icon="log-out-outline" 
+              label={t('logout')}
+              onPress={handleLogout}
+            />
+          )}
         </YStack>
       </ScrollView>
     </YStack>

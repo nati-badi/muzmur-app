@@ -6,6 +6,7 @@ const { Ionicons } = require('@expo/vector-icons');
 const { useAppTheme } = require('../context/ThemeContext');
 const { useLanguage } = require('../context/LanguageContext');
 const { useFavorites } = require('../context/FavoritesContext');
+const { useAuth } = require('../context/AuthContext');
 const mezmursData = require('../data/mezmurs.json');
 
 const ProfileScreen = ({ navigation }) => {
@@ -13,6 +14,12 @@ const ProfileScreen = ({ navigation }) => {
   const { theme } = useAppTheme();
   const { t } = useLanguage();
   const { favoritesCount } = useFavorites();
+  const { user, isAuthenticated, isAnonymous, logOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await logOut();
+    navigation.replace('Auth');
+  };
 
   return (
     <YStack f={1} backgroundColor={theme.background || '#F5F5F5'} paddingTop={insets.top}>
@@ -59,7 +66,7 @@ const ProfileScreen = ({ navigation }) => {
                   color={theme.primary}
                   marginBottom={4}
                 >
-                  {t('user')}
+                  {isAuthenticated && user?.displayName ? user.displayName : t('user')}
                 </Text>
                 <Text 
                   fontFamily="$body" 
@@ -67,7 +74,7 @@ const ProfileScreen = ({ navigation }) => {
                   color={theme.textSecondary}
                   opacity={0.7}
                 >
-                  user@example.com
+                  {isAuthenticated && user?.email ? user.email : (isAnonymous ? 'Guest User' : 'Not signed in')}
                 </Text>
               </View>
             </View>
@@ -228,6 +235,7 @@ const ProfileScreen = ({ navigation }) => {
 
             <TouchableOpacity 
               activeOpacity={0.7}
+              onPress={isAuthenticated ? handleSignOut : () => navigation.replace('Auth')}
             >
               <View style={{
                 backgroundColor: 'transparent',
@@ -239,14 +247,14 @@ const ProfileScreen = ({ navigation }) => {
                 alignItems: 'center',
                 justifyContent: 'center',
               }}>
-                <Ionicons name="log-out" size={20} color={theme.error} style={{ marginRight: 12 }} />
+                <Ionicons name={isAuthenticated ? "log-out" : "log-in"} size={20} color={theme.error} style={{ marginRight: 12 }} />
                 <Text 
                   fontFamily="$ethiopic" 
                   fontSize="$4" 
                   fontWeight="600" 
                   color={theme.error}
                 >
-                  {t('logout')}
+                  {isAuthenticated ? t('logout') : 'Sign In'}
                 </Text>
               </View>
             </TouchableOpacity>
