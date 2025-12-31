@@ -36,13 +36,17 @@ const FavoritesScreen = ({ navigation }) => {
   const renderItem = useCallback(({ item }) => (
       <MezmurListCard
         item={item}
-        isFavorite={isFavorite}
+        isFavorite={isFavorite(item.id)}
         onToggleFavorite={toggleFavorite}
         onPress={(item) => navigation.navigate('Detail', { mezmur: item })}
         getStatusColor={getStatusColor}
         theme={theme}
       />
     ), [isFavorite, toggleFavorite, navigation, getStatusColor, theme]);
+
+  const getItemLayout = useCallback((data, index) => (
+    { length: 140, offset: 140 * index, index }
+  ), []);
 
   return (
     <YStack f={1} backgroundColor={theme.background || "$background"} paddingTop={insets.top}>
@@ -87,6 +91,12 @@ const FavoritesScreen = ({ navigation }) => {
           data={favoriteMezmurs}
           keyExtractor={item => String(item.id)}
           renderItem={renderItem}
+          getItemLayout={getItemLayout}
+          initialNumToRender={10}
+          maxToRenderPerBatch={5}
+          windowSize={7}
+          updateCellsBatchingPeriod={50}
+          removeClippedSubviews={true}
           contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 10, paddingBottom: 32 }}
         />
       )}

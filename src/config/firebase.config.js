@@ -15,16 +15,19 @@ const firebaseConfig = {
 };
 
 // Singleton pattern for Firebase initialization
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-
-// Singleton for Auth with persistence
+let app;
 let auth;
-try {
-  auth = getAuth(app);
-} catch (e) {
+
+if (getApps().length === 0) {
+  // First time initialization
+  app = initializeApp(firebaseConfig);
   auth = initializeAuth(app, {
     persistence: getReactNativePersistence(AsyncStorage)
   });
+} else {
+  // Already initialized - get existing instances
+  app = getApp();
+  auth = getAuth(app);
 }
 
 const db = getFirestore(app);

@@ -198,7 +198,7 @@ const HomeScreen = ({ navigation }) => {
   const renderItem = useCallback(({ item }) => (
     <MezmurListCard
       item={item}
-      isFavorite={isFavorite}
+      isFavorite={isFavorite(item.id)}
       onToggleFavorite={toggleFavorite}
       onPress={handlePress}
       getStatusColor={getStatusColor}
@@ -254,7 +254,7 @@ const HomeScreen = ({ navigation }) => {
             <View style={{ flex: 1, backgroundColor: 'transparent' }}>
                <YStack
                 position="absolute"
-                top={60 + insets.top} // Adjust based on header height
+                top={insets.top + 10} // Positioned right below the three-dots button
                 right={16}
                 width={200}
                 backgroundColor={theme.surface}
@@ -312,8 +312,10 @@ const HomeScreen = ({ navigation }) => {
         renderItem={isLoadingData ? () => <SkeletonCard /> : renderItem}
         getItemLayout={getItemLayout}
         removeClippedSubviews={true}
-        maxToRenderPerBatch={10}
-        windowSize={21}
+        initialNumToRender={calculatedInitialCount}
+        maxToRenderPerBatch={5}
+        windowSize={7}
+        updateCellsBatchingPeriod={50}
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40 }}
         ListFooterComponent={
            !isLoadingData && filteredMezmurs.length > visibleCount && (

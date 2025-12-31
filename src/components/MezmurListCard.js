@@ -11,7 +11,6 @@ const MezmurListCard = memo(({ item, isFavorite, onToggleFavorite, onPress, getS
   };
 
   const calculatedCategory = item.category || getCategory(item.lyrics);
-  const itemIsFavorite = isFavorite(item.id);
   const statusColor = getStatusColor(calculatedCategory);
 
   // Truncate lyrics for preview (first 2 lines)
@@ -108,9 +107,9 @@ const MezmurListCard = memo(({ item, isFavorite, onToggleFavorite, onPress, getS
           backgroundColor="$background"
           elevation="$1"
           icon={<Ionicons 
-            name={itemIsFavorite ? "heart" : "heart-outline"} 
+            name={isFavorite ? "heart" : "heart-outline"} 
             size={18} 
-            color={itemIsFavorite ? theme.error : "$colorSecondary"} 
+            color={isFavorite ? theme.error : "$colorSecondary"} 
           />}
           onPress={(e) => {
             e.stopPropagation();
@@ -124,7 +123,8 @@ const MezmurListCard = memo(({ item, isFavorite, onToggleFavorite, onPress, getS
 }, (prevProps, nextProps) => {
   return (
     prevProps.item.id === nextProps.item.id &&
-    prevProps.isFavorite(prevProps.item.id) === nextProps.isFavorite(nextProps.item.id)
+    prevProps.isFavorite === nextProps.isFavorite &&
+    prevProps.theme === nextProps.theme
   );
 });
 

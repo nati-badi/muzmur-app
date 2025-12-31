@@ -1,6 +1,6 @@
 const React = require('react');
 const { createContext, useState, useContext, useEffect, useRef } = React;
-const { Audio } = require('expo-av');
+const { Audio } = require('expo-audio');
 
 const AudioContext = createContext();
 
