@@ -29,8 +29,8 @@ const TodayScreen = ({ navigation }) => {
           onPress={() => navigation.toggleDrawer()}
           pressStyle={{ opacity: 0.6 }}
         />
-        <Text fontFamily="$ethiopicSerif" fontSize={28} fontWeight="800" color={theme.primary} letterSpacing={-0.5}>
-          ቅዱስ ዜማ
+        <Text fontFamily="$ethiopicSerif" fontSize={24} fontWeight="800" color={theme.primary}>
+          {t('today')}
         </Text>
       </XStack>
 

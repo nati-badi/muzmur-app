@@ -14,13 +14,35 @@ const AuthContext = createContext({});
 
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Fetch Firestore profile data
+  const fetchProfile = async (uid) => {
+    try {
+      const { doc, getDoc } = require('firebase/firestore');
+      const { db } = require('../config/firebase.config');
+      const docRef = doc(db, 'users', uid);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setProfileData(data);
+      }
+    } catch (e) {
+      console.error('Error fetching profile:', e);
+    }
+  };
 
   // Listen to auth state changes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+      if (currentUser) {
+        fetchProfile(currentUser.uid);
+      } else {
+        setProfileData(null);
+      }
       setLoading(false);
     });
 
@@ -60,13 +82,10 @@ const AuthProvider = ({ children }) => {
   // Sign in anonymously (guest mode)
   const signInAsGuest = async () => {
     try {
-      console.log('Attempting anonymous sign-in...');
       setError(null);
       const result = await signInAnonymously(auth);
-      console.log('Anonymous sign-in successful:', result.user.uid);
       return { success: true, user: result.user };
     } catch (err) {
-      console.error('Anonymous sign-in failed:', err.code, err.message);
       setError(err.message);
       return { success: false, error: err.message };
     }
@@ -84,14 +103,37 @@ const AuthProvider = ({ children }) => {
     }
   };
 
+  // Update user profile picture
+  const updateProfilePicture = async (url) => {
+    try {
+      if (!user) return { success: false, error: 'No user' };
+      setError(null);
+      
+      // We no longer call updateProfile(auth.currentUser) with the potentially huge Base64 URL
+      // Instead, we just update our local profileData state
+      // The Base64 is already saved in Firestore by UserProfileService
+      setProfileData(prev => ({
+        ...prev,
+        photoURL: url
+      }));
+      
+      return { success: true };
+    } catch (err) {
+      setError(err.message);
+      return { success: false, error: err.message };
+    }
+  };
+
   const value = {
     user,
+    profileData,
     loading,
     error,
     signUp,
     signIn,
     signInAsGuest,
     logOut,
+    updateProfilePicture,
     isAuthenticated: !!user && !user.isAnonymous,
     isAnonymous: user?.isAnonymous || false,
   };

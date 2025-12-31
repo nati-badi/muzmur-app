@@ -6,12 +6,12 @@ const { useAppTheme } = require('../context/ThemeContext');
 const { useLanguage } = require('../context/LanguageContext');
 const { useAuth } = require('../context/AuthContext');
 const { useSafeAreaInsets } = require('react-native-safe-area-context');
-const { View } = require('react-native');
+const { View, Image } = require('react-native');
 
 const Sidebar = (props) => {
   const { theme } = useAppTheme();
   const { t } = useLanguage();
-  const { user, isAuthenticated, isAnonymous } = useAuth();
+  const { user, profileData, isAuthenticated, isAnonymous } = useAuth();
   const insets = useSafeAreaInsets();
   
   // Determine active route to style the selected item
@@ -27,6 +27,7 @@ const Sidebar = (props) => {
   const secondaryItems = [
     { id: 4, label: t('settings'), icon: 'settings-outline', activeIcon: 'settings', screen: 'Settings' },
     { id: 5, label: t('helpSupport'), icon: 'help-circle-outline', activeIcon: 'help-circle', screen: null }, // Placeholder
+    { id: 6, label: t('aboutUs'), icon: 'information-circle-outline', activeIcon: 'information-circle', screen: null }, // Placeholder
   ];
 
   // Get user display name and subtitle
@@ -34,17 +35,17 @@ const Sidebar = (props) => {
     if (isAuthenticated && user?.displayName) {
       return {
         name: user.displayName,
-        subtitle: user.email || 'View Profile'
+        subtitle: user.email || t('viewProfile')
       };
     } else if (isAnonymous) {
       return {
-        name: 'Guest User',
-        subtitle: 'Sign in to sync'
+        name: t('guestUser'),
+        subtitle: t('signInToSync')
       };
     } else {
       return {
         name: t('user'),
-        subtitle: 'View Profile'
+        subtitle: t('viewProfile')
       };
     }
   };
@@ -52,6 +53,7 @@ const Sidebar = (props) => {
   const userInfo = getUserInfo();
 
   const MenuItem = ({ item }) => {
+    const isDisabled = !item.screen;
     return (
       <Button
         backgroundColor="transparent"
@@ -60,7 +62,9 @@ const Sidebar = (props) => {
         minHeight={60}
         borderRadius="$4"
         justifyContent="flex-start"
+        opacity={isDisabled ? 0.4 : 1}
         onPress={() => {
+          if (isDisabled) return;
           if (item.params) {
             props.navigation.navigate(item.screen, item.params);
           } else {
@@ -68,7 +72,7 @@ const Sidebar = (props) => {
           }
            setTimeout(() => props.navigation.closeDrawer(), 100);
         }}
-        pressStyle={{ backgroundColor: `${theme.primary}08`, scale: 0.98 }}
+        pressStyle={isDisabled ? {} : { backgroundColor: `${theme.primary}08`, scale: 0.98 }}
         group 
       >
         <XStack alignItems="center" space="$4">
@@ -169,6 +173,13 @@ const Sidebar = (props) => {
 
       </DrawerContentScrollView>
 
+      {/* 3.5 Version Display: Clean & Professional */}
+      <YStack paddingBottom="$2" alignItems="center" opacity={0.4}>
+        <Text fontFamily="$body" fontSize={10} color={theme.textSecondary} letterSpacing={1}>
+          {t('version').toUpperCase()} 1.0.0
+        </Text>
+      </YStack>
+
       {/* 4. Footer: Clean Docked User Profile */}
       <YStack 
         padding="$5" 
@@ -187,8 +198,12 @@ const Sidebar = (props) => {
           pressStyle={{ opacity: 0.6 }}
         >
           <XStack alignItems="center" space="$3">
-            <Circle size={46} backgroundColor={theme.accent} borderWidth={2} borderColor={theme.background}>
-              <Ionicons name="person" size={24} color="white" />
+            <Circle size={46} backgroundColor={theme.accent} borderWidth={2} borderColor={theme.background} overflow="hidden">
+              {(profileData?.photoURL || user?.photoURL) ? (
+                <Image source={{ uri: profileData?.photoURL || user?.photoURL }} style={{ width: '100%', height: '100%' }} />
+              ) : (
+                <Ionicons name="person" size={24} color="white" />
+              )}
             </Circle>
             <YStack f={1} space="$1">
               <Text fontFamily="$ethiopic" fontSize={16} fontWeight="700" color={theme.text} numberOfLines={1}>

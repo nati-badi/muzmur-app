@@ -12,13 +12,18 @@ const translations = {
     settings: 'Settings',
     favorites: 'Favorites',
     home: 'Home',
+    player: 'Player',
+    appTitle: 'ቅዱስ ዜማ',
+    appTagline: 'Orthodox Hymns',
+    shareMessage: 'Check out the app! Download it now to listen to your favorite hymns.',
     
     // Profile Screen
     user: 'User',
     appearance: 'Appearance',
     language: 'Language',
     notifications: 'Notifications',
-    helpSupport: 'About Us',
+    helpSupport: 'Help & Support',
+    aboutUs: 'About Us',
     logout: 'Logout',
     
     // Settings labels
@@ -37,6 +42,8 @@ const translations = {
     long: 'Long',
     loadMore: 'Load More',
     noResults: 'No hymns found',
+    playlists: 'Playlists',
+    recent: 'Recent',
     
     // Sidebar
     sidebarTitle: 'Menu',
@@ -44,6 +51,27 @@ const translations = {
     // Common
     back: 'Back',
     translation: 'Translation',
+    ok: 'OK',
+    great: 'OK',
+    cancel: 'Cancel',
+    viewProfile: 'View Profile',
+    signInToSync: 'Sign in to sync',
+    guestUser: 'Guest User',
+    version: 'Version',
+
+    // Overflow Menu
+    shareApp: 'Share App',
+    feedback: 'Feedback',
+    checkUpdates: 'Check for Updates',
+    feedbackAlertTitle: 'Feedback',
+    feedbackAlertMessage: 'We value your feedback! Please send us your thoughts at natibadideb@gmail.com',
+    updatesAlertTitle: 'Check for Updates',
+    updatesAlertMessage: 'You are already on the latest version (v1.0.0).',
+    moreOptions: 'More Options',
+    chooseAction: 'Choose an action:',
+    noHymnSelected: 'No Hymn Selected',
+    selectHymnDetail: 'Choose a hymn from the list to start listening.',
+    browseMezmurs: 'Browse Mezmurs',
   },
   am: {
     // Screen Titles
@@ -52,13 +80,18 @@ const translations = {
     settings: 'ቅንብሮች',
     favorites: 'ተወዳጆች',
     home: 'ቤት',
+    player: 'ማጫወቻ',
+    appTitle: 'ቅዱስ ዜማ',
+    appTagline: 'ኦርቶዶክስ መዝሙራት',
+    shareMessage: 'መተግበሪያውን ይመልከቱ! የሚወዱትን መዝሙር ለማዳመጥ አሁኑኑ ያውርዱት።',
     
     // Profile Screen
     user: 'ተጠቃሚ',
     appearance: 'ገጽታ',
     language: 'ቋንቋ',
     notifications: 'ማሳወቂያዎች',
-    helpSupport: 'እርዳታ',
+    helpSupport: 'እርዳታና ድጋፍ',
+    aboutUs: 'ስለ እኛ',
     logout: 'ውጣ',
     
     // Settings labels
@@ -77,6 +110,8 @@ const translations = {
     long: 'ረጅም',
     loadMore: 'ተጨማሪ አሳይ',
     noResults: 'ምንም መዝሙር አልተገኘም',
+    playlists: 'ስብስቦች',
+    recent: 'የቅርብ ጊዜ',
     
     // Sidebar
     sidebarTitle: 'ማውጫ',
@@ -84,6 +119,27 @@ const translations = {
     // Common
     back: 'ተመለስ',
     translation: 'ትርጉም',
+    ok: 'እሺ',
+    great: 'እሺ',
+    cancel: 'ሰርዝ',
+    viewProfile: 'መገለጫን ይመልከቱ',
+    signInToSync: 'ለመቀላቀል ይግቡ',
+    guestUser: 'እንግዳ ተጠቃሚ',
+    version: 'ስሪት',
+
+    // Overflow Menu
+    shareApp: 'መተግበሪያውን አጋራ',
+    feedback: 'አስተያየት',
+    checkUpdates: 'ዝመናን ፈትሽ',
+    feedbackAlertTitle: 'አስተያየት',
+    feedbackAlertMessage: 'አስተያየትዎን እናደንቃለን! እባክዎን ሃሳብዎን በ natibadideb@gmail.com ይላኩልን',
+    updatesAlertTitle: 'ዝመናን ፈትሽ',
+    updatesAlertMessage: 'እርስዎ በአሁኑ ጊዜ የቅርብ ጊዜው ስሪት (v1.0.0) ላይ ነዎት።',
+    moreOptions: 'ተጨማሪ አማራጮች',
+    chooseAction: 'አንድ እርምጃ ይምረጡ:',
+    noHymnSelected: 'ምንም መዝሙር አልተመረጠም',
+    selectHymnDetail: 'መዝሙር ለማዳመጥ ከዝርዝሩ ውስጥ አንዱን ይምረጡ።',
+    browseMezmurs: 'መዝሙራትን ይመልከቱ',
   }
 };
 

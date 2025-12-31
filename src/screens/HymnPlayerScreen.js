@@ -2,35 +2,21 @@ const React = require('react');
 const { useState, useEffect, useCallback } = React;
 const { StyleSheet, ActivityIndicator } = require('react-native');
 const { YStack, XStack, Text, Button, Circle } = require('tamagui');
-const { Audio } = require('expo-audio');
 const AsyncStorage = require('@react-native-async-storage/async-storage').default || require('@react-native-async-storage/async-storage');
 const { useSafeAreaInsets } = require('react-native-safe-area-context');
 const { useAppTheme } = require('../context/ThemeContext');
+const { useLanguage } = require('../context/LanguageContext');
 const { useFavorites } = require('../context/FavoritesContext');
-const mezmursData = require('../data/mezmurs.json');
+const { useAudio } = require('../context/GlobalAudioState.js');
 const { Ionicons } = require('@expo/vector-icons');
 
 const HymnPlayerScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const { theme } = useAppTheme();
+  const { t } = useLanguage();
   
-  // Use the first mezmur as "Featured" for now
-  const mezmur = mezmursData[0];
-  
-  const [sound, setSound] = useState(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [position, setPosition] = useState(0);
-  const [duration, setDuration] = useState(0);
   const { isFavorite, toggleFavorite } = useFavorites();
-
-  useEffect(() => {
-    return () => {
-      if (sound) {
-        sound.unloadAsync();
-      }
-    };
-  }, []);
+  const { currentMezmur, isPlaying, isLoading, position, duration, togglePlayback, skip } = useAudio();
 
   const formatTime = (millis) => {
     if (!millis || isNaN(millis)) return '0:00';
@@ -40,54 +26,46 @@ const HymnPlayerScreen = ({ navigation }) => {
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   };
 
-  const playPauseAudio = async () => {
-    try {
-      if (sound) {
-        if (isPlaying) {
-          await sound.pauseAsync();
-          setIsPlaying(false);
-        } else {
-          await sound.playAsync();
-          setIsPlaying(true);
-        }
-      } else {
-        setIsLoading(true);
-        const { sound: newSound } = await Audio.Sound.createAsync(
-          { uri: mezmur.audioUrl },
-          { shouldPlay: true }
-        );
-        setSound(newSound);
-        setIsPlaying(true);
-        setIsLoading(false);
-        
-        newSound.setOnPlaybackStatusUpdate((status) => {
-            if (status.isLoaded) {
-                setPosition(status.positionMillis);
-                setDuration(status.durationMillis || 0);
-                if (status.didJustFinish) {
-                    setIsPlaying(false);
-                    newSound.setPositionAsync(0);
-                }
-            }
-        });
-      }
-    } catch (error) {
-      console.error("Error playing audio", error);
-      setIsLoading(false);
-    }
-  };
+  if (!currentMezmur) {
+    return (
+      <YStack f={1} backgroundColor={theme.background} paddingTop={insets.top}>
+        <XStack paddingHorizontal="$5" paddingVertical="$3" alignItems="center" justifyContent="center">
+           <Button 
+            position="absolute"
+            left="$4"
+            circular 
+            size="$3" 
+            backgroundColor="transparent"
+            icon={<Ionicons name="menu-outline" size={28} color={theme.primary} />}
+            onPress={() => navigation.toggleDrawer()}
+            pressStyle={{ opacity: 0.6 }}
+          />
+          <Text fontFamily="$ethiopicSerif" fontSize={24} fontWeight="800" color={theme.primary}>
+            {t('player')}
+          </Text>
+        </XStack>
+        <YStack f={1} justifyContent="center" alignItems="center" padding="$10">
+          <Ionicons name="musical-notes-outline" size={100} color={theme.primary} opacity={0.2} />
+          <Text fontFamily="$ethiopicSerif" fontSize="$6" fontWeight="800" color={theme.primary} opacity={0.5} textAlign="center" marginTop="$4">
+            {t('noHymnSelected')}
+          </Text>
+          <Text fontFamily="$ethiopic" fontSize="$4" color={theme.textSecondary} textAlign="center" marginTop="$2" opacity={0.7}>
+            {t('selectHymnDetail')}
+          </Text>
+          <Button 
+            marginTop="$6" 
+            backgroundColor={theme.primary} 
+            onPress={() => navigation.navigate('Mezmurs')}
+            pressStyle={{ opacity: 0.8 }}
+          >
+            <Text color="white" fontWeight="BOLD">{t('browseMezmurs')}</Text>
+          </Button>
+        </YStack>
+      </YStack>
+    );
+  }
 
-  const skip = async (seconds) => {
-    if (sound) {
-      const status = await sound.getStatusAsync();
-      if (status.isLoaded) {
-        let newPosition = status.positionMillis + seconds * 1000;
-        if (newPosition < 0) newPosition = 0;
-        if (newPosition > status.durationMillis) newPosition = status.durationMillis;
-        await sound.setPositionAsync(newPosition);
-      }
-    }
-  };
+  const mezmur = currentMezmur;
 
   return (
     <YStack f={1} backgroundColor={theme.background || '#F5F5F5'} paddingTop={insets.top}>
@@ -108,8 +86,8 @@ const HymnPlayerScreen = ({ navigation }) => {
           onPress={() => navigation.toggleDrawer()}
           pressStyle={{ opacity: 0.6 }}
         />
-        <Text fontFamily="$ethiopicSerif" fontSize="$8" fontWeight="800" color={theme.primary} letterSpacing={-0.5}>
-          ቅዱስ ዜማ
+        <Text fontFamily="$ethiopicSerif" fontSize={24} fontWeight="800" color={theme.primary}>
+          {t('player')}
         </Text>
       </XStack>
 
@@ -183,7 +161,7 @@ const HymnPlayerScreen = ({ navigation }) => {
               circular
               size="$5"
               backgroundColor="transparent"
-              icon={<Ionicons name="play-skip-back" size={36} color={theme.primary} />}
+              icon={<Ionicons name="play-skip-back" size={32} color={theme.primary} />}
               onPress={() => skip(-10)}
               pressStyle={{ opacity: 0.6 }}
             />
@@ -191,19 +169,19 @@ const HymnPlayerScreen = ({ navigation }) => {
             <Button
               circular
               size="$8"
-              backgroundColor={theme.accent}
-              icon={isLoading ? <ActivityIndicator color={theme.primary} /> : <Ionicons name={isPlaying ? "pause" : "play"} size={42} color={theme.primary} />}
-              onPress={playPauseAudio}
+              backgroundColor={theme.primary}
+              icon={isLoading ? <ActivityIndicator color="white" /> : <Ionicons name={isPlaying ? "pause" : "play"} size={40} color="white" />}
+              onPress={togglePlayback}
               disabled={isLoading}
-              pressStyle={{ scale: 0.9 }}
-              elevation="$6"
+              pressStyle={{ scale: 0.95 }}
+              elevation="$4"
             />
 
             <Button
               circular
               size="$5"
               backgroundColor="transparent"
-              icon={<Ionicons name="play-skip-forward" size={36} color={theme.primary} />}
+              icon={<Ionicons name="play-skip-forward" size={32} color={theme.primary} />}
               onPress={() => skip(10)}
               pressStyle={{ opacity: 0.6 }}
             />

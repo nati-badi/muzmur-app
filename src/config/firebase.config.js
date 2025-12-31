@@ -1,11 +1,9 @@
-const { initializeApp } = require('firebase/app');
+const { initializeApp, getApp, getApps } = require('firebase/app');
 const { getAuth, initializeAuth, getReactNativePersistence } = require('firebase/auth');
 const { getFirestore } = require('firebase/firestore');
 const AsyncStorage = require('@react-native-async-storage/async-storage').default || require('@react-native-async-storage/async-storage');
 
 // Firebase configuration
-// TODO: Replace with your Firebase project credentials
-// Get these from Firebase Console -> Project Settings -> General -> Your apps
 const firebaseConfig = {
   apiKey: "AIzaSyAkrurc3q-NxT0gkopBxPPXLF72kwAA6bU",
   authDomain: "muzmur-app.firebaseapp.com",
@@ -16,15 +14,19 @@ const firebaseConfig = {
   measurementId: "G-ESVDENWWSZ"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Singleton pattern for Firebase initialization
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
-// Initialize Auth with AsyncStorage persistence
-const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(AsyncStorage)
-});
+// Singleton for Auth with persistence
+let auth;
+try {
+  auth = getAuth(app);
+} catch (e) {
+  auth = initializeAuth(app, {
+    persistence: getReactNativePersistence(AsyncStorage)
+  });
+}
 
-// Initialize Firestore
 const db = getFirestore(app);
 
 module.exports = {

@@ -76,7 +76,7 @@ const TabNavigator = () => {
       <Tab.Screen 
         name="HymnPlayer" 
         component={HymnPlayerScreen} 
-        options={{ tabBarLabel: 'ማጫወቻ' }}
+        options={{ tabBarLabel: t('player') }}
       />
       <Tab.Screen 
         name="Profile" 

@@ -4,6 +4,23 @@ const AsyncStorage = require('@react-native-async-storage/async-storage').defaul
 
 class UserProfileService {
   /**
+   * Save profile picture as Base64 string in Firestore
+   */
+  static async saveProfilePictureBase64(userId, base64Data) {
+    try {
+      const photoURL = `data:image/jpeg;base64,${base64Data}`;
+      
+      // Update Firestore profile with the Base64 image URL
+      await this.saveProfile(userId, { photoURL });
+
+      return { success: true, downloadURL: photoURL };
+    } catch (error) {
+      console.error('Error saving profile picture:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
    * Get user profile from Firestore
    */
   static async getProfile(userId) {

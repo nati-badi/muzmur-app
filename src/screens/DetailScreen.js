@@ -2,11 +2,11 @@ const React = require('react');
 const { useState, useEffect, useCallback } = React;
 const { ScrollView, StyleSheet, ActivityIndicator } = require('react-native');
 const { YStack, XStack, Text, Button, Circle, Theme } = require('tamagui');
-const { Audio } = require('expo-audio');
 const AsyncStorage = require('@react-native-async-storage/async-storage').default || require('@react-native-async-storage/async-storage');
 const { useAppTheme } = require('../context/ThemeContext');
 const { useLanguage } = require('../context/LanguageContext');
 const { useFavorites } = require('../context/FavoritesContext');
+const { useAudio } = require('../context/GlobalAudioState.js');
 const { Ionicons } = require('@expo/vector-icons');
 const { useSafeAreaInsets } = require('react-native-safe-area-context');
 const { TouchableOpacity } = require('react-native');
@@ -16,21 +16,12 @@ const DetailScreen = ({ route, navigation }) => {
   const { theme } = useAppTheme();
   const { t } = useLanguage();
   const { mezmur } = route.params;
-  const [position, setPosition] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [sound, setSound] = useState(null);
-
   const { isFavorite, toggleFavorite } = useFavorites();
+  const { currentMezmur, isPlaying, isLoading, position, duration, playMezmur, togglePlayback, skip } = useAudio();
 
-  useEffect(() => {
-    return () => {
-      if (sound) {
-        sound.unloadAsync();
-      }
-    };
-  }, []);
+  const handlePlayPause = () => {
+    playMezmur(mezmur);
+  };
 
   const getCategoryByLines = (lyrics = '') => {
     if (!lyrics) return 'አጭር';
@@ -53,60 +44,22 @@ const DetailScreen = ({ route, navigation }) => {
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   };
 
-  const playPauseAudio = async () => {
-    try {
-      if (sound) {
-        if (isPlaying) {
-          await sound.pauseAsync();
-          setIsPlaying(false);
-        } else {
-          await sound.playAsync();
-          setIsPlaying(true);
-        }
-      } else {
-        setIsLoading(true);
-        const { sound: newSound } = await Audio.Sound.createAsync(
-          { uri: mezmur.audioUrl },
-          { shouldPlay: true }
-        );
-        setSound(newSound);
-        setIsPlaying(true);
-        setIsLoading(false);
-        
-        newSound.setOnPlaybackStatusUpdate((status) => {
-            if (status.isLoaded) {
-                setPosition(status.positionMillis);
-                setDuration(status.durationMillis || 0);
-                if (status.didJustFinish) {
-                    setIsPlaying(false);
-                    newSound.setPositionAsync(0);
-                }
-            }
-        });
-      }
-    } catch (error) {
-      console.error("Error playing audio", error);
-      setIsLoading(false);
-    }
-  };
-
-  const skip = async (seconds) => {
-    if (sound) {
-      const status = await sound.getStatusAsync();
-      if (status.isLoaded) {
-        let newPosition = status.positionMillis + seconds * 1000;
-        if (newPosition < 0) newPosition = 0;
-        if (newPosition > status.durationMillis) newPosition = status.durationMillis;
-        await sound.setPositionAsync(newPosition);
-      }
-    }
-  };
 
   return (
     <YStack f={1} backgroundColor="$background" paddingTop={insets.top}>
-      <XStack justifyContent="space-between" alignItems="center" paddingHorizontal="$4" paddingVertical="$2">
-        <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.7} style={{ padding: 8 }}>
-          <Ionicons name="arrow-back" size={28} color={theme.primary} />
+      <XStack 
+        paddingHorizontal="$5" 
+        paddingVertical="$3"
+        alignItems="center"
+        justifyContent="space-between"
+      >
+        <TouchableOpacity 
+          onPress={() => navigation.goBack()}
+          style={{ padding: 4 }}
+        >
+          <XStack alignItems="center" space="$1">
+            <Ionicons name="chevron-back" size={24} color={theme.primary} />
+          </XStack>
         </TouchableOpacity>
         <Button
           circular
@@ -257,15 +210,15 @@ const DetailScreen = ({ route, navigation }) => {
                 <YStack 
                     backgroundColor={theme.playerAccent} 
                     height="100%" 
-                    width={`${duration > 0 ? (position / duration) * 100 : 0}%`} 
+                    width={`${duration > 0 && currentMezmur?.id === mezmur.id ? (position / duration) * 100 : 0}%`} 
                 />
             </YStack>
             <XStack justifyContent="space-between">
                 <Text color={theme.playerAccent} fontFamily="$body" fontSize="$1" fontWeight="bold">
-                    {formatTime(position)}
+                    {currentMezmur?.id === mezmur.id ? formatTime(position) : '0:00'}
                 </Text>
                 <Text color={theme.playerAccent} fontFamily="$body" fontSize="$1" fontWeight="bold">
-                    {formatTime(duration || 332000)}
+                    {currentMezmur?.id === mezmur.id ? formatTime(duration) : formatTime(332000)}
                 </Text>
             </XStack>
         </YStack>
@@ -294,8 +247,8 @@ const DetailScreen = ({ route, navigation }) => {
                     circular
                     size="$6"
                     backgroundColor={theme.playerAccent}
-                    icon={isLoading ? <ActivityIndicator color={theme.playerBackground} /> : <Ionicons name={isPlaying ? "pause" : "play"} size={32} color={theme.playerBackground} />}
-                    onPress={playPauseAudio}
+                    icon={(isLoading && currentMezmur?.id === mezmur.id) ? <ActivityIndicator color={theme.playerBackground} /> : <Ionicons name={(isPlaying && currentMezmur?.id === mezmur.id) ? "pause" : "play"} size={32} color={theme.playerBackground} />}
+                    onPress={handlePlayPause}
                     disabled={isLoading}
                     pressStyle={{ scale: 0.95 }}
                     elevation="$4"

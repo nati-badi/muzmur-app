@@ -23,8 +23,12 @@ const SettingsScreen = ({ navigation }) => {
 
   const themeOptions = Object.values(THEMES);
 
-  const SettingRow = ({ icon, label, sublabel, onPress, rightIcon = "chevron-forward" }) => (
-    <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
+  const SettingRow = ({ icon, label, sublabel, onPress, rightIcon = "chevron-forward", disabled = false }) => (
+    <TouchableOpacity 
+      onPress={disabled ? null : onPress} 
+      activeOpacity={disabled ? 1 : 0.7}
+      disabled={disabled}
+    >
       <View style={{
         backgroundColor: theme.surface || '#FFFFFF',
         padding: 16,
@@ -32,6 +36,7 @@ const SettingsScreen = ({ navigation }) => {
         borderWidth: 1.5,
         borderColor: theme.borderColor || 'rgba(0,0,0,0.15)',
         marginBottom: 12,
+        opacity: disabled ? 0.4 : 1,
       }}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Ionicons name={icon} size={24} color={theme.primary} style={{ marginRight: 16 }} />
@@ -65,12 +70,19 @@ const SettingsScreen = ({ navigation }) => {
   return (
     <YStack f={1} backgroundColor={theme.background || '#F5F5F5'} paddingTop={insets.top}>
       {/* Header */}
-      <XStack paddingHorizontal="$4" paddingVertical="$3" alignItems="center" justifyContent="center">
+      <XStack 
+        paddingHorizontal="$5" 
+        paddingVertical="$3"
+        alignItems="center"
+        justifyContent="center"
+      >
         <TouchableOpacity 
           onPress={() => navigation.goBack()}
           style={{ position: 'absolute', left: 16 }}
         >
-          <Ionicons name="arrow-back" size={28} color={theme.primary} />
+          <XStack alignItems="center" space="$1">
+            <Ionicons name="chevron-back" size={24} color={theme.primary} />
+          </XStack>
         </TouchableOpacity>
         <Text fontFamily="$ethiopicSerif" fontSize="$7" fontWeight="800" color={theme.primary}>
           {t('settings')}
@@ -148,12 +160,14 @@ const SettingsScreen = ({ navigation }) => {
             icon="notifications-outline" 
             label={t('notifications')}
             onPress={() => {}}
+            disabled={true}
           />
 
           <SettingRow 
             icon="help-circle-outline" 
             label={t('helpSupport')}
             onPress={() => {}}
+            disabled={true}
           />
 
           {isAuthenticated && (

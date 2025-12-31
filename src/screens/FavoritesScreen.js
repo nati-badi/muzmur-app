@@ -40,23 +40,31 @@ const FavoritesScreen = ({ navigation }) => {
         onToggleFavorite={toggleFavorite}
         onPress={(item) => navigation.navigate('Detail', { mezmur: item })}
         getStatusColor={getStatusColor}
+        theme={theme}
       />
-    ), [isFavorite, toggleFavorite, navigation, getStatusColor]);
+    ), [isFavorite, toggleFavorite, navigation, getStatusColor, theme]);
 
   return (
     <YStack f={1} backgroundColor={theme.background || "$background"} paddingTop={insets.top}>
       <XStack 
-        justifyContent="space-between" 
-        alignItems="center" 
         paddingHorizontal="$5" 
         paddingVertical="$3"
+        alignItems="center"
+        justifyContent="center"
         marginBottom="$4"
       >
-        <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.7} style={{ padding: 8 }}>
-           <Ionicons name="arrow-back" size={28} color={theme.primary} />
+        <TouchableOpacity 
+          onPress={() => navigation.goBack()} 
+          activeOpacity={0.7} 
+          style={{ position: 'absolute', left: 16 }}
+        >
+          <XStack alignItems="center" space="$1">
+            <Ionicons name="chevron-back" size={24} color={theme.primary} />
+          </XStack>
         </TouchableOpacity>
-        <Text fontFamily="$ethiopicSerif" fontSize="$7" fontWeight="800" color={theme.primary}>{t('favorites')}</Text>
-        <XStack width={60} /> 
+        <Text fontFamily="$ethiopicSerif" fontSize="$7" fontWeight="800" color={theme.primary}>
+          {t('favorites')}
+        </Text>
       </XStack>
 
       {favoriteMezmurs.length === 0 ? (

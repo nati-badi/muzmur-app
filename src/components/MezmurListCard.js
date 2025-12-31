@@ -2,9 +2,8 @@ const React = require('react');
 const { memo } = React;
 const { YStack, XStack, Text, Button } = require('tamagui');
 const { Ionicons } = require('@expo/vector-icons');
-const { COLORS } = require('../constants/theme');
 
-const MezmurListCard = memo(({ item, isFavorite, onToggleFavorite, onPress, getStatusColor }) => {
+const MezmurListCard = memo(({ item, isFavorite, onToggleFavorite, onPress, getStatusColor, theme }) => {
   const getCategory = (lyrics = '') => {
     if (!lyrics) return 'አጭር';
     const lineCount = lyrics.split('\n').length;
@@ -43,7 +42,7 @@ const MezmurListCard = memo(({ item, isFavorite, onToggleFavorite, onPress, getS
 
       {/* Watermark Icon */}
       <YStack position="absolute" right={-10} bottom={-15} opacity={0.05} rotate="-15deg">
-        <Ionicons name="musical-note" size={120} color={COLORS.primary} />
+        <Ionicons name="musical-note" size={120} color={theme.primary} />
       </YStack>
 
       <XStack padding="$4" paddingLeft="$5" justifyContent="space-between" alignItems="flex-start">
@@ -111,7 +110,7 @@ const MezmurListCard = memo(({ item, isFavorite, onToggleFavorite, onPress, getS
           icon={<Ionicons 
             name={itemIsFavorite ? "heart" : "heart-outline"} 
             size={18} 
-            color={itemIsFavorite ? COLORS.error : "$colorSecondary"} 
+            color={itemIsFavorite ? theme.error : "$colorSecondary"} 
           />}
           onPress={(e) => {
             e.stopPropagation();

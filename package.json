@@ -28,6 +28,7 @@
     "expo-audio": "^1.1.1",
     "expo-av": "~16.0.8",
     "expo-font": "*",
+    "expo-image-picker": "~17.0.10",
     "expo-splash-screen": "~31.0.13",
     "expo-status-bar": "~3.0.9",
     "firebase": "^12.7.0",

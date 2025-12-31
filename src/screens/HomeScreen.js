@@ -1,7 +1,7 @@
 const React = require('react');
 const { useState, useEffect, useCallback, useMemo, memo } = React;
-const { FlatList, Modal, ScrollView, StyleSheet, ActivityIndicator, useWindowDimensions } = require('react-native');
-const { YStack, XStack, Text, Input, Button, Circle, Theme } = require('tamagui');
+const { FlatList, Modal, ScrollView, StyleSheet, ActivityIndicator, useWindowDimensions, Share, Alert, TouchableWithoutFeedback, View } = require('react-native');
+const { YStack, XStack, Text, Input, Button, Circle, Theme, Separator } = require('tamagui');
 const { useSafeAreaInsets } = require('react-native-safe-area-context');
 const { Ionicons } = require('@expo/vector-icons');
 const AsyncStorage = require('@react-native-async-storage/async-storage').default || require('@react-native-async-storage/async-storage');
@@ -55,7 +55,7 @@ const HomeScreen = ({ navigation }) => {
   const [selectedSectionId, setSelectedSectionId] = useState(SECTION_ALL_ID); 
   
   const [isLoadingData, setIsLoadingData] = useState(true);
-  
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   
   // Estimate how many cards fit the screen initially
   const calculatedInitialCount = useMemo(() => {
@@ -112,6 +112,49 @@ const HomeScreen = ({ navigation }) => {
     }, 500);
   };
 
+  const handleShare = async () => {
+    setIsMenuOpen(false);
+    try {
+      await Share.share({
+        message: `${t('appTitle')}: ${t('shareMessage')}`,
+        url: 'https://muzmur-app.web.app',
+      });
+    } catch (error) {
+      console.error(error.message);
+    }
+  };
+
+  const handleFeedback = () => {
+    setIsMenuOpen(false);
+    Alert.alert(
+      t('feedbackAlertTitle'),
+      t('feedbackAlertMessage'),
+      [{ text: t('ok') }]
+    );
+  };
+
+  const handleCheckUpdate = () => {
+    setIsMenuOpen(false);
+    Alert.alert(
+      t('updatesAlertTitle'),
+      t('updatesAlertMessage'),
+      [{ text: t('great') }]
+    );
+  };
+
+  const handleShowMenu = () => {
+    Alert.alert(
+      t('moreOptions'),
+      t('chooseAction'),
+      [
+        { text: t('shareApp'), onPress: handleShare },
+        { text: t('feedback'), onPress: handleFeedback },
+        { text: t('checkUpdates'), onPress: handleCheckUpdate },
+        { text: t('cancel'), style: 'cancel' }
+      ]
+    );
+  };
+
   const filteredMezmurs = useMemo(() => {
     let result = mezmursData;
 
@@ -159,8 +202,9 @@ const HomeScreen = ({ navigation }) => {
       onToggleFavorite={toggleFavorite}
       onPress={handlePress}
       getStatusColor={getStatusColor}
+      theme={theme}
     />
-  ), [isFavorite, toggleFavorite, handlePress, getStatusColor]);
+  ), [isFavorite, toggleFavorite, handlePress, getStatusColor, theme]);
 
   const getItemLayout = useCallback((data, index) => (
     { length: 140, offset: 140 * index, index }
@@ -173,6 +217,7 @@ const HomeScreen = ({ navigation }) => {
         paddingVertical="$3"
         alignItems="center"
         justifyContent="center"
+        zIndex={100}
       >
         <Button 
           position="absolute"
@@ -192,12 +237,73 @@ const HomeScreen = ({ navigation }) => {
           right="$4"
           circular 
           size="$3" 
-          backgroundColor={theme.accent}
-          icon={<Ionicons name="person" size={20} color="white" />}
-          onPress={() => navigation.navigate('Tabs', { screen: 'Profile' })}
-          pressStyle={{ opacity: 0.8 }}
-          elevation="$2"
+          backgroundColor="transparent"
+          icon={<Ionicons name="ellipsis-vertical" size={24} color={theme.primary} />}
+          onPress={() => setIsMenuOpen(!isMenuOpen)}
+          pressStyle={{ opacity: 0.6 }}
         />
+
+        {/* Modal-based Modern Dropdown Menu for reliable dismiss-on-tap-outside */}
+        <Modal
+          visible={isMenuOpen}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setIsMenuOpen(false)}
+        >
+          <TouchableWithoutFeedback onPress={() => setIsMenuOpen(false)}>
+            <View style={{ flex: 1, backgroundColor: 'transparent' }}>
+               <YStack
+                position="absolute"
+                top={60 + insets.top} // Adjust based on header height
+                right={16}
+                width={200}
+                backgroundColor={theme.surface}
+                borderRadius="$4"
+                padding="$2"
+                elevation="$5"
+                zIndex={100}
+                borderWidth={1}
+                borderColor={theme.borderColor}
+                shadowColor="#000"
+                shadowOffset={{ width: 0, height: 4 }}
+                shadowOpacity={0.2}
+                shadowRadius={8}
+              >
+                <Button
+                  size="$4"
+                  chromeless
+                  justifyContent="flex-start"
+                  onPress={handleShare}
+                  icon={<Ionicons name="share-social-outline" size={20} color={theme.primary} />}
+                  pressStyle={{ backgroundColor: `${theme.primary}15` }}
+                >
+                  <Text fontFamily="$body" color={theme.text} fontSize="$3">{t('shareApp')}</Text>
+                </Button>
+                <Button
+                  size="$4"
+                  chromeless
+                  justifyContent="flex-start"
+                  onPress={handleFeedback}
+                  icon={<Ionicons name="chatbubble-ellipses-outline" size={20} color={theme.primary} />}
+                  pressStyle={{ backgroundColor: `${theme.primary}15` }}
+                >
+                  <Text fontFamily="$body" color={theme.text} fontSize="$3">{t('feedback')}</Text>
+                </Button>
+                <Separator borderColor={theme.borderColor} opacity={0.5} marginVertical="$1" />
+                <Button
+                  size="$4"
+                  chromeless
+                  justifyContent="flex-start"
+                  onPress={handleCheckUpdate}
+                  icon={<Ionicons name="cloud-download-outline" size={20} color={theme.primary} />}
+                  pressStyle={{ backgroundColor: `${theme.primary}15` }}
+                >
+                  <Text fontFamily="$body" color={theme.text} fontSize="$3">{t('checkUpdates')}</Text>
+                </Button>
+              </YStack>
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
       </XStack>
 
       <FlatList
@@ -212,22 +318,22 @@ const HomeScreen = ({ navigation }) => {
         ListFooterComponent={
            !isLoadingData && filteredMezmurs.length > visibleCount && (
              <YStack alignItems="center" marginTop="$4" marginBottom="$6">
-               <Button
-                 size="$4"
-                 theme="active"
-                 backgroundColor="transparent"
-                 borderColor="$primary"
-                 borderWidth={1}
-                 borderRadius="$10"
-                 onPress={handleLoadMore}
-                 disabled={isLoadingMore}
-                 opacity={isLoadingMore ? 0.6 : 1}
-                 icon={isLoadingMore ? <ActivityIndicator color={theme.primary} size="small" /> : undefined}
-               >
-                 <Text fontFamily="$ethiopicSerif" color="$primary" fontWeight="700">
-                   {t('loadMore')}
-                 </Text>
-               </Button>
+                <Button
+                  size="$4"
+                  theme="active"
+                  backgroundColor="transparent"
+                  borderColor={theme.primary}
+                  borderWidth={1.5}
+                  borderRadius="$10"
+                  onPress={handleLoadMore}
+                  disabled={isLoadingMore}
+                  opacity={isLoadingMore ? 0.6 : 1}
+                  icon={isLoadingMore ? <ActivityIndicator color={theme.primary} size="small" /> : undefined}
+                >
+                  <Text fontFamily="$ethiopicSerif" color={theme.primary} fontWeight="700">
+                     {t('loadMore')}
+                  </Text>
+                </Button>
                <Text fontFamily="$body" fontSize="$1" color="$colorSecondary" marginTop="$2" opacity={0.6}>
                  {visibleCount} / {filteredMezmurs.length}
                </Text>
@@ -238,7 +344,7 @@ const HomeScreen = ({ navigation }) => {
           <YStack paddingBottom="$5" space="$4">
             <Input
               size="$5"
-              fontFamily="$ethiopicSerif"
+              fontFamily="$body"
               backgroundColor="transparent"
               placeholder={t('searchPlaceholder')}
               value={searchQuery}
