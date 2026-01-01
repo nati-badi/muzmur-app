@@ -2,6 +2,7 @@ const React = require('react');
 const { useState, useEffect, useCallback } = React;
 const { ScrollView, StyleSheet, ActivityIndicator } = require('react-native');
 const { YStack, XStack, Text, Button, Circle, Theme } = require('tamagui');
+const Slider = require('@react-native-community/slider').default || require('@react-native-community/slider');
 const AsyncStorage = require('@react-native-async-storage/async-storage').default || require('@react-native-async-storage/async-storage');
 const { useAppTheme } = require('../context/ThemeContext');
 const { useLanguage } = require('../context/LanguageContext');
@@ -10,6 +11,7 @@ const { useAudio } = require('../context/GlobalAudioState.js');
 const { Ionicons } = require('@expo/vector-icons');
 const { useSafeAreaInsets } = require('react-native-safe-area-context');
 const { TouchableOpacity } = require('react-native');
+const SmoothSlider = require('../components/SmoothSlider');
 
 const DetailScreen = ({ route, navigation }) => {
   const insets = useSafeAreaInsets();
@@ -17,10 +19,21 @@ const DetailScreen = ({ route, navigation }) => {
   const { t } = useLanguage();
   const { mezmur } = route.params;
   const { isFavorite, toggleFavorite } = useFavorites();
-  const { currentMezmur, isPlaying, isLoading, position, duration, playMezmur, togglePlayback, skip } = useAudio();
+  const { 
+    currentMezmur, isPlaying, isLoading, position, duration, 
+    isLooping, isShuffle, setIsSeeking,
+    playMezmur, togglePlayback, toggleLoop, toggleShuffle, skip, seek
+  } = useAudio();
+
+
+  const isCurrentPlaying = currentMezmur?.id === mezmur.id;
 
   const handlePlayPause = () => {
-    playMezmur(mezmur);
+    if (isCurrentPlaying) {
+      togglePlayback();
+    } else {
+      playMezmur(mezmur);
+    }
   };
 
   const getCategoryByLines = (lyrics = '') => {
@@ -35,7 +48,6 @@ const DetailScreen = ({ route, navigation }) => {
 
   const category = getCategoryByLines(mezmur.lyrics);
   const statusColor = getStatusColor(category);
-
   const formatTime = (millis) => {
     if (!millis || isNaN(millis)) return '0:00';
     const totalSeconds = millis / 1000;
@@ -43,7 +55,6 @@ const DetailScreen = ({ route, navigation }) => {
     const seconds = Math.floor(totalSeconds % 60);
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   };
-
 
   return (
     <YStack f={1} backgroundColor="$background" paddingTop={insets.top}>
@@ -114,9 +125,10 @@ const DetailScreen = ({ route, navigation }) => {
         <Text 
           fontFamily="$ethiopic" 
           fontSize="$5" 
-          color="$color" 
+          color={theme.primary} 
           lineHeight={32} 
           textAlign="center"
+          fontWeight="500"
         >
           {mezmur.lyrics}
         </Text>
@@ -132,17 +144,18 @@ const DetailScreen = ({ route, navigation }) => {
               textAlign="center" 
               marginBottom="$4"
               fontStyle="italic"
-              opacity={0.9}
+              opacity={1}
             >
               {t('translation')}
             </Text>
             <Text 
               fontFamily="$ethiopicSerif" 
               fontSize="$5" 
-              color="$colorSecondary" 
+              color={theme.textSecondary || "$colorSecondary"} 
               lineHeight={30} 
               textAlign="center" 
               fontStyle="italic"
+              opacity={0.95}
             >
               {mezmur.translation}
             </Text>
@@ -150,7 +163,7 @@ const DetailScreen = ({ route, navigation }) => {
         )}
       </ScrollView>
 
-      {/* Premium Player UI (Image-Matched Design) */}
+      {/* Premium Player UI (Synced with HymnPlayerScreen) */}
       <YStack 
         position="absolute" 
         bottom={0} 
@@ -170,7 +183,6 @@ const DetailScreen = ({ route, navigation }) => {
         {/* Top Info Row */}
         <XStack paddingHorizontal="$5" alignItems="center" justifyContent="space-between" marginBottom="$4">
           <XStack space="$4" alignItems="center" f={1}>
-            {/* Album Art Placeholder */}
             <YStack 
                 backgroundColor={theme.playerAccent} 
                 width={50} 
@@ -186,7 +198,7 @@ const DetailScreen = ({ route, navigation }) => {
                 <Text color="white" fontFamily="$ethiopicSerif" fontSize="$4" fontWeight="800" numberOfLines={1}>
                     {mezmur.title}
                 </Text>
-                <Text color={theme.playerAccent} fontFamily="$ethiopicSerif" fontSize="$2" fontWeight="600" opacity={0.9}>
+                <Text color={theme.playerAccent} fontFamily="$ethiopicSerif" fontSize="$2" fontWeight="700" opacity={1}>
                     {mezmur.section}
                 </Text>
             </YStack>
@@ -204,23 +216,14 @@ const DetailScreen = ({ route, navigation }) => {
           />
         </XStack>
 
-        {/* Progress Bar Container */}
-        <YStack paddingHorizontal="$5" space="$1" marginBottom="$4">
-            <YStack backgroundColor="rgba(255,255,255,0.1)" height={6} borderRadius={3} overflow="hidden">
-                <YStack 
-                    backgroundColor={theme.playerAccent} 
-                    height="100%" 
-                    width={`${duration > 0 && currentMezmur?.id === mezmur.id ? (position / duration) * 100 : 0}%`} 
-                />
-            </YStack>
-            <XStack justifyContent="space-between">
-                <Text color={theme.playerAccent} fontFamily="$body" fontSize="$1" fontWeight="bold">
-                    {currentMezmur?.id === mezmur.id ? formatTime(position) : '0:00'}
-                </Text>
-                <Text color={theme.playerAccent} fontFamily="$body" fontSize="$1" fontWeight="bold">
-                    {currentMezmur?.id === mezmur.id ? formatTime(duration) : formatTime(332000)}
-                </Text>
-            </XStack>
+        {/* Progress Slider (Interactive) */}
+        <YStack paddingHorizontal="$5" marginBottom="$4">
+            <SmoothSlider 
+              position={isCurrentPlaying ? position : 0}
+              duration={isCurrentPlaying ? duration : 0}
+              onSeek={seek}
+              theme={theme}
+            />
         </YStack>
 
         {/* Control Row */}
@@ -228,8 +231,9 @@ const DetailScreen = ({ route, navigation }) => {
            <Button
               circular
               size="$3"
-              backgroundColor="transparent"
-              icon={<Ionicons name="shuffle" size={20} color="white" opacity={0.6} />}
+              backgroundColor={isShuffle ? "rgba(255,255,255,0.15)" : "transparent"}
+              icon={<Ionicons name="shuffle" size={20} color={isShuffle ? theme.playerAccent : "white"} opacity={isShuffle ? 1 : 0.85} />}
+              onPress={toggleShuffle}
               pressStyle={{ opacity: 0.6 }}
             />
             
@@ -238,8 +242,8 @@ const DetailScreen = ({ route, navigation }) => {
                     circular
                     size="$4"
                     backgroundColor="transparent"
-                    icon={<Ionicons name="play-skip-back" size={28} color="white" />}
-                    onPress={() => skip(-10)}
+                    icon={<Ionicons name="play-back" size={28} color="white" />}
+                    onPress={() => isCurrentPlaying && skip(-5)}
                     pressStyle={{ opacity: 0.6 }}
                 />
 
@@ -247,7 +251,7 @@ const DetailScreen = ({ route, navigation }) => {
                     circular
                     size="$6"
                     backgroundColor={theme.playerAccent}
-                    icon={(isLoading && currentMezmur?.id === mezmur.id) ? <ActivityIndicator color={theme.playerBackground} /> : <Ionicons name={(isPlaying && currentMezmur?.id === mezmur.id) ? "pause" : "play"} size={32} color={theme.playerBackground} />}
+                    icon={(isLoading && isCurrentPlaying) ? <ActivityIndicator color={theme.playerBackground} /> : <Ionicons name={(isPlaying && isCurrentPlaying) ? "pause" : "play"} size={32} color={theme.playerBackground} />}
                     onPress={handlePlayPause}
                     disabled={isLoading}
                     pressStyle={{ scale: 0.95 }}
@@ -258,8 +262,8 @@ const DetailScreen = ({ route, navigation }) => {
                     circular
                     size="$4"
                     backgroundColor="transparent"
-                    icon={<Ionicons name="play-skip-forward" size={28} color="white" />}
-                    onPress={() => skip(10)}
+                    icon={<Ionicons name="play-forward" size={28} color="white" />}
+                    onPress={() => isCurrentPlaying && skip(5)}
                     pressStyle={{ opacity: 0.6 }}
                 />
             </XStack>
@@ -267,8 +271,9 @@ const DetailScreen = ({ route, navigation }) => {
             <Button
               circular
               size="$3"
-              backgroundColor="transparent"
-              icon={<Ionicons name="repeat" size={20} color="white" opacity={0.6} />}
+              backgroundColor={isLooping ? "rgba(255,255,255,0.15)" : "transparent"}
+              icon={<Ionicons name={isLooping ? "repeat" : "repeat-outline"} size={20} color={isLooping ? theme.playerAccent : "white"} opacity={isLooping ? 1 : 0.85} />}
+              onPress={toggleLoop}
               pressStyle={{ opacity: 0.6 }}
             />
         </XStack>

@@ -5,13 +5,13 @@ const AsyncStorage = require('@react-native-async-storage/async-storage').defaul
 
 // Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyAkrurc3q-NxT0gkopBxPPXLF72kwAA6bU",
-  authDomain: "muzmur-app.firebaseapp.com",
-  projectId: "muzmur-app",
-  storageBucket: "muzmur-app.firebasestorage.app",
-  messagingSenderId: "260498236434",
-  appId: "1:260498236434:web:00655ece7c2861c71164cb",
-  measurementId: "G-ESVDENWWSZ"
+  apiKey: "AIzaSyB5X9EhGAEaD_ia9RS9Ywl2j2hLOZe0Zjs",
+  authDomain: "muzmur-app-v2-20d15.firebaseapp.com",
+  projectId: "muzmur-app-v2-20d15",
+  storageBucket: "muzmur-app-v2-20d15.firebasestorage.app",
+  messagingSenderId: "696692999848",
+  appId: "1:696692999848:web:21c578da833217a69a249d",
+  measurementId: "G-L66DWCKV71"
 };
 
 // Singleton pattern for Firebase initialization
@@ -31,9 +31,12 @@ if (getApps().length === 0) {
 }
 
 const db = getFirestore(app);
+const { getStorage } = require('firebase/storage');
+const storage = getStorage(app);
 
 module.exports = {
   app,
   auth,
-  db
+  db,
+  storage
 };
