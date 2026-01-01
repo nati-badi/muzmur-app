@@ -24,6 +24,7 @@
     "@tamagui/lucide-icons": "1.141.5",
     "@tamagui/shorthands": "1.141.5",
     "@tamagui/themes": "1.141.5",
+    "ethiopian-date-converter": "^1.0.7",
     "expo": "~54.0.30",
     "expo-audio": "^1.1.1",
     "expo-av": "~16.0.8",

@@ -11,6 +11,8 @@ const ProfileScreen = require('../screens/ProfileScreen').default || require('..
 const SettingsScreen = require('../screens/SettingsScreen').default || require('../screens/SettingsScreen');
 const WelcomeScreen = require('../screens/WelcomeScreen').default || require('../screens/WelcomeScreen');
 const AuthScreen = require('../screens/AuthScreen').default || require('../screens/AuthScreen');
+const AboutScreen = require('../screens/AboutScreen').default || require('../screens/AboutScreen');
+const CalendarScreen = require('../screens/CalendarScreen').default || require('../screens/CalendarScreen');
 const TabNavigator = require('./TabNavigator').default || require('./TabNavigator');
 const Sidebar = require('../components/Sidebar').default || require('../components/Sidebar');
 const { useAuth } = require('../context/AuthContext');
@@ -120,6 +122,8 @@ const AppNavigator = () => {
         <Stack.Screen name="Favorites" component={FavoritesScreen} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
+        <Stack.Screen name="About" component={AboutScreen} />
+        <Stack.Screen name="Calendar" component={CalendarScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

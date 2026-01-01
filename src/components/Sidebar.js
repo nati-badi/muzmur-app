@@ -26,8 +26,8 @@ const Sidebar = (props) => {
 
   const secondaryItems = [
     { id: 4, label: t('settings'), icon: 'settings-outline', activeIcon: 'settings', screen: 'Settings' },
-    { id: 5, label: t('helpSupport'), icon: 'help-circle-outline', activeIcon: 'help-circle', screen: null }, // Placeholder
-    { id: 6, label: t('aboutUs'), icon: 'information-circle-outline', activeIcon: 'information-circle', screen: null }, // Placeholder
+    { id: 5, label: t('Calendar'), icon: 'calendar-number-outline', activeIcon: 'calendar-number', screen: 'Calendar' },
+    { id: 6, label: t('aboutUs'), icon: 'information-circle-outline', activeIcon: 'information-circle', screen: 'About' },
   ];
 
   // Get user display name and subtitle
