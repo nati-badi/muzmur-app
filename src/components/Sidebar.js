@@ -10,10 +10,12 @@ const { View, Image } = require('react-native');
 
 const Sidebar = (props) => {
   const { theme } = useAppTheme();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { user, profileData, isAuthenticated, isAnonymous } = useAuth();
   const insets = useSafeAreaInsets();
   
+  const capitalize = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+
   // Determine active route to style the selected item
   const activeRoute = props.state.routeNames[props.state.index];
   const activeParams = props.state.routes[props.state.index].params;
@@ -22,11 +24,12 @@ const Sidebar = (props) => {
     { id: 1, label: t('home'), icon: 'home-outline', activeIcon: 'home', screen: 'Tabs', params: { screen: 'Mezmurs' } },
     { id: 2, label: t('favorites'), icon: 'heart-outline', activeIcon: 'heart', screen: 'Favorites' },
     { id: 3, label: t('today'), icon: 'calendar-outline', activeIcon: 'calendar', screen: 'Tabs', params: { screen: 'Today' } },
+    // Manual fallback for translation since key seems missing
+    { id: 5, label: language === 'am' ? 'የቀን መቁጠሪያ' : 'Calendar', icon: 'calendar-number-outline', activeIcon: 'calendar-number', screen: 'Calendar' },
   ];
 
   const secondaryItems = [
     { id: 4, label: t('settings'), icon: 'settings-outline', activeIcon: 'settings', screen: 'Settings' },
-    { id: 5, label: t('Calendar'), icon: 'calendar-number-outline', activeIcon: 'calendar-number', screen: 'Calendar' },
     { id: 6, label: t('aboutUs'), icon: 'information-circle-outline', activeIcon: 'information-circle', screen: 'About' },
   ];
 
@@ -104,16 +107,16 @@ const Sidebar = (props) => {
       {/* Cool Themed Background Effect - Giant Watermark */}
       <View 
         position="absolute" 
-        bottom={-50} 
-        right={-50} 
-        opacity={0.05} 
+        bottom={40} 
+        right={-40} 
+        opacity={0.06} 
         pointerEvents="none"
       >
         <Ionicons name="musical-notes" size={300} color={theme.primary} />
       </View>
 
       {/* 1. Header: Clean & Bold */}
-      <YStack paddingHorizontal="$6" paddingTop="$6" paddingBottom="$4">
+      <YStack paddingHorizontal="$6" paddingTop="$2" paddingBottom="$4">
         <XStack alignItems="center" space="$3">
           <Circle size={48} backgroundColor={theme.primary} elevation="$3">
              <Ionicons name="musical-notes" size={24} color={theme.accent} />
@@ -151,10 +154,10 @@ const Sidebar = (props) => {
           {menuItems.map((item) => <MenuItem key={item.id} item={item} />)}
         </YStack>
 
-        <YStack height={60} />
-
-        {/* 3. Secondary Navigation */}
-        <YStack paddingHorizontal="$4" space="$1">
+        {/* 3. Secondary Navigation - With Top Spacing & Divider */}
+        <YStack paddingHorizontal="$4" space="$1" marginTop="$6">
+          <Separator marginHorizontal="$4" borderColor={theme.text} opacity={0.1} marginBottom="$4" />
+          
           <Text 
             fontFamily="$body" 
             fontSize={11} 

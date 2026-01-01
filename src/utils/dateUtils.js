@@ -14,29 +14,6 @@ const ETHIOPIC_MONTHS = [
  * @returns {Object} { year, month, day }
  */
 const toEthiopian = (year, month, day) => {
-  // Simple offset-based calculation suitable for modern era
-  // Inputs are standard Gregorian
-  
-  const gDate = new Date(year, month - 1, day);
-  
-  // Ethiopian New Year (Meskerem 1) is usually Sep 11.
-  // It is Sep 12 in the year BEFORE a Gregorian leap year (e.g. Sep 12, 2023 for Eth 2016)
-  // Actually, let's use the difference in days from a known anchor.
-  
-  // Anchor: Meskerem 1, 2017 E.C. is September 11, 2024 G.C.
-  // (2024 is a leap year, so Feb had 29 days. New Year was Sept 11).
-  const anchorGreg = new Date(2024, 8, 11); // Sept 11, 2024
-  const anchorEth = { year: 2017, month: 1, day: 1 };
-  
-  // Calculate difference in milliseconds
-  const diffTime = gDate.getTime() - anchorGreg.getTime();
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-  
-  // Now add days to anchor
-  // This is a rough estimation loop, simpler than full JD math but accurate enough for +/- 10 years
-  // which is fine for this app context.
-  // Ideally we use full JDN math. Let's do a reliable JDN implementation.
-  
   return toEthiopianJDN(year, month, day);
 };
 
@@ -50,9 +27,6 @@ const toEthiopianJDN = (gYear, gMonth, gDay) => {
   const jdn = gDay + Math.floor((153 * m + 2) / 5) + 365 * y + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400) - 32045;
   
   // JDN to Ethiopic
-  // Offset: JDN of Ethiopic epoch (Incarnation Era) is 1723856
-  // But standard algorithm is:
-  
   const jd = jdn;
   const r = (jd - 1723856) % 1461;
   const n = (r % 365) + 365 * Math.floor(r / 1460);
@@ -76,8 +50,53 @@ const getEthiopianMonthStartDay = (year, month) => {
   return (jdn + 1) % 7;
 };
 
+/**
+ * Converts an Ethiopian date to Gregorian date
+ * @param {number} year - Ethiopian Year
+ * @param {number} month - Ethiopian Month (1-13)
+ * @param {number} day - Ethiopian Day (1-30)
+ * @returns {Object} { year, month, day }
+ */
+const toGregorian = (year, month, day) => {
+  // Ethiopian to JDN
+  // JDN = 1723856 + 365*(year-1) + floor((year-1)/4) + 30*(month-1) + day
+  const jdn = 1723856 + 365 * (year - 1) + Math.floor((year - 1) / 4) + 30 * (month - 1) + day;
+  
+  return jdnToGregorian(jdn);
+};
+
+// Standard JDN to Gregorian Algorithm
+const jdnToGregorian = (jdn) => {
+  const l = jdn + 68569;
+  const n = Math.floor((4 * l) / 146097);
+  const l_ = l - Math.floor((146097 * n + 3) / 4);
+  const i = Math.floor((4000 * (l_ + 1)) / 1461001);
+  const l__ = l_ - Math.floor((1461 * i) / 4) + 31;
+  const j = Math.floor((80 * l__) / 2447);
+  const day = l__ - Math.floor((2447 * j) / 80);
+  const l___ = Math.floor(j / 11);
+  const month = j + 2 - 12 * l___;
+  const year = 100 * (n - 49) + i + l___;
+  
+  return { year, month, day };
+};
+
+/**
+ * Converts number (1-30) to Geez numeral
+ * @param {number} n
+ * @returns {string} Geez numeral
+ */
+const toGeez = (n) => {
+  const ones = ['', '፩', '፪', '፫', '፬', '፭', '፮', '፯', '፰', '፱'];
+  const tens = ['', '፲', '፳', '፴'];
+  if (n <= 0 || n > 30) return n.toString();
+  return (tens[Math.floor(n / 10)] + ones[n % 10]);
+};
+
 module.exports = {
   toEthiopian,
+  toGregorian,
   getEthiopianMonthStartDay,
+  toGeez,
   ETHIOPIC_MONTHS
 };
