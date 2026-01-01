@@ -49,6 +49,7 @@ const HomeScreen = ({ navigation }) => {
   const { t } = useLanguage();
   const { isFavorite, toggleFavorite } = useFavorites();
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   
   // State uses IDs for stable logic
   const [selectedFilterId, setSelectedFilterId] = useState(FILTER_IDS.ALL); 
@@ -56,6 +57,14 @@ const HomeScreen = ({ navigation }) => {
   
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Debounce search query to prevent excessive filtering during typing
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+    }, 300); // 300ms delay is standard for good UX
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
   
   // Estimate how many cards fit the screen initially
   const calculatedInitialCount = useMemo(() => {
@@ -177,9 +186,9 @@ const HomeScreen = ({ navigation }) => {
       });
     }
 
-    // 3. Search
-    if (searchQuery) {
-      const lowerQuery = searchQuery.toLowerCase();
+    // 3. Search (using debounced query for stability)
+    if (debouncedQuery) {
+      const lowerQuery = debouncedQuery.toLowerCase();
       result = result.filter(item => 
         (item.title && item.title.toLowerCase().includes(lowerQuery)) ||
         (item.lyrics && item.lyrics.toLowerCase().includes(lowerQuery)) ||
@@ -188,7 +197,7 @@ const HomeScreen = ({ navigation }) => {
     }
 
     return result;
-  }, [searchQuery, selectedFilterId, selectedSectionId]);
+  }, [debouncedQuery, selectedFilterId, selectedSectionId]);
 
   // Paginated Data
   const paginatedData = useMemo(() => {
@@ -344,22 +353,33 @@ const HomeScreen = ({ navigation }) => {
         }
         ListHeaderComponent={
           <YStack paddingBottom="$5" space="$4">
-            <Input
-              size="$5"
-              fontFamily="$body"
-              backgroundColor="transparent"
-              placeholder={t('searchPlaceholder')}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              placeholderTextColor="$colorSecondary"
-              borderWidth={0}
-              borderBottomWidth={2}
-              borderColor={theme.primary}
-              borderRadius={0}
-              paddingHorizontal={0}
-              focusStyle={{ borderColor: theme.accent, borderBottomWidth: 3 }}
-              opacity={0.8}
-            />
+            <XStack alignItems="center" borderBottomWidth={2} borderColor={theme.primary} space="$2">
+              <Input
+                f={1}
+                size="$5"
+                fontFamily="$body"
+                backgroundColor="transparent"
+                placeholder={t('searchPlaceholder')}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                placeholderTextColor="$colorSecondary"
+                borderWidth={0}
+                borderRadius={0}
+                paddingHorizontal={0}
+                focusStyle={{ borderBottomWidth: 0 }}
+                opacity={0.8}
+              />
+              {searchQuery.length > 0 && (
+                <Button 
+                  circular 
+                  chromeless 
+                  size="$2" 
+                  icon={<Ionicons name="close-circle" size={20} color={theme.primary} opacity={0.6} />} 
+                  onPress={() => setSearchQuery('')}
+                  pressStyle={{ opacity: 0.5 }}
+                />
+              )}
+            </XStack>
 
             <XStack space="$3" justifyContent="center">
               {filterOptions.map(option => (
