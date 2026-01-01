@@ -1,8 +1,11 @@
 const React = require('react');
 const { createContext, useState, useContext, useEffect, useCallback, useRef, useMemo } = React;
+const AsyncStorage = require('@react-native-async-storage/async-storage').default || require('@react-native-async-storage/async-storage');
 const audioService = require('../services/audioService');
 
 const AudioContext = createContext();
+
+const RECENTLY_PLAYED_KEY = 'recently_played_hymns';
 
 const AudioProvider = ({ children }) => {
   const [currentMezmur, setCurrentMezmur] = useState(null);
@@ -13,6 +16,7 @@ const AudioProvider = ({ children }) => {
   const [isLooping, setIsLooping] = useState(false);
   const [isShuffle, setIsShuffle] = useState(false);
   const [isSeeking, setIsSeeking] = useState(false);
+  const [recentlyPlayed, setRecentlyPlayed] = useState([]);
 
   // Use a Ref for the status handler to provide a perfectly stable reference to the engine
   const statusHandlerRef = useRef(null);
@@ -26,6 +30,7 @@ const AudioProvider = ({ children }) => {
 
   useEffect(() => {
     audioService.init();
+    loadRecentlyPlayed();
     
     // Define the actual logic once
     statusHandlerRef.current = async (status) => {
@@ -50,6 +55,31 @@ const AudioProvider = ({ children }) => {
     };
   }, []);
 
+  const loadRecentlyPlayed = async () => {
+    try {
+      const stored = await AsyncStorage.getItem(RECENTLY_PLAYED_KEY);
+      if (stored) {
+        setRecentlyPlayed(JSON.parse(stored));
+      }
+    } catch (e) {
+      console.error('Failed to load recently played', e);
+    }
+  };
+
+  const addToRecentlyPlayed = async (mezmur) => {
+    try {
+      const newList = [
+        mezmur,
+        ...recentlyPlayed.filter(m => m.id !== mezmur.id)
+      ].slice(0, 10);
+      
+      setRecentlyPlayed(newList);
+      await AsyncStorage.setItem(RECENTLY_PLAYED_KEY, JSON.stringify(newList));
+    } catch (e) {
+      console.error('Failed to save recently played', e);
+    }
+  };
+
   // This is the stable callback passed to audio engine
   const onStatusUpdate = useCallback((status) => {
     if (statusHandlerRef.current) {
@@ -73,6 +103,7 @@ const AudioProvider = ({ children }) => {
       }
 
       setCurrentMezmur(mezmur);
+      addToRecentlyPlayed(mezmur);
       setIsLoading(false);
     } catch (error) {
       console.error("Error playing audio", error);
@@ -120,6 +151,7 @@ const AudioProvider = ({ children }) => {
     duration,
     isLooping,
     isShuffle,
+    recentlyPlayed,
     playMezmur,
     togglePlayback,
     toggleLoop,
@@ -128,7 +160,7 @@ const AudioProvider = ({ children }) => {
     seek
   }), [
     currentMezmur, isPlaying, isLoading, position, duration, 
-    isLooping, isShuffle, playMezmur, togglePlayback, 
+    isLooping, isShuffle, recentlyPlayed, playMezmur, togglePlayback, 
     toggleLoop, toggleShuffle, skip, seek
   ]);
 

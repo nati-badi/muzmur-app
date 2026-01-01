@@ -42,18 +42,25 @@ const SkeletonCard = memo(() => (
   </YStack>
 ));
 
-const HomeScreen = ({ navigation }) => {
+const HomeScreen = ({ navigation, route }) => {
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
   const { theme } = useAppTheme();
   const { t } = useLanguage();
   const { isFavorite, toggleFavorite } = useFavorites();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedQuery, setDebouncedQuery] = useState('');
+  
+  // Drill-down support
+  const initialSectionId = route.params?.sectionId || SECTION_ALL_ID;
+  const initialSectionTitle = route.params?.sectionTitle;
+  const initialSearchQuery = route.params?.searchQuery || '';
+  const isDrillDown = !!route.params?.sectionId || !!route.params?.searchQuery;
+
+  const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
+  const [debouncedQuery, setDebouncedQuery] = useState(initialSearchQuery);
   
   // State uses IDs for stable logic
   const [selectedFilterId, setSelectedFilterId] = useState(FILTER_IDS.ALL); 
-  const [selectedSectionId, setSelectedSectionId] = useState(SECTION_ALL_ID); 
+  const [selectedSectionId, setSelectedSectionId] = useState(initialSectionId); 
   
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -234,12 +241,20 @@ const HomeScreen = ({ navigation }) => {
           circular 
           size="$3" 
           backgroundColor="transparent"
-          icon={<Ionicons name="menu-outline" size={28} color={theme.primary} />}
-          onPress={() => navigation.toggleDrawer()}
+          icon={<Ionicons name={isDrillDown ? "chevron-back" : "menu-outline"} size={28} color={theme.primary} />}
+          onPress={() => isDrillDown ? navigation.goBack() : navigation.toggleDrawer()}
           pressStyle={{ opacity: 0.6 }}
         />
-        <Text fontFamily="$ethiopicSerif" fontSize="$8" fontWeight="800" color={theme.primary} letterSpacing={-0.5}>
-          ቅዱስ ዜማ
+        <Text 
+          fontFamily="$ethiopicSerif" 
+          fontSize={isDrillDown ? "$6" : "$8"} 
+          fontWeight="800" 
+          color={theme.primary} 
+          letterSpacing={-0.5}
+          numberOfLines={1}
+          maxWidth="70%"
+        >
+          {isDrillDown ? initialSectionTitle : t('appTitle')}
         </Text>
         <Button 
           position="absolute"
@@ -407,36 +422,38 @@ const HomeScreen = ({ navigation }) => {
               ))}
             </XStack>
 
-            <YStack space="$2">
-               <Text fontFamily="$ethiopicSerif" fontSize="$3" color="$colorSecondary" opacity={0.7} marginLeft="$2">
-                 {t('sections')}
-               </Text>
-               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingRight: 20 }}>
-                  {sectionOptions.map((option) => (
-                    <YStack
-                      key={option.id}
-                      onPress={() => setSelectedSectionId(option.id)}
-                      marginRight="$3"
-                      paddingVertical="$2"
-                      paddingHorizontal="$3"
-                      borderBottomWidth={selectedSectionId === option.id ? 3 : 0}
-                      borderColor={theme.accent}
-                      opacity={selectedSectionId === option.id ? 1 : 0.6}
-                      pressStyle={{ opacity: 0.8 }}
-                    >
-                      <Text 
-                        fontFamily="$ethiopicSerif" 
-                        fontSize="$4" 
-                        color={selectedSectionId === option.id ? theme.primary : theme.text} 
-                        fontWeight={selectedSectionId === option.id ? "800" : "500"} 
+            {!isDrillDown && (
+              <YStack space="$2">
+                 <Text fontFamily="$ethiopicSerif" fontSize="$3" color="$colorSecondary" opacity={0.7} marginLeft="$2">
+                   {t('sections')}
+                 </Text>
+                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingRight: 20 }}>
+                    {sectionOptions.map((option) => (
+                      <YStack
+                        key={option.id}
+                        onPress={() => setSelectedSectionId(option.id)}
+                        marginRight="$3"
+                        paddingVertical="$2"
+                        paddingHorizontal="$3"
+                        borderBottomWidth={selectedSectionId === option.id ? 3 : 0}
+                        borderColor={theme.accent}
+                        opacity={selectedSectionId === option.id ? 1 : 0.6}
+                        pressStyle={{ opacity: 0.8 }}
                       >
-                        {option.label}
-                      </Text>
-                    </YStack>
-                  ))}
-               </ScrollView>
-               <YStack height={1} backgroundColor="$borderColor" opacity={0.5} marginTop="$-2" zIndex={-1} />
-            </YStack>
+                        <Text 
+                          fontFamily="$ethiopicSerif" 
+                          fontSize="$4" 
+                          color={selectedSectionId === option.id ? theme.primary : theme.text} 
+                          fontWeight={selectedSectionId === option.id ? "800" : "500"} 
+                        >
+                          {option.label}
+                        </Text>
+                      </YStack>
+                    ))}
+                 </ScrollView>
+                 <YStack height={1} backgroundColor="$borderColor" opacity={0.5} marginTop="$-2" zIndex={-1} />
+              </YStack>
+            )}
           </YStack>
         }
         ListEmptyComponent={

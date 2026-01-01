@@ -8,6 +8,7 @@ const HomeScreen = require('../screens/HomeScreen').default || require('../scree
 const TodayScreen = require('../screens/TodayScreen').default || require('../screens/TodayScreen');
 const ProfileScreen = require('../screens/ProfileScreen').default || require('../screens/ProfileScreen');
 const CalendarScreen = require('../screens/CalendarScreen').default || require('../screens/CalendarScreen');
+const SectionListScreen = require('../screens/SectionListScreen').default || require('../screens/SectionListScreen');
 const { useAppTheme } = require('../context/ThemeContext');
 const { useLanguage } = require('../context/LanguageContext');
 
@@ -23,12 +24,12 @@ const TabNavigator = () => {
         headerShown: false,
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
-          if (route.name === 'Mezmurs') {
+          if (route.name === 'Home') {
+            iconName = focused ? 'home' : 'home-outline';
+          } else if (route.name === 'Mezmurs') {
             iconName = focused ? 'musical-notes' : 'musical-notes-outline';
           } else if (route.name === 'Today') {
             iconName = focused ? 'calendar' : 'calendar-outline';
-          } else if (route.name === 'Calendar') {
-            iconName = focused ? 'calendar-number' : 'calendar-number-outline';
           } else if (route.name === 'Profile') {
             iconName = focused ? 'person' : 'person-outline';
           }
@@ -64,19 +65,19 @@ const TabNavigator = () => {
       })}
     >
       <Tab.Screen 
-        name="Mezmurs" 
-        component={HomeScreen} 
+        name="Home" 
+        component={TodayScreen} 
         options={{ tabBarLabel: t('home') }}
+      />
+      <Tab.Screen 
+        name="Mezmurs" 
+        component={SectionListScreen} 
+        options={{ tabBarLabel: t('mezmurs') }}
       />
       <Tab.Screen 
         name="Today" 
         component={TodayScreen} 
         options={{ tabBarLabel: t('today') }}
-      />
-      <Tab.Screen 
-        name="Calendar" 
-        component={CalendarScreen} 
-        options={{ tabBarLabel: language === 'am' ? 'የቀን መቁጠሪያ' : 'Calendar' }}
       />
       <Tab.Screen 
         name="Profile" 

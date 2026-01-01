@@ -8,11 +8,19 @@ const { useLanguage } = require('../context/LanguageContext');
 const { toEthiopian, toGeez, ETHIOPIC_MONTHS, ETHIOPIC_MONTHS_EN } = require('../utils/dateUtils');
 const { getFeastForDate } = require('../utils/holidayData');
 const MEZMURS = require('../data/mezmurs.json');
+const { useAudio } = require('../context/GlobalAudioState.js');
+const { useFavorites } = require('../context/FavoritesContext');
+const { useAuth } = require('../context/AuthContext');
 
 const TodayScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const { theme } = useAppTheme();
   const { t, language } = useLanguage();
+  const { recentlyPlayed } = useAudio();
+  const { favoritesCount } = useFavorites();
+  const { user } = useAuth();
+
+  const userDisplayName = user?.displayName || user?.email?.split('@')[0] || t('guest') || 'Guest';
 
   // 1. Get Today's Ethiopian Date
   const today = new Date();
@@ -88,13 +96,117 @@ const TodayScreen = ({ navigation }) => {
           onPress={() => navigation.toggleDrawer()}
           pressStyle={{ opacity: 0.6 }}
         />
-        <Text fontFamily="$ethiopicSerif" fontSize={24} fontWeight="800" color={theme.primary}>
-          {t('today')}
-        </Text>
+        <YStack alignItems="center">
+           <Text fontFamily="$ethiopicSerif" fontSize={22} fontWeight="800" color={theme.primary}>
+             {t('appTitle') || 'ቅዱስ ዜማ'}
+           </Text>
+           <Text fontFamily="$body" fontSize={11} color={theme.primary} opacity={0.6} textTransform="uppercase" letterSpacing={1}>
+             {language === 'am' ? 'ሰላም ላንተ ይሁን' : 'Welcome back'}, {userDisplayName}
+           </Text>
+        </YStack>
+        <Button 
+          position="absolute"
+          right="$4"
+          circular 
+          size="$3" 
+          backgroundColor="transparent"
+          icon={<Ionicons name="person-circle-outline" size={28} color={theme.primary} />}
+          onPress={() => navigation.navigate('Profile')}
+          pressStyle={{ opacity: 0.6 }}
+        />
       </XStack>
 
       <ScrollView f={1} showsVerticalScrollIndicator={false}>
         <YStack padding="$5" space="$5">
+          
+          {/* Quick Actions / Link Tiles */}
+          <XStack space="$4" paddingBottom="$2">
+             <Card 
+               f={1} 
+               height={120} 
+               bordered 
+               borderRadius="$4" 
+               backgroundColor={theme.primary} 
+               onPress={() => navigation.navigate('Favorites')}
+               pressStyle={{ scale: 0.98, opacity: 0.9 }}
+             >
+                <YStack f={1} p="$3" jc="space-between">
+                   <Ionicons name="heart" size={24} color="white" />
+                   <YStack>
+                     <Text fontFamily="$ethiopicSerif" color="white" fontWeight="800" fontSize="$4">{t('favorites')}</Text>
+                     <Text color="white" opacity={0.8} fontSize="$1">{favoritesCount} {t('mezmurs')}</Text>
+                   </YStack>
+                </YStack>
+             </Card>
+             <Card 
+               f={1} 
+               height={120} 
+               bordered 
+               borderRadius="$4" 
+               backgroundColor={theme.accent} 
+               onPress={() => navigation.navigate('Mezmurs')}
+               pressStyle={{ scale: 0.98, opacity: 0.9 }}
+             >
+                <YStack f={1} p="$3" jc="space-between">
+                   <Ionicons name="compass" size={24} color={theme.primary} />
+                   <YStack>
+                     <Text fontFamily="$ethiopicSerif" color={theme.primary} fontWeight="800" fontSize="$4">Explore</Text>
+                     <Text color={theme.primary} opacity={0.8} fontSize="$1">Categories</Text>
+                   </YStack>
+                </YStack>
+             </Card>
+          </XStack>
+
+          {/* Recently Played Carousel */}
+          {recentlyPlayed.length > 0 && (
+            <YStack space="$3">
+              <XStack justifyContent="space-between" alignItems="center">
+                <Text fontFamily="$ethiopicSerif" fontSize={18} fontWeight="800" color={theme.text}>
+                  Recently Played
+                </Text>
+                <Button chromeless p="$0" onPress={() => navigation.navigate('Mezmurs')}>
+                   <Text fontSize="$2" color={theme.primary}>See All</Text>
+                </Button>
+              </XStack>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingRight: 20 }}>
+                {recentlyPlayed.map((item) => (
+                  <YStack 
+                    key={item.id} 
+                    width={140} 
+                    marginRight="$4" 
+                    onPress={() => navigation.navigate('Detail', { mezmur: item })}
+                    pressStyle={{ opacity: 0.8 }}
+                  >
+                    <YStack 
+                      width={140} 
+                      height={140} 
+                      backgroundColor={theme.cardBackground} 
+                      borderRadius="$6" 
+                      bordered 
+                      borderColor={theme.borderColor}
+                      ai="center"
+                      jc="center"
+                      marginBottom="$2"
+                      elevation="$2"
+                    >
+                      <Ionicons name="musical-note" size={60} color={theme.primary} opacity={0.15} />
+                      <View position="absolute" bottom={10} right={10}>
+                         <Circle size={30} backgroundColor={theme.primary}>
+                            <Ionicons name="play" size={16} color="white" style={{marginLeft: 2}} />
+                         </Circle>
+                      </View>
+                    </YStack>
+                    <Text fontFamily="$ethiopic" fontSize={14} fontWeight="700" color={theme.text} numberOfLines={1}>
+                      {item.title}
+                    </Text>
+                    <Text fontFamily="$ethiopic" fontSize={11} color={theme.textSecondary} opacity={0.6} numberOfLines={1}>
+                      {item.section}
+                    </Text>
+                  </YStack>
+                ) )}
+              </ScrollView>
+            </YStack>
+          )}
           
           {/* 2. Today's Date Card (Large & Premium) */}
           <YStack alignItems="center" space="$2" marginVertical="$4">

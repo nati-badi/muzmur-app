@@ -119,6 +119,7 @@ const AppNavigator = () => {
           options={{ gestureEnabled: false }}
         />
         <Stack.Screen name="Detail" component={DetailScreen} />
+        <Stack.Screen name="MezmurList" component={HomeScreen} />
         <Stack.Screen name="Favorites" component={FavoritesScreen} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
