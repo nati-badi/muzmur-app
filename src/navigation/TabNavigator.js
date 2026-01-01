@@ -7,7 +7,7 @@ const { Platform } = require('react-native');
 const HomeScreen = require('../screens/HomeScreen').default || require('../screens/HomeScreen');
 const TodayScreen = require('../screens/TodayScreen').default || require('../screens/TodayScreen');
 const ProfileScreen = require('../screens/ProfileScreen').default || require('../screens/ProfileScreen');
-const HymnPlayerScreen = require('../screens/HymnPlayerScreen').default || require('../screens/HymnPlayerScreen');
+const CalendarScreen = require('../screens/CalendarScreen').default || require('../screens/CalendarScreen');
 const { useAppTheme } = require('../context/ThemeContext');
 const { useLanguage } = require('../context/LanguageContext');
 
@@ -15,7 +15,7 @@ const Tab = createBottomTabNavigator();
 
 const TabNavigator = () => {
   const { theme } = useAppTheme();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   return (
     <Tab.Navigator
@@ -27,8 +27,8 @@ const TabNavigator = () => {
             iconName = focused ? 'musical-notes' : 'musical-notes-outline';
           } else if (route.name === 'Today') {
             iconName = focused ? 'calendar' : 'calendar-outline';
-          } else if (route.name === 'HymnPlayer') {
-            iconName = focused ? 'play-circle' : 'play-circle-outline';
+          } else if (route.name === 'Calendar') {
+            iconName = focused ? 'calendar-number' : 'calendar-number-outline';
           } else if (route.name === 'Profile') {
             iconName = focused ? 'person' : 'person-outline';
           }
@@ -74,9 +74,9 @@ const TabNavigator = () => {
         options={{ tabBarLabel: t('today') }}
       />
       <Tab.Screen 
-        name="HymnPlayer" 
-        component={HymnPlayerScreen} 
-        options={{ tabBarLabel: t('player') }}
+        name="Calendar" 
+        component={CalendarScreen} 
+        options={{ tabBarLabel: language === 'am' ? 'የቀን መቁጠሪያ' : 'Calendar' }}
       />
       <Tab.Screen 
         name="Profile" 

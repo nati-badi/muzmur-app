@@ -177,7 +177,7 @@ const CalendarScreen = ({ navigation }) => {
              </XStack>
 
              {/* Modern Divider */}
-             <YStack height={1} backgroundColor={theme.borderColor} opacity={0.5} width="100%" marginBottom="$3" />
+             <YStack height={1} backgroundColor={theme.borderColor} opacity={1} width="100%" marginBottom="$3" />
              
              {feastInfo.major ? (
                  <YStack backgroundColor={`${theme.primary}10`} padding="$3" borderRadius="$3" marginBottom="$2" borderLeftWidth={4} borderLeftColor={theme.primary}>

@@ -98,14 +98,14 @@ const AboutScreen = ({ navigation }) => {
         </YStack>
 
         {/* Mission Statement */}
-        <InfoSection title={t('Our Mission') || "Mission"}>
+        <InfoSection title={t('ourMission')}>
           <Text fontFamily="$body" fontSize="$4" lineHeight={24} color={theme.text} opacity={0.8}>
-            This application is dedicated to preserving and sharing the rich heritage of Ethiopian Orthodox Tewahedo Church Mezmurs. Our goal is to make these spiritual hymns accessible to everyone, everywhere.
+            {t('missionStatement')}
           </Text>
         </InfoSection>
 
         {/* Developer Info */}
-        <InfoSection title={t('Developer') || "Developer"}>
+        <InfoSection title={t('developerLabel')}>
            <XStack alignItems="center" space="$3" marginBottom="$2">
               <Ionicons name="code-slash" size={20} color={theme.primary} />
               <Text fontFamily="$body" fontSize="$4" fontWeight="600" color={theme.text}>

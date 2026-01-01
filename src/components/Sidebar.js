@@ -24,8 +24,6 @@ const Sidebar = (props) => {
     { id: 1, label: t('home'), icon: 'home-outline', activeIcon: 'home', screen: 'Tabs', params: { screen: 'Mezmurs' } },
     { id: 2, label: t('favorites'), icon: 'heart-outline', activeIcon: 'heart', screen: 'Favorites' },
     { id: 3, label: t('today'), icon: 'calendar-outline', activeIcon: 'calendar', screen: 'Tabs', params: { screen: 'Today' } },
-    // Manual fallback for translation since key seems missing
-    { id: 5, label: language === 'am' ? 'የቀን መቁጠሪያ' : 'Calendar', icon: 'calendar-number-outline', activeIcon: 'calendar-number', screen: 'Calendar' },
   ];
 
   const secondaryItems = [
@@ -143,7 +141,7 @@ const Sidebar = (props) => {
             fontSize={11} 
             color={theme.textSecondary} 
             opacity={0.5} 
-            marginBottom="$2" 
+            marginBottom="$" 
             fontWeight="700" 
             textTransform="uppercase"
             letterSpacing={1.5}
@@ -154,9 +152,13 @@ const Sidebar = (props) => {
           {menuItems.map((item) => <MenuItem key={item.id} item={item} />)}
         </YStack>
 
-        {/* 3. Secondary Navigation - With Top Spacing & Divider */}
-        <YStack paddingHorizontal="$4" space="$1" marginTop="$6">
-          <Separator marginHorizontal="$4" borderColor={theme.text} opacity={0.1} marginBottom="$4" />
+        {/* Premium Section Divider with Spacious Gap */}
+        <YStack height={70} justifyContent="center" marginTop="$8">
+          <Separator marginHorizontal="$10" borderColor={theme.text} opacity={0.06} />
+        </YStack>
+
+        {/* 3. Secondary Navigation */}
+        <YStack paddingHorizontal="$4" space="$1">
           
           <Text 
             fontFamily="$body" 

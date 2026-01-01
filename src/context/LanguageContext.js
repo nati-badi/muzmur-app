@@ -72,6 +72,9 @@ const translations = {
     noHymnSelected: 'No Hymn Selected',
     selectHymnDetail: 'Choose a hymn from the list to start listening.',
     browseMezmurs: 'Browse Mezmurs',
+    ourMission: 'Our Mission',
+    missionStatement: 'This application is dedicated to preserving and sharing the rich heritage of Ethiopian Orthodox Tewahedo Church Mezmurs. Our goal is to make these spiritual hymns accessible to everyone, everywhere.',
+    developerLabel: 'Developer',
   },
   am: {
     // Screen Titles
@@ -140,6 +143,9 @@ const translations = {
     noHymnSelected: 'ምንም መዝሙር አልተመረጠም',
     selectHymnDetail: 'መዝሙር ለማዳመጥ ከዝርዝሩ ውስጥ አንዱን ይምረጡ።',
     browseMezmurs: 'መዝሙራትን ይመልከቱ',
+    ourMission: 'ዓላማችን',
+    missionStatement: 'ይህ መተግበሪያ የኢትዮጵያ ኦርቶዶክስ ተዋሕዶ ቤተክርስቲያን መዝሙራትን ቅርሶችን ለመጠበቅና ለማካፈል የተዘጋጀ ነው። ዓላማችን እነዚህን መንፈሳዊ መዝሙራት ለሁሉም ሰው በየትኛውም ቦታ ተደራሽ ማድረግ ነው።',
+    developerLabel: 'አልሚ',
   }
 };
 

@@ -6,6 +6,12 @@ const ETHIOPIC_MONTHS = [
   'ግንቦት', 'ሰኔ', 'ሐምሌ', 'ነሐሴ', 'ጳጉሜ'
 ];
 
+const ETHIOPIC_MONTHS_EN = [
+  'Meskerem', 'Tikimt', 'Hidar', 'Tahsas',
+  'Tir', 'Yekatit', 'Megabit', 'Miyazia',
+  'Ginbot', 'Sene', 'Hamle', 'Nehase', 'Pagume'
+];
+
 /**
  * Converts a Gregorian date to Ethiopian date
  * @param {number} year - Gregorian Year
@@ -98,5 +104,6 @@ module.exports = {
   toGregorian,
   getEthiopianMonthStartDay,
   toGeez,
-  ETHIOPIC_MONTHS
+  ETHIOPIC_MONTHS,
+  ETHIOPIC_MONTHS_EN
 };
