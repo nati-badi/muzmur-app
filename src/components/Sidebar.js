@@ -23,8 +23,7 @@ const Sidebar = (props) => {
   const menuItems = [
     { id: 1, label: t('home'), icon: 'home-outline', activeIcon: 'home', screen: 'Tabs', params: { screen: 'Home' } },
     { id: 2, label: t('favorites'), icon: 'heart-outline', activeIcon: 'heart', screen: 'Favorites' },
-    { id: 3, label: t('today'), icon: 'calendar-outline', activeIcon: 'calendar', screen: 'Tabs', params: { screen: 'Today' } },
-    { id: 5, label: language === 'am' ? 'የቀን መቁጠሪያ' : 'Calendar', icon: 'calendar-number-outline', activeIcon: 'calendar-number', screen: 'Calendar' },
+    { id: 5, label: language === 'am' ? 'የቀን መቁጠሪያ' : 'Calendar', icon: 'calendar-number-outline', activeIcon: 'calendar-number', screen: 'Tabs', params: { screen: 'Calendar' } },
   ];
 
   const secondaryItems = [

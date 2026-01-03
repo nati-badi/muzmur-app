@@ -32,34 +32,32 @@ const AuthScreen = ({ navigation }) => {
   const formatError = (errorMessage) => {
     if (!errorMessage) return '';
     
-    // Firebase error codes
+    // Firebase error codes mapping to localized keys
     if (errorMessage.includes('auth/invalid-email')) {
-      return 'Please enter a valid email address';
+      return t('invalidEmail');
     }
-    if (errorMessage.includes('auth/user-not-found')) {
-      return 'No account found with this email';
+    if (errorMessage.includes('auth/user-not-found') || errorMessage.includes('auth/invalid-credential')) {
+      // Modern safety: often combined to prevent account enumeration
+      return t('userNotFound');
     }
     if (errorMessage.includes('auth/wrong-password')) {
-      return 'Incorrect password';
+      return t('wrongPassword');
     }
     if (errorMessage.includes('auth/email-already-in-use')) {
-      return 'An account with this email already exists';
+      return t('emailInUse');
     }
     if (errorMessage.includes('auth/weak-password')) {
-      return 'Password should be at least 6 characters';
+      return t('weakPassword');
     }
     if (errorMessage.includes('auth/network-request-failed')) {
-      return 'Network error. Please check your connection';
+      return t('networkError');
     }
     if (errorMessage.includes('auth/too-many-requests')) {
-      return 'Too many attempts. Please try again later';
-    }
-    if (errorMessage.includes('auth/operation-not-allowed')) {
-      return 'This sign-in method is disabled. Please enable it in Firebase Console.';
+      return t('tooManyRequests');
     }
     
     // Generic error
-    return 'Something went wrong. Please try again';
+    return t('genericError');
   };
 
   const handleSubmit = async () => {
@@ -68,17 +66,17 @@ const AuthScreen = ({ navigation }) => {
     
     // Validation
     if (!email || !password) {
-      setError('Please fill in all fields');
+      setError(t('fillAllFields'));
       return;
     }
 
     if (!isLogin && !displayName) {
-      setError('Please enter your name');
+      setError(t('nameRequired'));
       return;
     }
 
     if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+      setError(t('passwordTooShort'));
       return;
     }
 
@@ -194,10 +192,13 @@ const AuthScreen = ({ navigation }) => {
                     backgroundColor={theme.surface}
                     placeholder="Your name"
                     value={displayName}
-                    onChangeText={setDisplayName}
                     placeholderTextColor={theme.textSecondary}
-                    borderColor={theme.borderColor}
+                    borderColor={error && !displayName && !isLogin ? theme.error : theme.borderColor}
                     focusStyle={{ borderColor: theme.primary, borderWidth: 2 }}
+                    onChangeText={(text) => {
+                      setDisplayName(text);
+                      setError('');
+                    }}
                   />
                 </YStack>
               )}
@@ -219,7 +220,7 @@ const AuthScreen = ({ navigation }) => {
                   keyboardType="email-address"
                   autoCapitalize="none"
                   placeholderTextColor={theme.textSecondary}
-                  borderColor={theme.borderColor}
+                  borderColor={(error && !email) || (error && error.includes(t('invalidEmail'))) ? theme.error : theme.borderColor}
                   focusStyle={{ borderColor: theme.primary, borderWidth: 2 }}
                 />
               </YStack>
@@ -240,22 +241,24 @@ const AuthScreen = ({ navigation }) => {
                   }}
                   secureTextEntry
                   placeholderTextColor={theme.textSecondary}
-                  borderColor={theme.borderColor}
+                  borderColor={(error && !password) || (error && (error.includes(t('passwordTooShort')) || error.includes(t('wrongPassword')))) ? theme.error : theme.borderColor}
                   focusStyle={{ borderColor: theme.primary, borderWidth: 2 }}
                 />
               </YStack>
 
               {error ? (
                 <YStack 
-                  backgroundColor={`${theme.error}15`} 
-                  padding="$3" 
-                  borderRadius="$3"
+                  backgroundColor={`${theme.error}10`} 
+                  padding="$3.5" 
+                  borderRadius="$4"
                   borderWidth={1}
-                  borderColor={`${theme.error}30`}
+                  borderColor={`${theme.error}40`}
+                  animation="quick"
+                  enterStyle={{ opacity: 0, scale: 0.95, y: -5 }}
                 >
-                  <XStack space="$2" alignItems="center">
-                    <Ionicons name="alert-circle" size={20} color={theme.error} />
-                    <Text fontFamily="$body" fontSize="$3" color={theme.error} f={1}>
+                  <XStack space="$2.5" alignItems="center">
+                    <Ionicons name="alert-circle" size={22} color={theme.error} />
+                    <Text fontFamily="$body" fontSize="$3" color={theme.error} fontWeight="600" f={1}>
                       {error}
                     </Text>
                   </XStack>

@@ -11,7 +11,11 @@ const HOLIDAY_DATA = {
   "monthly_default_cycle": {
     "1": {
         en: "Lideta Mariam (Birth of Mary), St. Raguel, St. Bartholomew",
-        am: "ልደታ ማርያም፣ ቅዱስ ራጉኤል፣ ቅዱስ በርተሎሜዎስ"
+        am: "ልደታ ማርያም፣ ቅዱስ ራጉኤል፣ ቅዱስ በርተሎሜዎስ",
+        details: {
+            am: "እመቤታችን ቅድስት ድንግል ማርያም የተወለደችበት ዕለት ነው።",
+            en: "The day commemorating the birth of our Lady Saint Mary."
+        }
     },
     "2": {
         en: "St. Thaddeus the Apostle, St. Job",
@@ -19,7 +23,11 @@ const HOLIDAY_DATA = {
     },
     "3": {
         en: "Ba'ata Mariam (Entry of Mary into the Temple)",
-        am: "በአታ ማርያም"
+        am: "በአታ ማርያም",
+        details: {
+            am: "እመቤታችን ንፅህናዋ ተጠብቆ እንዲኖር በሦስት ዓመቷ ወደ ቤተ መቅደስ የገባችበት ዕለት ነው።",
+            en: "Commemoration of the entry of Saint Mary into the Temple at the age of three."
+        }
     },
     "4": {
         en: "Yohannes (John the Son of Thunder/Evangelist)",
@@ -55,7 +63,11 @@ const HOLIDAY_DATA = {
     },
     "12": {
         en: "Kidus Mikael (Archangel Michael)",
-        am: "ቅዱስ ሚካኤል"
+        am: "ቅዱስ ሚካኤል",
+        details: {
+            am: "ቅዱስ ሚካኤል ሕዝበ እስራኤልን ከግብፅ ባርነት የመራበትና ባሕረ ኤርትራን የከፈለበት ዕለት ነው።",
+            en: "Archangel Michael's monthly feast, commemorating his leadership of the Israelites out of Egypt."
+        }
     },
     "13": {
         en: "Egziabher Ab (God the Father), Kidus Ruphael (Archangel Raphael)",
@@ -83,7 +95,11 @@ const HOLIDAY_DATA = {
     },
     "19": {
         en: "Kidus Gabriel (Archangel Gabriel)",
-        am: "ቅዱስ ገብርኤል"
+        am: "ቅዱስ ገብርኤል",
+        details: {
+            am: "ቅዱስ ገብርኤል ሠለስቱ ደቂቅን (ሦስቱን ወጣቶች) ከሚነድ እሳት ያዳነበት ዕለት ነው።",
+            en: "The day Archangel Gabriel saved the three youths from the furnace."
+        }
     },
     "20": {
         en: "Hnstata (Building of the Church of Mary)",
@@ -115,7 +131,11 @@ const HOLIDAY_DATA = {
     },
     "27": {
         en: "Medhane Alem (Savior of the World)",
-        am: "መድኃኔዓለም"
+        am: "መድኃኔዓለም",
+        details: {
+            am: "ጌታችን መድኃኒታችን ኢየሱስ ክርስቶስ ለዓለም ድኅነት በዕፀ መስቀል ላይ የፈጸመው የማዳን ሥራ ይታሰባል::",
+            en: "Commemorating the saving work of our Lord Jesus Christ for the salvation of the world."
+        }
     },
     "28": {
         en: "Amanuel (Emmanuel)",
@@ -142,7 +162,11 @@ const HOLIDAY_DATA = {
     },
     "Meskerem_17": {
         en: "Meskel (Finding of the True Cross) - MAJOR FEAST",
-        am: "መስቀል (የደምራ በዓል)"
+        am: "መስቀል (የደምራ በዓል)",
+        details: {
+            am: "ንግሥት እሌኒ በጸሎትና በሱባኤ የእውነተኛውን መስቀል የተቀበረበትን ቦታ ያገኘችበትን ዕለት ለማስታወስ ይከበራል።",
+            en: "Celebrated to commemorate the finding of the True Cross by Queen Helena."
+        }
     },
     "Meskerem_21": {
         en: "Gishen Mariam",
@@ -193,12 +217,20 @@ const HOLIDAY_DATA = {
     },
     "Tahsas_29": {
         en: "Gena (Nativity of Christ) - MAJOR FEAST",
-        am: "በዓለ ገና (ልደት)"
+        am: "በዓለ ገና (ልደት)",
+        details: {
+            am: "ጌታችን መድኃኒታችን ኢየሱስ ክርስቶስ በቤተልሔም የተወለደበት ታላቅ የደስታ ዕለት ነው።",
+            en: "The joyful day commemorating the birth of our Lord and Savior Jesus Christ in Bethlehem."
+        }
     },
     
     "Tir_11": {
         en: "Timket (Epiphany/Baptism) - MAJOR FEAST",
-        am: "ጥምቀት"
+        am: "ጥምቀት",
+        details: {
+            am: "ጌታችን በዮርዳኖስ ባሕር በዮሐንስ እጅ ለመጠመቁ መታሰቢያ የሚከበር ታላቅ በዓል ነው።",
+            en: "The great feast commemorating the baptism of our Lord in the Jordan River by John."
+        }
     },
     "Tir_12": {
         en: "Kana ZeGalila (Cana of Galilee)",
@@ -229,7 +261,11 @@ const HOLIDAY_DATA = {
     
     "Miyazya_23": {
         en: "Kidus Giorgis (Annual Feast) - MAJOR FEAST",
-        am: "ቅዱስ ጊዮርጊስ (ሚያዚያ 23)"
+        am: "ቅዱስ ጊዮርጊስ (ሚያዚያ 23)",
+        details: {
+            am: "ታላቁ ሰማዕት ቅዱስ ጊዮርጊስ በሰማዕትነት ያለፈበት ዓመታዊ በዓል ነው።",
+            en: "The annual feast commemorating the martyrdom of the great martyr Saint George."
+        }
     },
     
     "Ginbot_01": {

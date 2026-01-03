@@ -1,7 +1,8 @@
 const React = require('react');
 const { useState } = React;
 const { YStack, XStack, Text, Circle, ScrollView } = require('tamagui');
-const { TouchableOpacity, View, Image, ActivityIndicator, Alert } = require('react-native');
+const { TouchableOpacity, View, Image, ActivityIndicator, Alert, Modal, Share, TouchableWithoutFeedback } = require('react-native');
+const { Separator } = require('tamagui');
 const { useSafeAreaInsets } = require('react-native-safe-area-context');
 const { Ionicons } = require('@expo/vector-icons');
 const ImagePicker = require('expo-image-picker');
@@ -11,6 +12,7 @@ const { useLanguage } = require('../context/LanguageContext');
 const { useFavorites } = require('../context/FavoritesContext');
 const { useAuth } = require('../context/AuthContext');
 const mezmursData = require('../data/mezmurs.json');
+const Button = require('tamagui').Button;
 
 const ProfileScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
@@ -19,15 +21,34 @@ const ProfileScreen = ({ navigation }) => {
   const { favoritesCount } = useFavorites();
   const { user, profileData, isAuthenticated, isAnonymous, logOut, updateProfilePicture } = useAuth();
   const [uploading, setUploading] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleSignOut = async () => {
     await logOut();
     navigation.replace('Auth');
   };
 
+  const handleShare = async () => {
+    try {
+      await Share.share({
+        message: t('shareMessage'),
+      });
+    } catch (error) {
+      console.error('Error sharing:', error);
+    }
+  };
+
+  const handleFeedback = () => {
+    Alert.alert(t('feedbackAlertTitle'), t('feedbackAlertMessage'), [{ text: t('ok') }]);
+  };
+
+  const handleCheckUpdate = () => {
+    Alert.alert(t('updatesAlertTitle'), t('updatesAlertMessage'), [{ text: t('ok') }]);
+  };
+
   const pickImage = async () => {
     if (!isAuthenticated) {
-      Alert.alert('Sign In Required', 'Please sign in to upload a profile picture.');
+      Alert.alert(t('signInRequired'), t('signInToUpload'));
       return;
     }
 
@@ -35,7 +56,7 @@ const ProfileScreen = ({ navigation }) => {
       // Request permission
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('Permission Denied', 'Sorry, we need camera roll permissions to make this work!');
+        Alert.alert(t('permissionDenied'), t('cameraRollPermission'));
         return;
       }
 
@@ -53,7 +74,7 @@ const ProfileScreen = ({ navigation }) => {
       }
     } catch (error) {
       console.error('Error picking image:', error);
-      Alert.alert('Error', 'Failed to pick image');
+      Alert.alert(t('error'), t('imagePickFailed'));
     }
   };
 
@@ -67,11 +88,11 @@ const ProfileScreen = ({ navigation }) => {
         // 2. Update Auth Profile
         await updateProfilePicture(result.downloadURL);
       } else {
-        Alert.alert('Upload Failed', result.error);
+        Alert.alert(t('uploadFailed'), result.error);
       }
     } catch (error) {
       console.error('Error uploading image:', error);
-      Alert.alert('Error', 'Failed to upload image');
+      Alert.alert(t('error'), t('imageUploadFailed'));
     } finally {
       setUploading(false);
     }
@@ -86,17 +107,81 @@ const ProfileScreen = ({ navigation }) => {
         alignItems="center"
         justifyContent="center" 
       >
-        <TouchableOpacity 
-          onPress={() => navigation.goBack()}
-          style={{ position: 'absolute', left: 16 }}
-        >
-          <XStack alignItems="center" space="$1">
-            <Ionicons name="chevron-back" size={24} color={theme.primary} />
-          </XStack>
-        </TouchableOpacity>
+        <Button 
+          position="absolute"
+          left="$4"
+          circular 
+          size="$3" 
+          backgroundColor="transparent"
+          icon={<Ionicons name="menu-outline" size={28} color={theme.primary} />}
+          onPress={() => navigation.toggleDrawer()}
+          pressStyle={{ opacity: 0.6 }}
+        />
         <Text fontFamily="$ethiopicSerif" fontSize="$7" fontWeight="800" color={theme.primary}>
           {t('profile')}
         </Text>
+        <TouchableOpacity 
+          onPress={() => setIsMenuOpen(!isMenuOpen)}
+          style={{ position: 'absolute', right: 16 }}
+        >
+          <Ionicons name="ellipsis-vertical" size={24} color={theme.primary} />
+        </TouchableOpacity>
+
+        {/* Overflow Menu */}
+        <Modal
+          visible={isMenuOpen}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setIsMenuOpen(false)}
+        >
+          <TouchableWithoutFeedback onPress={() => setIsMenuOpen(false)}>
+            <View style={{ flex: 1, backgroundColor: 'transparent' }}>
+               <YStack
+                position="absolute"
+                top={insets.top + 10} 
+                right={16}
+                width={200}
+                backgroundColor={theme.surface}
+                borderRadius="$4"
+                padding="$2"
+                elevation="$5"
+                zIndex={100}
+                borderWidth={1}
+                borderColor={theme.borderColor}
+                shadowColor="#000"
+                shadowOffset={{ width: 0, height: 4 }}
+                shadowOpacity={0.2}
+                shadowRadius={8}
+              >
+                <TouchableOpacity 
+                   onPress={() => { setIsMenuOpen(false); handleShare(); }}
+                   style={{ padding: 12, flexDirection: 'row', alignItems: 'center' }}
+                >
+                  <Ionicons name="share-social-outline" size={20} color={theme.primary} style={{ marginRight: 12 }} />
+                  <Text fontFamily="$body" color={theme.text} fontSize="$3">{t('shareApp')}</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                   onPress={() => { setIsMenuOpen(false); handleFeedback(); }}
+                   style={{ padding: 12, flexDirection: 'row', alignItems: 'center' }}
+                >
+                  <Ionicons name="chatbubble-ellipses-outline" size={20} color={theme.primary} style={{ marginRight: 12 }} />
+                  <Text fontFamily="$body" color={theme.text} fontSize="$3">{t('feedback')}</Text>
+                </TouchableOpacity>
+
+                <Separator borderColor={theme.borderColor} opacity={0.5} marginVertical={4} />
+
+                <TouchableOpacity 
+                   onPress={() => { setIsMenuOpen(false); handleCheckUpdate(); }}
+                   style={{ padding: 12, flexDirection: 'row', alignItems: 'center' }}
+                >
+                  <Ionicons name="cloud-download-outline" size={20} color={theme.primary} style={{ marginRight: 12 }} />
+                  <Text fontFamily="$body" color={theme.text} fontSize="$3">{t('checkUpdates')}</Text>
+                </TouchableOpacity>
+              </YStack>
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
       </XStack>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>

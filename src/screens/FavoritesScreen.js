@@ -83,7 +83,7 @@ const FavoritesScreen = ({ navigation }) => {
             fontStyle="italic"
             opacity={0.6}
           >
-            ምንም የተመረጡ መዝሙራት የሉም።
+            {t('noFavorites') || 'No favorite hymns yet.'}
           </Text>
         </YStack>
       ) : (

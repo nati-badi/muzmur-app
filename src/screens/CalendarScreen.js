@@ -81,11 +81,18 @@ const CalendarScreen = ({ navigation }) => {
     <YStack f={1} backgroundColor={theme.background} paddingTop={insets.top}>
       {/* Header */}
       <XStack paddingHorizontal="$5" paddingVertical="$3" alignItems="center" justifyContent="center">
-        <TouchableOpacity onPress={() => navigation.goBack()} style={{ position: 'absolute', left: 16, zIndex: 10 }}>
-          <Ionicons name="chevron-back" size={24} color={theme.primary} />
-        </TouchableOpacity>
+        <Button 
+          position="absolute"
+          left="$4"
+          circular 
+          size="$3" 
+          backgroundColor="transparent"
+          icon={<Ionicons name="menu-outline" size={28} color={theme.primary} />}
+          onPress={() => navigation.toggleDrawer()}
+          pressStyle={{ opacity: 0.6 }}
+        />
         <Text fontFamily="$ethiopicSerif" fontSize="$7" fontWeight="800" color={theme.primary}>
-          {t('Calendar') || "የቀን መቁጠሪያ"}
+          {t('calendar') || 'የቀን መቁጠሪያ'}
         </Text>
         <TouchableOpacity onPress={jumpToToday} style={{ position: 'absolute', right: 16 }}>
            <XStack backgroundColor={theme.surface} paddingHorizontal="$3" paddingVertical="$1.5" borderRadius="$10" borderWidth={1} borderColor={theme.borderColor} alignItems="center" shadowColor="black" shadowOpacity={0.05} shadowRadius={2} elevation={1}>
@@ -103,68 +110,106 @@ const CalendarScreen = ({ navigation }) => {
              
              <YStack alignItems="center">
                 <Text fontFamily="$ethiopic" fontSize="$8" fontWeight="800" color={theme.text}>
-                  {ETHIOPIC_MONTHS[currentMonth - 1] || "Month"} <Text fontSize="$6" opacity={0.6}>{currentYear}</Text>
+                  {ETHIOPIC_MONTHS[currentMonth - 1]} <Text fontSize="$6" opacity={0.6}>{currentYear}</Text>
                 </Text>
              </YStack>
              
              <Button circular size="$4" backgroundColor="transparent" onPress={() => changeMonth(1)} icon={<Ionicons name="chevron-forward" size={24} color={theme.primary} />} />
            </XStack>
 
-           {/* Weekday Header */}
-           <XStack justifyContent="space-between" marginBottom="$2" paddingHorizontal="$2">
-             {WEEKDAYS.map(day => (
-               <Text key={day} fontFamily="$ethiopic" fontSize="$3" color={theme.primary} width={38} textAlign="center" fontWeight="700">
-                 {day}
-               </Text>
-             ))}
-           </XStack>
+           {/* Integrated Full Grid Structure */}
+           <YStack borderWidth={1} borderColor={theme.borderColor} borderRadius="$4" overflow="hidden">
+             {/* Weekdays Row */}
+             <XStack backgroundColor={`${theme.primary}05`} borderBottomWidth={1} borderBottomColor={theme.borderColor}>
+               {WEEKDAYS.map((day, i) => (
+                 <YStack 
+                   key={day} 
+                   width="14.28%" 
+                   paddingVertical="$2.5" 
+                   ai="center" 
+                   jc="center"
+                   borderRightWidth={i < 6 ? 1 : 0}
+                   borderRightColor={theme.borderColor}
+                 >
+                   <Text fontFamily="$ethiopic" fontSize="$2" fontWeight="900" color={theme.primary} opacity={0.9}>
+                     {day}
+                   </Text>
+                 </YStack>
+               ))}
+             </XStack>
 
-           {/* Calendar Grid */}
-           <XStack flexWrap="wrap" justifyContent="flex-start">
-             {calendarGrid.map((item, index) => {
-               if(!item) return <YStack key={index} width="14.28%" aspectRatio={0.85} />;
-               
-               const isSelected = item.ethDay === selectedEthDate.day && currentMonth === selectedEthDate.month && currentYear === selectedEthDate.year;
-               const isToday = item.ethDay === todayEth.day && currentMonth === todayEth.month && currentYear === todayEth.year;
+             {/* Days Grid */}
+             <XStack flexWrap="wrap">
+               {calendarGrid.map((item, index) => {
+                 const isLastInRow = (index + 1) % 7 === 0;
+                 const isLastRow = index >= calendarGrid.length - 7;
 
-               return (
-               <YStack key={index} width="14.28%" aspectRatio={0.85} alignItems="center" justifyContent="center" padding="$1">
-                   <TouchableOpacity onPress={() => handleDayPress(item.ethDay)} style={{ width: '100%', height: '100%' }}>
+                 if(!item) return (
                    <YStack 
-                     width="100%" 
-                     height="100%"
-                     alignItems="center" 
-                     justifyContent="center"
-                     borderRadius="$3"
-                     backgroundColor={
-                       isSelected ? theme.primary : (isToday ? `${theme.primary}15` : "transparent")
-                     }
-                     borderWidth={isToday ? 1.5 : 0}
-                     borderColor={theme.primary}
+                     key={index} 
+                     width="14.28%" 
+                     aspectRatio={0.9} 
+                     backgroundColor={`${theme.background}20`}
+                     borderRightWidth={isLastInRow ? 0 : 1}
+                     borderBottomWidth={isLastRow ? 0 : 1}
+                     borderColor={theme.borderColor}
+                   />
+                 );
+                 
+                 const isSelected = item.ethDay === selectedEthDate.day && currentMonth === selectedEthDate.month && currentYear === selectedEthDate.year;
+                 const isToday = item.ethDay === todayEth.day && currentMonth === todayEth.month && currentYear === todayEth.year;
+
+                 return (
+                   <YStack 
+                     key={index} 
+                     width="14.28%" 
+                     aspectRatio={0.9} 
+                     ai="center" 
+                     jc="center" 
+                     borderRightWidth={isLastInRow ? 0 : 1}
+                     borderBottomWidth={isLastRow ? 0 : 1}
+                     borderColor={theme.borderColor}
                    >
-                     <Text 
-                       fontFamily="$body" 
-                       fontSize="$5" 
-                       fontWeight="700"
-                       lineHeight={24}
-                       color={isSelected ? "white" : (isToday ? theme.primary : theme.text)}
+                     <TouchableOpacity 
+                       onPress={() => handleDayPress(item.ethDay)} 
+                       style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' }}
                      >
-                       {item.ethDay}
-                     </Text>
-                     <Text 
-                       fontFamily="$ethiopic"
-                       fontSize={12}
-                       color={isSelected ? "white" : theme.textSecondary}
-                       opacity={isSelected ? 0.9 : 0.6}
-                       fontWeight="600"
-                     >
-                       {item.geezDay}
-                     </Text>
+                       <YStack 
+                         width="82%" 
+                         height="82%"
+                         ai="center" 
+                         jc="center"
+                         borderRadius="$3"
+                         backgroundColor={isSelected ? theme.primary : (isToday ? `${theme.primary}12` : "transparent")}
+                         borderWidth={isToday ? 1.5 : 0}
+                         borderColor={theme.primary}
+                         elevation={isSelected ? 4 : 0}
+                       >
+                         <Text 
+                           fontFamily="$body" 
+                           fontSize="$4" 
+                           fontWeight="800"
+                           color={isSelected ? "white" : (isToday ? theme.primary : theme.text)}
+                         >
+                           {item.ethDay}
+                         </Text>
+                         <Text 
+                           fontFamily="$ethiopic"
+                           fontSize={9}
+                           color={isSelected ? "white" : theme.textSecondary}
+                           opacity={isSelected ? 1 : 0.7}
+                           fontWeight="600"
+                           marginTop={-2}
+                         >
+                           {item.geezDay}
+                         </Text>
+                       </YStack>
+                     </TouchableOpacity>
                    </YStack>
-                   </TouchableOpacity>
-               </YStack>
-             )})}
-           </XStack>
+                 );
+               })}
+             </XStack>
+           </YStack>
         </YStack>
         
         {/* Feast/Holiday Info Card */}
@@ -185,7 +230,7 @@ const CalendarScreen = ({ navigation }) => {
                          ዓመታዊ በዓል
                      </Text>
                      <Text fontFamily="$body" fontSize="$4" color={theme.text} marginTop="$1">
-                         {feastInfo.major.am || feastInfo.major.en}
+                         {feastInfo.major.am}
                      </Text>
                  </YStack>
              ) : null}
@@ -194,9 +239,30 @@ const CalendarScreen = ({ navigation }) => {
                 <Text fontFamily="$body" fontSize="$3" color={theme.textSecondary} fontWeight="600" marginBottom="$1">
                     የዕለቱ መታሰቢያ:
                 </Text>
-                <Text fontFamily="$body" fontSize="$4" color={theme.text} lineHeight={22}>
-                    {(feastInfo.monthly && (feastInfo.monthly.am || feastInfo.monthly.en)) || "የተመዘገበ በዓል የለም"}
+                <Text fontFamily="$body" fontSize="$4" color={theme.text} lineHeight={22} fontWeight="700">
+                    {feastInfo.monthly?.am || "የተመዘገበ በዓል የለም"}
                 </Text>
+
+                {/* Enriched Details/Meaning Section - Amharic Only */}
+                {(feastInfo.major?.details?.am || feastInfo.monthly?.details?.am) && (
+                  <YStack 
+                    marginTop="$3" 
+                    padding="$3" 
+                    backgroundColor={`${theme.accent}15`} 
+                    borderRadius="$3"
+                    space="$2"
+                  >
+                    <XStack ai="center" space="$2">
+                       <Ionicons name="information-circle" size={16} color={theme.primary} />
+                       <Text fontFamily="$ethiopicSerif" fontSize="$2" fontWeight="800" color={theme.primary} textTransform="uppercase">
+                          የዕለቱ ምስጢር
+                       </Text>
+                    </XStack>
+                    <Text fontFamily="$body" fontSize="$3" color={theme.text} lineHeight={20} fontStyle="italic">
+                       {feastInfo.major?.details?.am || feastInfo.monthly?.details?.am}
+                    </Text>
+                  </YStack>
+                )}
              </YStack>
         </YStack>
 

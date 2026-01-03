@@ -1,10 +1,8 @@
 const React = require('react');
-const { createBottomTabNavigator } = require('@react-navigation/bottom-tabs');
+const { createMaterialTopTabNavigator } = require('@react-navigation/material-top-tabs');
 const { Ionicons } = require('@expo/vector-icons');
-const { useTheme } = require('tamagui');
-const { Platform } = require('react-native');
+const { Text, XStack, YStack } = require('tamagui');
 
-const HomeScreen = require('../screens/HomeScreen').default || require('../screens/HomeScreen');
 const TodayScreen = require('../screens/TodayScreen').default || require('../screens/TodayScreen');
 const ProfileScreen = require('../screens/ProfileScreen').default || require('../screens/ProfileScreen');
 const CalendarScreen = require('../screens/CalendarScreen').default || require('../screens/CalendarScreen');
@@ -12,79 +10,113 @@ const SectionListScreen = require('../screens/SectionListScreen').default || req
 const { useAppTheme } = require('../context/ThemeContext');
 const { useLanguage } = require('../context/LanguageContext');
 
-const Tab = createBottomTabNavigator();
+const TopTab = createMaterialTopTabNavigator();
+
+const CustomBottomPill = ({ state, descriptors, navigation, theme, t }) => {
+  return (
+    <XStack
+      position="absolute"
+      bottom={20}
+      left={15}
+      right={15}
+      backgroundColor={theme.primary}
+      borderRadius={25}
+      height={65}
+      elevation={10}
+      shadowColor="#000"
+      shadowOffset={{ width: 0, height: 4 }}
+      shadowOpacity={0.4}
+      shadowRadius={10}
+      paddingHorizontal={10}
+      alignItems="center"
+      justifyContent="space-around"
+    >
+      {state.routes.map((route, index) => {
+        const { options } = descriptors[route.key];
+        const label = options.tabBarLabel !== undefined ? options.tabBarLabel : route.name;
+        const isFocused = state.index === index;
+
+        const onPress = () => {
+          const event = navigation.emit({
+            type: 'tabPress',
+            target: route.key,
+            canPreventDefault: true,
+          });
+
+          if (!isFocused && !event.defaultPrevented) {
+            navigation.navigate(route.name);
+          }
+        };
+
+        const color = isFocused ? '#FFFFFF' : 'rgba(255,255,255,0.5)';
+        
+        let iconName;
+        if (route.name === 'Home') iconName = isFocused ? 'home' : 'home-outline';
+        else if (route.name === 'Mezmurs') iconName = isFocused ? 'musical-notes' : 'musical-notes-outline';
+        else if (route.name === 'Calendar') iconName = isFocused ? 'calendar-number' : 'calendar-number-outline';
+        else if (route.name === 'Profile') iconName = isFocused ? 'person' : 'person-outline';
+
+        return (
+          <YStack
+            key={route.key}
+            flex={1}
+            alignItems="center"
+            justifyContent="center"
+            onPress={onPress}
+            pressStyle={{ opacity: 0.7 }}
+          >
+            <Ionicons name={iconName} size={22} color={color} />
+            <Text
+              fontFamily="$ethiopic"
+              fontSize={10}
+              fontWeight="700"
+              color={color}
+              marginTop={2}
+              numberOfLines={1}
+            >
+              {label}
+            </Text>
+          </YStack>
+        );
+      })}
+    </XStack>
+  );
+};
 
 const TabNavigator = () => {
   const { theme } = useAppTheme();
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
 
   return (
-    <Tab.Navigator
-      screenOptions={({ route }) => ({
-        headerShown: false,
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName;
-          if (route.name === 'Home') {
-            iconName = focused ? 'home' : 'home-outline';
-          } else if (route.name === 'Mezmurs') {
-            iconName = focused ? 'musical-notes' : 'musical-notes-outline';
-          } else if (route.name === 'Today') {
-            iconName = focused ? 'calendar' : 'calendar-outline';
-          } else if (route.name === 'Profile') {
-            iconName = focused ? 'person' : 'person-outline';
-          }
-          return <Ionicons name={iconName} size={size} color={color} />;
-        },
-        tabBarActiveTintColor: '#FFFFFF', 
-        tabBarInactiveTintColor: 'rgba(255,255,255,0.5)',
-        tabBarStyle: {
-          position: 'absolute',
-          bottom: 20,
-          marginHorizontal: 15, // Slightly wider for more content space
-          backgroundColor: theme.primary,
-          borderRadius: 25,
-          height: 70, // Slightly taller for better spacing
-          paddingBottom: Platform.OS === 'ios' ? 20 : 10,
-          paddingTop: 10,
-          borderTopWidth: 0,
-          elevation: 10,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.4,
-          shadowRadius: 10,
-        },
-        tabBarLabelStyle: {
-          fontFamily: '$ethiopic',
-          fontSize: 11, // Increased from 10
-          fontWeight: '700',
-          marginBottom: 4,
-        },
-        tabBarIconStyle: {
-          marginBottom: 0,
-        }
-      })}
+    <TopTab.Navigator
+      tabBarPosition="bottom"
+      tabBar={(props) => <CustomBottomPill {...props} theme={theme} t={t} />}
+      initialRouteName="Home"
+      screenOptions={{
+        swipeEnabled: true,
+      }}
     >
-      <Tab.Screen 
+      <TopTab.Screen 
         name="Home" 
         component={TodayScreen} 
         options={{ tabBarLabel: t('home') }}
       />
-      <Tab.Screen 
+      <TopTab.Screen 
         name="Mezmurs" 
         component={SectionListScreen} 
         options={{ tabBarLabel: t('mezmurs') }}
       />
-      <Tab.Screen 
-        name="Today" 
-        component={TodayScreen} 
-        options={{ tabBarLabel: t('today') }}
+      <TopTab.Screen 
+        name="Calendar" 
+        component={CalendarScreen} 
+        options={{ tabBarLabel: t('calendar') }}
       />
-      <Tab.Screen 
+      <TopTab.Screen 
         name="Profile" 
         component={ProfileScreen} 
         options={{ tabBarLabel: t('profile') }}
       />
-    </Tab.Navigator>
+    </TopTab.Navigator>
   );
 };
 

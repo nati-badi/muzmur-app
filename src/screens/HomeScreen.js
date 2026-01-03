@@ -1,6 +1,6 @@
 const React = require('react');
 const { useState, useEffect, useCallback, useMemo, memo } = React;
-const { FlatList, Modal, ScrollView, StyleSheet, ActivityIndicator, useWindowDimensions, Share, Alert, TouchableWithoutFeedback, View } = require('react-native');
+const { FlatList, Modal, ScrollView, StyleSheet, ActivityIndicator, useWindowDimensions, Share, Alert, TouchableWithoutFeedback, View, Image: RNImage } = require('react-native');
 const { YStack, XStack, Text, Input, Button, Circle, Theme, Separator } = require('tamagui');
 const { useSafeAreaInsets } = require('react-native-safe-area-context');
 const { Ionicons } = require('@expo/vector-icons');
@@ -11,8 +11,9 @@ const { useLanguage } = require('../context/LanguageContext');
 const { getAllSections } = require('../constants/sections');
 const mezmursData = require('../data/mezmurs.json');
 const { COLORS } = require('../constants/theme');
-const MezmurListCard = require('../components/MezmurListCard');
+const SearchBar = require('../components/SearchBar');
 const { useFavorites } = require('../context/FavoritesContext');
+const { useAuth } = require('../context/AuthContext');
 
 // Constants
 const FILTER_IDS = {
@@ -23,6 +24,20 @@ const FILTER_IDS = {
 
 const SECTION_ALL_ID = 'ALL_SECTIONS';
 const LOAD_INCREMENT = 10;
+
+// Pre-calculate data metadata for high performance filtering
+// This runs once on module load, removing O(N) string splitting from the render path
+const PROCESSED_DATA = mezmursData.map(item => {
+  let lengthType = FILTER_IDS.SHORT;
+  if (item.lyrics) {
+     const count = item.lyrics.split('\n').length;
+     if (count > 8) lengthType = FILTER_IDS.LONG;
+  }
+  // Add searchable text string for faster search
+  const searchText = (item.title + ' ' + (item.lyrics || '') + ' ' + item.id).toLowerCase();
+  
+  return { ...item, lengthType, searchText };
+});
 
 // Skeleton loader for a premium feel during "fetching"
 const SkeletonCard = memo(() => (
@@ -42,12 +57,49 @@ const SkeletonCard = memo(() => (
   </YStack>
 ));
 
+// Memoized filter component to prevent list renders from blocking button clicks
+const FilterToggles = memo(({ options, activeId, onSelect, theme }) => {
+  return (
+    <XStack space="$3" justifyContent="center">
+      {options.map(option => {
+        const isActive = activeId === option.id;
+        return (
+          <Button
+            key={option.id}
+            size="$3"
+            borderRadius="$10"
+            backgroundColor={isActive ? theme.primary : 'transparent'}
+            borderColor={theme.primary}
+            borderWidth={isActive ? 0 : 1}
+            onPress={() => onSelect(option.id)}
+            pressStyle={{ opacity: 0.8, scale: 0.95 }}
+            paddingHorizontal="$4"
+            elevation={isActive ? "$2" : "$0"}
+            height={40}
+            minWidth={80}
+          >
+            <Text 
+              fontFamily="$ethiopic"
+              fontSize="$3" 
+              fontWeight={isActive ? "700" : "600"}
+              color={isActive ? "white" : theme.primary}
+            >
+              {option.label}
+            </Text>
+          </Button>
+        );
+      })}
+    </XStack>
+  );
+});
+
 const HomeScreen = ({ navigation, route }) => {
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
   const { theme } = useAppTheme();
   const { t } = useLanguage();
   const { isFavorite, toggleFavorite } = useFavorites();
+  const { profileData } = useAuth();
   
   // Drill-down support
   const initialSectionId = route.params?.sectionId || SECTION_ALL_ID;
@@ -59,12 +111,14 @@ const HomeScreen = ({ navigation, route }) => {
   const [debouncedQuery, setDebouncedQuery] = useState(initialSearchQuery);
   
   // State uses IDs for stable logic
-  const [selectedFilterId, setSelectedFilterId] = useState(FILTER_IDS.ALL); 
+  const [selectedFilterId, setSelectedFilterId] = useState(FILTER_IDS.ALL);
+  const [appliedFilterId, setAppliedFilterId] = useState(FILTER_IDS.ALL); // For deferred filtering
   const [selectedSectionId, setSelectedSectionId] = useState(initialSectionId); 
   
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  // Debounce search query to prevent excessive filtering during typing
   // Debounce search query to prevent excessive filtering during typing
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -72,6 +126,18 @@ const HomeScreen = ({ navigation, route }) => {
     }, 300); // 300ms delay is standard for good UX
     return () => clearTimeout(handler);
   }, [searchQuery]);
+
+  // Deferred effect to update filter without blocking UI
+  useEffect(() => {
+    if (selectedFilterId !== appliedFilterId) {
+       // A longer delay here ensures the UI color swap is COMPLETELY finished
+       // and the user sees the button change before the heavy list filtering starts.
+       const timer = setTimeout(() => {
+         setAppliedFilterId(selectedFilterId);
+       }, 100); 
+       return () => clearTimeout(timer);
+    }
+  }, [selectedFilterId, appliedFilterId]);
   
   // Estimate how many cards fit the screen initially
   const calculatedInitialCount = useMemo(() => {
@@ -110,7 +176,7 @@ const HomeScreen = ({ navigation, route }) => {
   // Reset pagination when filters change
   useEffect(() => {
     setVisibleCount(calculatedInitialCount);
-  }, [searchQuery, selectedFilterId, selectedSectionId, calculatedInitialCount]);
+  }, [searchQuery, appliedFilterId, selectedSectionId, calculatedInitialCount]);
 
   const getStatusColor = useCallback((category) => {
     return category === 'ረጅም' ? theme.error : theme.success;
@@ -172,39 +238,26 @@ const HomeScreen = ({ navigation, route }) => {
   };
 
   const filteredMezmurs = useMemo(() => {
-    let result = mezmursData;
+    let result = PROCESSED_DATA;
 
     // 1. Filter by Section
     if (selectedSectionId !== SECTION_ALL_ID) {
       result = result.filter(item => item.section === selectedSectionId);
     }
 
-    // 2. Filter by Length
-    if (selectedFilterId !== FILTER_IDS.ALL) {
-      const determineLengthId = (lyrics) => {
-         if (!lyrics) return FILTER_IDS.SHORT;
-         const lineCount = lyrics.split('\n').length;
-         return lineCount > 8 ? FILTER_IDS.LONG : FILTER_IDS.SHORT;
-      };
-      
-      result = result.filter(item => {
-        const lengthId = determineLengthId(item.lyrics);
-        return lengthId === selectedFilterId;
-      });
+    // 2. Filter by Length (optimized with pre-calculated field)
+    if (appliedFilterId !== FILTER_IDS.ALL) {
+      result = result.filter(item => item.lengthType === appliedFilterId);
     }
 
-    // 3. Search (using debounced query for stability)
+    // 3. Search (using pre-calculated searchText)
     if (debouncedQuery) {
       const lowerQuery = debouncedQuery.toLowerCase();
-      result = result.filter(item => 
-        (item.title && item.title.toLowerCase().includes(lowerQuery)) ||
-        (item.lyrics && item.lyrics.toLowerCase().includes(lowerQuery)) ||
-        String(item.id).includes(lowerQuery)
-      );
+      result = result.filter(item => item.searchText.includes(lowerQuery));
     }
 
     return result;
-  }, [debouncedQuery, selectedFilterId, selectedSectionId]);
+  }, [debouncedQuery, appliedFilterId, selectedSectionId]);
 
   // Paginated Data
   const paginatedData = useMemo(() => {
@@ -254,7 +307,7 @@ const HomeScreen = ({ navigation, route }) => {
           numberOfLines={1}
           maxWidth="70%"
         >
-          {isDrillDown ? initialSectionTitle : t('appTitle')}
+          {initialSearchQuery ? t('searchResults') : (isDrillDown ? initialSectionTitle : t('appTitle'))}
         </Text>
         <Button 
           position="absolute"
@@ -262,10 +315,19 @@ const HomeScreen = ({ navigation, route }) => {
           circular 
           size="$3" 
           backgroundColor="transparent"
-          icon={<Ionicons name="ellipsis-vertical" size={24} color={theme.primary} />}
           onPress={() => setIsMenuOpen(!isMenuOpen)}
           pressStyle={{ opacity: 0.6 }}
-        />
+          padding="$0"
+        >
+          {profileData?.photoURL ? (
+            <RNImage 
+              source={{ uri: profileData.photoURL }} 
+              style={{ width: 34, height: 34, borderRadius: 17 }} 
+            />
+          ) : (
+            <Ionicons name="ellipsis-vertical" size={24} color={theme.primary} />
+          )}
+        </Button>
 
         {/* Modal-based Modern Dropdown Menu for reliable dismiss-on-tap-outside */}
         <Modal
@@ -368,59 +430,23 @@ const HomeScreen = ({ navigation, route }) => {
         }
         ListHeaderComponent={
           <YStack paddingBottom="$5" space="$4">
-            <XStack alignItems="center" borderBottomWidth={2} borderColor={theme.primary} space="$2">
-              <Input
-                f={1}
-                size="$5"
-                fontFamily="$body"
-                backgroundColor="transparent"
-                placeholder={t('searchPlaceholder')}
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                placeholderTextColor="$colorSecondary"
-                borderWidth={0}
-                borderRadius={0}
-                paddingHorizontal={0}
-                focusStyle={{ borderBottomWidth: 0 }}
-                opacity={0.8}
-              />
-              {searchQuery.length > 0 && (
-                <Button 
-                  circular 
-                  chromeless 
-                  size="$2" 
-                  icon={<Ionicons name="close-circle" size={20} color={theme.primary} opacity={0.6} />} 
-                  onPress={() => setSearchQuery('')}
-                  pressStyle={{ opacity: 0.5 }}
-                />
-              )}
-            </XStack>
+            <SearchBar 
+               value={searchQuery}
+               onChangeText={setSearchQuery}
+               onClear={() => setSearchQuery('')}
+               placeholder={t('searchPlaceholder')}
+            />
 
-            <XStack space="$3" justifyContent="center">
-              {filterOptions.map(option => (
-                <Button
-                  key={option.id}
-                  size="$3"
-                  borderRadius="$10"
-                  backgroundColor={selectedFilterId === option.id ? theme.primary : "transparent"}
-                  borderColor={theme.primary}
-                  borderWidth={1}
-                  onPress={() => setSelectedFilterId(option.id)}
-                  pressStyle={{ opacity: 0.8 }}
-                  paddingHorizontal="$4"
-                  elevation={selectedFilterId === option.id ? "$2" : "$0"}
-                >
-                  <Text 
-                    fontFamily="$ethiopic"
-                    fontSize="$3" 
-                    fontWeight={selectedFilterId === option.id ? "800" : "600"}
-                    color={selectedFilterId === option.id ? "white" : theme.primary}
-                  >
-                    {option.label}
-                  </Text>
-                </Button>
-              ))}
-            </XStack>
+            <FilterToggles 
+              options={[
+                { id: FILTER_IDS.ALL, label: t('all') || 'All' },
+                { id: FILTER_IDS.LONG, label: t('long') || 'Long' },
+                { id: FILTER_IDS.SHORT, label: t('short') || 'Short' }
+              ]}
+              activeId={selectedFilterId}
+              onSelect={setSelectedFilterId}
+              theme={theme}
+            />
 
             {!isDrillDown && (
               <YStack space="$2">

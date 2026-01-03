@@ -1,11 +1,12 @@
-const React = require('react');
-const { ScrollView, useWindowDimensions } = require('react-native');
-const { YStack, XStack, Text, Card, Circle, Button, Input } = require('tamagui');
+const { ScrollView, useWindowDimensions, Keyboard, TouchableWithoutFeedback } = require('react-native');
+const { YStack, XStack, Text, Card, Circle, Button, Input, Image } = require('tamagui');
 const { Ionicons } = require('@expo/vector-icons');
 const { useSafeAreaInsets } = require('react-native-safe-area-context');
 const { useAppTheme } = require('../context/ThemeContext');
 const { useLanguage } = require('../context/LanguageContext');
+const SearchBar = require('../components/SearchBar');
 const { SECTIONS } = require('../constants/sections');
+const MEZMURS = require('../data/mezmurs.json');
 
 const SectionListScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
@@ -13,24 +14,65 @@ const SectionListScreen = ({ navigation }) => {
   const { t } = useLanguage();
   const { width } = useWindowDimensions();
   const [searchQuery, setSearchQuery] = React.useState('');
+  const [searchSuggestions, setSearchSuggestions] = React.useState([]);
+  const [showSuggestions, setShowSuggestions] = React.useState(false);
+  const [searchBarLayout, setSearchBarLayout] = React.useState(null);
   
+  
+  // Effect to disable parent swipe when search is active
+  React.useEffect(() => {
+    navigation.setOptions({ 
+      swipeEnabled: !showSuggestions 
+    });
+
+    return () => {
+      navigation.setOptions({ 
+        swipeEnabled: true 
+      });
+    };
+  }, [showSuggestions, navigation]);
+
+  const handleSearchChange = (text) => {
+    setSearchQuery(text);
+    if (text.trim().length > 1) {
+      const suggestions = MEZMURS
+        .filter(m => m.title.toLowerCase().includes(text.toLowerCase()))
+        .slice(0, 10);
+      setSearchSuggestions(suggestions);
+      setShowSuggestions(suggestions.length > 0);
+    } else {
+      setSearchSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
   const handleSearch = () => {
     if (searchQuery.trim()) {
+      setShowSuggestions(false);
+      Keyboard.dismiss();
       navigation.navigate('MezmurList', { searchQuery: searchQuery.trim(), sectionTitle: t('searchResults') || 'Search Results' });
     }
   };
 
+  const selectSuggestion = (hymn) => {
+    setSearchQuery('');
+    setShowSuggestions(false);
+    Keyboard.dismiss();
+    navigation.navigate('Detail', { mezmur: hymn });
+  };
+
   const sections = [
-    { id: SECTIONS.MARY, label: 'የእመቤታችን', icon: 'heart', color: '#E91E63' },
-    { id: SECTIONS.MICHAEL, label: 'የቅዱስ ሚካኤል', icon: 'shield', color: '#2196F3' },
-    { id: SECTIONS.GABRIEL, label: 'የቅዱስ ገብርኤል', icon: 'paper-plane', color: '#4CAF50' },
-    { id: SECTIONS.BAPTISM, label: 'የጥምቀት', icon: 'water', color: '#00BCD4' },
-    { id: SECTIONS.THANKSGIVING, label: 'የመድኃኔዓለም', icon: 'sunny', color: '#FF9800' },
-    { id: SECTIONS.GEORGE, label: 'የቅዱስ ጊዮርጊስ', icon: 'ribbon', color: '#F44336' },
-    { id: SECTIONS.TEKLE_HAYMANOT, label: 'የአቡነ ተክለ ሃይማኖት', icon: 'leaf', color: '#8BC34A' },
-    { id: SECTIONS.CANA, label: 'የቃና ዘገሊላ', icon: 'wine', color: '#9C27B0' },
-    { id: SECTIONS.GEBRE_MENFES_KIDUS, label: 'የአቡነ ገብረ መንፈስ ቅዱስ', icon: 'disc', color: '#795548' },
-    { id: SECTIONS.CHURCH, label: 'ስለ ቤተ ክርስቲያን', icon: 'home', color: '#607D8B' },
+    { id: SECTIONS.MARY, label: 'የእመቤታችን', image: require('../../assets/sections/maryam.jpg') },
+    { id: SECTIONS.MICHAEL, label: 'የቅዱስ ሚካኤል', image: require('../../assets/sections/michael.jpg') },
+    { id: SECTIONS.GABRIEL, label: 'የቅዱስ ገብርኤል', image: require('../../assets/sections/gebriel.jpg') },
+    { id: SECTIONS.BAPTISM, label: 'የጥምቀት', image: require('../../assets/sections/timket_1.jpg') },
+    { id: SECTIONS.THANKSGIVING, label: 'የመድኃኔዓለም', image: require('../../assets/sections/medhanialem.jpg') },
+    { id: SECTIONS.GEORGE, label: 'የቅዱስ ጊዮርጊስ', image: require('../../assets/sections/george.jpg') },
+    { id: SECTIONS.TEKLE_HAYMANOT, label: 'የአቡነ ተክለ ሃይማኖት', image: require('../../assets/sections/tekle_haymanot.jpg') },
+    { id: SECTIONS.CANA, label: 'የቃና ዘገሊላ', image: require('../../assets/sections/cana.jpg') },
+    { id: SECTIONS.GEBRE_MENFES_KIDUS, label: 'የአቡነ ገብረ መንፈስ ቅዱስ', image: require('../../assets/sections/gebre_menfes.jpg') },
+    { id: SECTIONS.CHURCH, label: 'ስለ ቤተ ክርስቲያን', image: require('../../assets/sections/church.jpg') },
+    { id: SECTIONS.ARSEMA, label: 'የቅድስት አርሴማ', image: require('../../assets/sections/arsema.jpg') },
   ];
 
   const cardWidth = (width - 60) / 2;
@@ -58,49 +100,113 @@ const SectionListScreen = ({ navigation }) => {
         </Text>
       </XStack>
 
-      <ScrollView contentContainerStyle={{ padding: 20 }}>
-        {/* Search Bar Hub */}
-        <YStack marginBottom="$6">
-           <XStack 
-             backgroundColor="$background" 
-             borderRadius="$10" 
-             borderWidth={1.5} 
-             borderColor={theme.primary} 
-             paddingHorizontal="$4" 
-             height={55} 
-             alignItems="center"
-             elevation="$2"
-           >
-             <Ionicons name="search" size={20} color={theme.primary} opacity={0.6} />
-             <Input 
-               f={1}
-               placeholder={t('searchPlaceholder')}
-               fontFamily="$body"
-               fontSize="$4"
-               backgroundColor="transparent"
-               borderWidth={0}
-               value={searchQuery}
-               onChangeText={setSearchQuery}
-               onSubmitEditing={handleSearch}
-               placeholderTextColor="$colorSecondary"
-             />
-             {searchQuery.length > 0 && (
-               <Button 
-                 circular 
-                 chromeless 
-                 size="$2" 
-                 icon={<Ionicons name="close-circle" size={20} color={theme.primary} opacity={0.6} />} 
-                 onPress={() => setSearchQuery('')}
-               />
-             )}
-           </XStack>
-           <XStack mt="$2" jc="flex-end">
-              <Text fontSize="$1" color={theme.primary} opacity={0.6} fontStyle="italic">
-                Search all hymns...
-              </Text>
-           </XStack>
-        </YStack>
+      {/* Backdrop for tapping outside */}
+      {showSuggestions && (
+        <TouchableWithoutFeedback
+          onPress={() => {
+            setShowSuggestions(false);
+            Keyboard.dismiss();
+          }}
+        >
+          <YStack 
+            position="absolute"
+            top={0}
+            left={0}
+            right={0}
+            bottom={0}
+            zIndex={900}
+            backgroundColor="transparent"
+          />
+        </TouchableWithoutFeedback>
+      )}
 
+      {/* Sticky Search Bar Hub */}
+      <YStack 
+        paddingHorizontal={20} 
+        zIndex={1000}
+        onLayout={(event) => {
+          const layout = event.nativeEvent.layout;
+          setSearchBarLayout(layout);
+        }}
+      >
+         <SearchBar
+           value={searchQuery}
+           onChangeText={handleSearchChange}
+           onSubmitEditing={handleSearch}
+           onFocus={() => {
+             if (searchQuery.length > 1) setShowSuggestions(true);
+           }}
+           onClear={() => {
+             setSearchQuery('');
+             setShowSuggestions(false);
+             Keyboard.dismiss();
+           }}
+           placeholder={t('searchPlaceholder')}
+         />
+         <XStack mt="$2" jc="flex-end" marginBottom="$4">
+            <Text fontSize="$1" color={theme.primary} opacity={0.6} fontStyle="italic">
+              {t('searchHint') || 'Search All Hymns...'}
+            </Text>
+         </XStack>
+      </YStack>
+
+      {/* Search Suggestions Dropdown - Root Level for Touch Handling */}
+      {showSuggestions && searchSuggestions.length > 0 && searchBarLayout && (
+         <YStack 
+           position="absolute"
+           top={searchBarLayout.y + 60} // Offset based on search bar position
+           left={20}
+           right={20}
+           backgroundColor={theme.background}
+           borderRadius="$5"
+           borderWidth={1}
+           borderColor={theme.borderColor}
+           elevation="$10"
+           maxHeight={350}
+           overflow="hidden"
+           zIndex={2000} // Highest Z-Index
+         >
+           <ScrollView 
+             keyboardShouldPersistTaps="handled"
+             keyboardDismissMode='none'
+             nestedScrollEnabled={true}
+             bounces={true}
+           >
+             {searchSuggestions.map((hymn, index) => (
+               <YStack
+                 key={hymn.id}
+                 paddingHorizontal="$4"
+                 paddingVertical="$3.5"
+                 borderBottomWidth={index < searchSuggestions.length - 1 ? 1 : 0}
+                 borderBottomColor={theme.borderColor}
+                 onPress={() => selectSuggestion(hymn)}
+                 pressStyle={{ backgroundColor: `${theme.primary}08` }}
+               >
+                 <XStack ai="center" space="$3">
+                    <Circle size={32} backgroundColor={`${theme.primary}12`}>
+                       <Ionicons name="musical-note" size={16} color={theme.primary} />
+                    </Circle>
+                    <YStack f={1} space="$0.5">
+                       <Text fontFamily="$ethiopic" fontSize={15} fontWeight="700" color={theme.text} numberOfLines={1}>
+                         {hymn.title}
+                       </Text>
+                       <Text fontFamily="$ethiopic" fontSize={11} color={theme.textSecondary} opacity={0.6}>
+                         {hymn.section}
+                       </Text>
+                    </YStack>
+                    <Ionicons name="chevron-forward" size={14} color={theme.textSecondary} opacity={0.3} />
+                 </XStack>
+               </YStack>
+             ))}
+           </ScrollView>
+         </YStack>
+      )}
+
+      <ScrollView 
+        contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
+        keyboardShouldPersistTaps="handled"
+        scrollEnabled={!showSuggestions}
+      >
         <Text fontFamily="$ethiopicSerif" fontSize={20} fontWeight="800" color={theme.text} marginBottom="$4">
            {t('categories') || 'Categories'}
         </Text>
@@ -109,8 +215,8 @@ const SectionListScreen = ({ navigation }) => {
             <Card
               key={section.id}
               width={cardWidth}
-              height={cardWidth * 1.1}
-              backgroundColor={theme.cardBackground}
+              height={cardWidth * 1.35}
+              backgroundColor="$background"
               marginBottom="$5"
               borderRadius="$6"
               elevate
@@ -118,18 +224,34 @@ const SectionListScreen = ({ navigation }) => {
               borderColor={theme.borderColor}
               onPress={() => navigation.navigate('MezmurList', { sectionId: section.id, sectionTitle: section.label })}
               pressStyle={{ scale: 0.96, opacity: 0.9 }}
+              overflow="hidden"
             >
-              <YStack f={1} ai="center" jc="center" padding="$4" space="$3">
-                <Circle size={width * 0.15} backgroundColor={section.color + '20'}>
-                  <Ionicons name={section.icon} size={32} color={section.color} />
-                </Circle>
+              {section.image && (
+                <Image 
+                  source={section.image} 
+                  style={{ position: 'absolute', width: '100%', height: '100%' }} 
+                  resizeMode="cover"
+                />
+              )}
+              <YStack 
+                f={1} 
+                ai="center" 
+                jc="flex-end" 
+                padding="$3" 
+                paddingBottom="$4"
+                space="$2" 
+                backgroundColor="rgba(0,0,0,0.25)"
+              >
                 <Text 
-                  fontFamily="$ethiopic" 
-                  fontSize={14} 
-                  fontWeight="700" 
-                  color={theme.text} 
+                  fontFamily="$ethiopicSerif" 
+                  fontSize={15} 
+                  fontWeight="900" 
+                  color="white" 
                   textAlign="center"
                   numberOfLines={2}
+                  textShadowColor="rgba(0,0,0,0.9)"
+                  textShadowOffset={{ width: 0, height: 1 }}
+                  textShadowRadius={4}
                 >
                   {section.label}
                 </Text>
