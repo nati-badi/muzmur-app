@@ -87,10 +87,15 @@ const TabNavigator = () => {
   const { theme } = useAppTheme();
   const { t } = useLanguage();
 
+  const renderTabBar = React.useCallback(
+    (props) => <CustomBottomPill {...props} theme={theme} t={t} />,
+    [theme, t]
+  );
+
   return (
     <TopTab.Navigator
       tabBarPosition="bottom"
-      tabBar={(props) => <CustomBottomPill {...props} theme={theme} t={t} />}
+      tabBar={renderTabBar}
       initialRouteName="Home"
       screenOptions={{
         swipeEnabled: true,

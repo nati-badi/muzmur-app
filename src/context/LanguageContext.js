@@ -249,12 +249,19 @@ const LanguageProvider = ({ children }) => {
     }
   };
 
-  const t = (key) => {
+  const t = React.useCallback((key) => {
     return translations[language]?.[key] || translations['am'][key] || key;
-  };
+  }, [language]);
+
+  const contextValue = React.useMemo(() => ({
+    language,
+    changeLanguage,
+    t,
+    isLoaded
+  }), [language, t, isLoaded]);
 
   return (
-    <LanguageContext.Provider value={{ language, changeLanguage, t, isLoaded }}>
+    <LanguageContext.Provider value={contextValue}>
       {children}
     </LanguageContext.Provider>
   );

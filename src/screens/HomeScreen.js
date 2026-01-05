@@ -14,6 +14,7 @@ const { COLORS } = require('../constants/theme');
 const SearchBar = require('../components/SearchBar');
 const { useFavorites } = require('../context/FavoritesContext');
 const { useAuth } = require('../context/AuthContext');
+const MezmurListCard = require('../components/MezmurListCard');
 
 // Constants
 const FILTER_IDS = {

@@ -37,8 +37,14 @@ const ThemeProvider = ({ children }) => {
     }
   };
 
+  const contextValue = React.useMemo(() => ({
+    theme: currentTheme,
+    setTheme: updateTheme,
+    isLoaded
+  }), [currentTheme, isLoaded]);
+
   return (
-    <ThemeContext.Provider value={{ theme: currentTheme, setTheme: updateTheme, isLoaded }}>
+    <ThemeContext.Provider value={contextValue}>
       {children}
     </ThemeContext.Provider>
   );

@@ -12,7 +12,7 @@ const AuthScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const { theme } = useAppTheme();
   const { t } = useLanguage();
-  const { signIn, signUp, signInAsGuest, user } = useAuth();
+  const { signIn, signUp, signInAsGuest, signInWithGoogle, user } = useAuth();
 
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -107,6 +107,23 @@ const AuthScreen = ({ navigation }) => {
       navigation.replace('Main');
     } else {
       setError(formatError(result.error));
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    Keyboard.dismiss();
+    setLoading(true);
+    setError('');
+
+    const result = await signInWithGoogle();
+    setLoading(false);
+
+    if (result.success) {
+      navigation.replace('Main');
+    } else {
+      if (result.error !== 'Sign in cancelled') {
+          setError(formatError(result.error));
+      }
     }
   };
 
@@ -281,6 +298,25 @@ const AuthScreen = ({ navigation }) => {
                     {isLogin ? 'Sign In' : 'Create Account'}
                   </Text>
                 )}
+              </Button>
+
+              <Button
+                size="$4"
+                backgroundColor="white"
+                borderWidth={1}
+                borderColor="#ddd"
+                marginTop="$4"
+                onPress={handleGoogleLogin}
+                disabled={loading}
+                pressStyle={{ opacity: 0.8 }}
+                elevation="$2"
+              >
+                <XStack space="$2" alignItems="center">
+                  <Ionicons name="logo-google" size={20} color="black" />
+                  <Text fontFamily="$ethiopic" fontSize="$3" color="black" fontWeight="600">
+                    Continue with Google
+                  </Text>
+                </XStack>
               </Button>
 
               <Button

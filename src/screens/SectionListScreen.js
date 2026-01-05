@@ -30,7 +30,8 @@ const SectionListScreen = ({ navigation }) => {
         swipeEnabled: true 
       });
     };
-  }, [showSuggestions, navigation]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showSuggestions]);
 
   const handleSearchChange = (text) => {
     setSearchQuery(text);
@@ -126,7 +127,11 @@ const SectionListScreen = ({ navigation }) => {
         zIndex={1000}
         onLayout={(event) => {
           const layout = event.nativeEvent.layout;
-          setSearchBarLayout(layout);
+          if (!searchBarLayout || 
+              Math.floor(layout.y) !== Math.floor(searchBarLayout.y) || 
+              Math.floor(layout.height) !== Math.floor(searchBarLayout.height)) {
+            setSearchBarLayout(layout);
+          }
         }}
       >
          <SearchBar

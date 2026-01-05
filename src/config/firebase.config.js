@@ -21,9 +21,19 @@ let auth;
 if (getApps().length === 0) {
   // First time initialization
   app = initializeApp(firebaseConfig);
-  auth = initializeAuth(app, {
-    persistence: getReactNativePersistence(AsyncStorage)
-  });
+  
+  // Robust Auth Initialization for React Native
+  let persistence;
+  try {
+    // Some versions/bundlers require importing from the subpath
+    const reactNativePersistence = getReactNativePersistence || require('firebase/auth/react-native').getReactNativePersistence;
+    persistence = reactNativePersistence(AsyncStorage);
+  } catch (e) {
+    console.warn('Could not load Native Persistence, falling back to default:', e);
+    // If all else fails, let it use default (memory/web)
+  }
+
+  auth = initializeAuth(app, persistence ? { persistence } : {});
 } else {
   // Already initialized - get existing instances
   app = getApp();

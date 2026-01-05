@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "696692999848",
+    "project_id": "muzmur-app-v2-20d15",
+    "storage_bucket": "muzmur-app-v2-20d15.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:696692999848:android:4414cc3e4b744ea29a249d",
+        "android_client_info": {
+          "package_name": "com.badi_nati.muzmurapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "696692999848-rbo6csn5g4t0nm9rn1k5c4s699uf7tia.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.badi_nati.muzmurapp",
+            "certificate_hash": "ecd1eed8ea59cc06b21f8fe63afdd7cd31708176"
+          }
+        },
+        {
+          "client_id": "696692999848-fh9ajem00u585o8989jainpqn0nmcdo1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA98-v6oDGQmjoxi-CJk0bjnhFOZzyUNSg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "696692999848-fh9ajem00u585o8989jainpqn0nmcdo1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

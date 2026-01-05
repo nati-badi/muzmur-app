@@ -6,9 +6,12 @@ const {
   signOut,
   onAuthStateChanged,
   signInAnonymously,
-  updateProfile
+  updateProfile,
+  GoogleAuthProvider,
+  signInWithCredential
 } = require('firebase/auth');
 const { auth } = require('../config/firebase.config');
+const { GoogleSignin } = require('@react-native-google-signin/google-signin');
 
 const AuthContext = createContext({});
 
@@ -44,6 +47,11 @@ const AuthProvider = ({ children }) => {
         setProfileData(null);
       }
       setLoading(false);
+    });
+
+    // Configure Google Sign-In
+    GoogleSignin.configure({
+        webClientId: '696692999848-fh9ajem00u585o8989jainpqn0nmcdo1.apps.googleusercontent.com',
     });
 
     return unsubscribe;
@@ -91,6 +99,31 @@ const AuthProvider = ({ children }) => {
     }
   };
 
+  // Google Sign In
+  const signInWithGoogle = async () => {
+    try {
+      setError(null);
+      await GoogleSignin.hasPlayServices();
+      
+      const userInfo = await GoogleSignin.signIn();
+      const { idToken } = userInfo.data || userInfo; // Handle different versions of lib
+      
+      if (!idToken) throw new Error('No ID Token found');
+
+      const credential = GoogleAuthProvider.credential(idToken);
+      const result = await signInWithCredential(auth, credential);
+      
+      return { success: true, user: result.user };
+    } catch (err) {
+      if (err.message && err.message.includes('CANCELED')) {
+          // User cancelled, do nothing
+          return { success: false, error: 'Sign in cancelled' };
+      }
+      setError(err.message);
+      return { success: false, error: err.message };
+    }
+  };
+
   // Sign out
   const logOut = async () => {
     try {
@@ -131,6 +164,7 @@ const AuthProvider = ({ children }) => {
     error,
     signUp,
     signIn,
+    signInWithGoogle,
     signInAsGuest,
     logOut,
     updateProfilePicture,
