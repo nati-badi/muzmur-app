@@ -1,5 +1,5 @@
 const React = require('react');
-const { useEffect } = React;
+const { useEffect, useMemo } = React;
 const { createStackNavigator } = require('@react-navigation/stack');
 const { createDrawerNavigator } = require('@react-navigation/drawer');
 const { NavigationContainer } = require('@react-navigation/native');
@@ -19,6 +19,7 @@ const { useAuth } = require('../context/AuthContext');
 const { useFavorites } = require('../context/FavoritesContext');
 const MigrationService = require('../services/MigrationService');
 const AsyncStorage = require('@react-native-async-storage/async-storage').default || require('@react-native-async-storage/async-storage');
+const { useAppTheme } = require('../context/ThemeContext');
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -42,6 +43,7 @@ const DrawerNavigator = () => {
 
 const AppNavigator = () => {
   const { user, loading } = useAuth();
+  const hasRunMigration = React.useRef(null);
   const { setFavoritesFromCloud } = useFavorites();
   const [hasSeenWelcome, setHasSeenWelcome] = React.useState(null);
 
@@ -57,8 +59,10 @@ const AppNavigator = () => {
   // Handle migration when user logs in
   useEffect(() => {
     const handleUserLogin = async () => {
-      if (user && !user.isAnonymous) {
+      if (user && !user.isAnonymous && hasRunMigration.current !== user.uid) {
+        hasRunMigration.current = user.uid; // Set immediately to prevent race
         console.log('User logged in, starting migration for:', user.uid);
+        
         // Perform migration
         const migrationResult = await MigrationService.performFullMigration(user.uid);
         
@@ -83,11 +87,14 @@ const AppNavigator = () => {
     handleUserLogin();
   }, [user, setFavoritesFromCloud]);
 
-  // Show loading spinner while auth is initializing
-  if (loading || hasSeenWelcome === null) {
+  // Show loading spinner while auth is initializing or welcome status unknown
+  const isInitializing = loading || hasSeenWelcome === null;
+
+  if (isInitializing) {
+    const { theme } = useAppTheme();
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F9F9F7' }}>
-        <ActivityIndicator size="large" color="#8B4513" />
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.background }}>
+        <ActivityIndicator size="large" color={theme.primary} />
       </View>
     );
   }

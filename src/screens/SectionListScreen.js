@@ -51,7 +51,7 @@ const SectionListScreen = ({ navigation }) => {
     if (searchQuery.trim()) {
       setShowSuggestions(false);
       Keyboard.dismiss();
-      navigation.navigate('MezmurList', { searchQuery: searchQuery.trim(), sectionTitle: t('searchResults') || 'Search Results' });
+      navigation.navigate('MezmurList', { searchQuery: searchQuery.trim(), sectionTitle: t('searchResults') });
     }
   };
 
@@ -63,17 +63,17 @@ const SectionListScreen = ({ navigation }) => {
   };
 
   const sections = [
-    { id: SECTIONS.MARY, label: 'የእመቤታችን', image: require('../../assets/sections/maryam.jpg') },
-    { id: SECTIONS.MICHAEL, label: 'የቅዱስ ሚካኤል', image: require('../../assets/sections/michael.jpg') },
-    { id: SECTIONS.GABRIEL, label: 'የቅዱስ ገብርኤል', image: require('../../assets/sections/gebriel.jpg') },
-    { id: SECTIONS.BAPTISM, label: 'የጥምቀት', image: require('../../assets/sections/timket_1.jpg') },
-    { id: SECTIONS.THANKSGIVING, label: 'የመድኃኔዓለም', image: require('../../assets/sections/medhanialem.jpg') },
-    { id: SECTIONS.GEORGE, label: 'የቅዱስ ጊዮርጊስ', image: require('../../assets/sections/george.jpg') },
-    { id: SECTIONS.TEKLE_HAYMANOT, label: 'የአቡነ ተክለ ሃይማኖት', image: require('../../assets/sections/tekle_haymanot.jpg') },
-    { id: SECTIONS.CANA, label: 'የቃና ዘገሊላ', image: require('../../assets/sections/cana.jpg') },
-    { id: SECTIONS.GEBRE_MENFES_KIDUS, label: 'የአቡነ ገብረ መንፈስ ቅዱስ', image: require('../../assets/sections/gebre_menfes.jpg') },
-    { id: SECTIONS.CHURCH, label: 'ስለ ቤተ ክርስቲያን', image: require('../../assets/sections/church.jpg') },
-    { id: SECTIONS.ARSEMA, label: 'የቅድስት አርሴማ', image: require('../../assets/sections/arsema.jpg') },
+    { id: SECTIONS.MARY, label: t('የእመቤታችን'), image: require('../../assets/sections/maryam.jpg') },
+    { id: SECTIONS.MICHAEL, label: t('የቅዱስ ሚካኤል'), image: require('../../assets/sections/michael.jpg') },
+    { id: SECTIONS.GABRIEL, label: t('የቅዱስ ገብርኤል'), image: require('../../assets/sections/gebriel.jpg') },
+    { id: SECTIONS.BAPTISM, label: t('የጥምቀት'), image: require('../../assets/sections/timket_1.jpg') },
+    { id: SECTIONS.THANKSGIVING, label: t('የመድኃኔዓለም'), image: require('../../assets/sections/medhanialem.jpg') },
+    { id: SECTIONS.GEORGE, label: t('የቅዱስ ጊዮርጊስ'), image: require('../../assets/sections/george.jpg') },
+    { id: SECTIONS.TEKLE_HAYMANOT, label: t('የአቡነ ተክለ ሃይማኖት'), image: require('../../assets/sections/tekle_haymanot.jpg') },
+    { id: SECTIONS.CANA, label: t('የቃና ዘገሊላ'), image: require('../../assets/sections/cana.jpg') },
+    { id: SECTIONS.GEBRE_MENFES_KIDUS, label: t('የአቡነ ገብረ መንፈስ ቅዱስ'), image: require('../../assets/sections/gebre_menfes.jpg') },
+    { id: SECTIONS.CHURCH, label: t('ስለ ቤተ ክርስቲያን'), image: require('../../assets/sections/church.jpg') },
+    { id: SECTIONS.ARSEMA, label: t('የቅድስት አርሴማ'), image: require('../../assets/sections/arsema.jpg') },
   ];
 
   const cardWidth = (width - 60) / 2;
@@ -97,7 +97,7 @@ const SectionListScreen = ({ navigation }) => {
           onPress={() => navigation.toggleDrawer()}
         />
         <Text fontFamily="$ethiopicSerif" fontSize={22} fontWeight="800" color={theme.primary}>
-          {t('explore') || 'Explore'}
+          {t('explore')}
         </Text>
       </XStack>
 
@@ -148,9 +148,9 @@ const SectionListScreen = ({ navigation }) => {
            }}
            placeholder={t('searchPlaceholder')}
          />
-         <XStack mt="$2" jc="flex-end" marginBottom="$4">
-            <Text fontSize="$1" color={theme.primary} opacity={0.6} fontStyle="italic">
-              {t('searchHint') || 'Search All Hymns...'}
+         <XStack mt="$2" jc="center" marginBottom="$4">
+            <Text fontSize="$1" color={theme.primary} opacity={0.8} fontStyle="italic">
+               {t('searchHint')}
             </Text>
          </XStack>
       </YStack>
@@ -195,7 +195,7 @@ const SectionListScreen = ({ navigation }) => {
                        <Text fontFamily="$ethiopic" fontSize={15} fontWeight="700" color={theme.text} numberOfLines={1}>
                          {hymn.title}
                        </Text>
-                       <Text fontFamily="$ethiopic" fontSize={11} color={theme.textSecondary} opacity={0.6}>
+                       <Text fontFamily="$ethiopic" fontSize={11} color={theme.textSecondary} opacity={0.8}>
                          {hymn.section}
                        </Text>
                     </YStack>
@@ -208,20 +208,20 @@ const SectionListScreen = ({ navigation }) => {
       )}
 
       <ScrollView 
-        contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
+        contentContainerStyle={{ padding: 20, paddingBottom: 140 }}
         keyboardShouldPersistTaps="handled"
         scrollEnabled={!showSuggestions}
       >
-        <Text fontFamily="$ethiopicSerif" fontSize={20} fontWeight="800" color={theme.text} marginBottom="$4">
-           {t('categories') || 'Categories'}
-        </Text>
+         <Text fontFamily="$ethiopicSerif" fontSize={20} fontWeight="800" color={theme.text} marginBottom="$4">
+            {t('categories')}
+         </Text>
         <XStack fw="wrap" jc="space-between">
           {sections.map((section) => (
             <Card
               key={section.id}
               width={cardWidth}
               height={cardWidth * 1.35}
-              backgroundColor="$background"
+              backgroundColor={theme.cardBackground}
               marginBottom="$5"
               borderRadius="$6"
               elevate

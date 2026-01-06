@@ -2,8 +2,10 @@ const React = require('react');
 const { memo } = React;
 const { YStack, XStack, Text, Button } = require('tamagui');
 const { Ionicons } = require('@expo/vector-icons');
+const { useLanguage } = require('../context/LanguageContext');
 
 const MezmurListCard = memo(({ item, isFavorite, onToggleFavorite, onPress, getStatusColor, theme }) => {
+  const { t } = useLanguage();
   const getCategory = (lyrics = '') => {
     if (!lyrics) return 'አጭር';
     const lineCount = lyrics.split('\n').length;
@@ -20,7 +22,7 @@ const MezmurListCard = memo(({ item, isFavorite, onToggleFavorite, onPress, getS
 
   return (
     <YStack 
-      backgroundColor="$background"
+      backgroundColor={theme.cardBackground}
       borderRadius="$3"
       marginBottom="$3"
       onPress={() => onPress(item)}
@@ -51,7 +53,7 @@ const MezmurListCard = memo(({ item, isFavorite, onToggleFavorite, onPress, getS
               <Text 
                 fontFamily="$body" 
                 fontSize="$1" 
-                color="$colorSecondary" 
+                color={theme.textSecondary} 
                 opacity={0.5}
                 letterSpacing={1}
               >
@@ -69,7 +71,7 @@ const MezmurListCard = memo(({ item, isFavorite, onToggleFavorite, onPress, getS
                   letterSpacing={0.5}
                   textTransform="uppercase"
                 >
-                  {calculatedCategory}
+                  {t(calculatedCategory)}
                 </Text>
               </YStack>
            </XStack>
@@ -79,7 +81,7 @@ const MezmurListCard = memo(({ item, isFavorite, onToggleFavorite, onPress, getS
              fontFamily="$ethiopic" 
              fontSize="$6" 
              fontWeight="800" 
-             color="$color" 
+             color={theme.text} 
              numberOfLines={1}
              marginBottom="$1"
            >
@@ -90,7 +92,7 @@ const MezmurListCard = memo(({ item, isFavorite, onToggleFavorite, onPress, getS
            <Text 
              fontFamily="$ethiopicSerif" 
              fontSize="$4" 
-             color="$colorSecondary" 
+             color={theme.textSecondary} 
              numberOfLines={2} 
              lineHeight={24}
              opacity={0.7}
@@ -98,18 +100,31 @@ const MezmurListCard = memo(({ item, isFavorite, onToggleFavorite, onPress, getS
            >
              "{lyricsPreview}..."
            </Text>
+           
+           {/* Localized Section Subtitle */}
+           <Text 
+             fontFamily="$ethiopic" 
+             fontSize={12} 
+             color={theme.textSecondary} 
+             opacity={0.8}
+             marginTop="$1"
+           >
+             {t(item.section)}
+           </Text>
         </YStack>
 
         {/* Floating Heart */}
         <Button 
           circular
           size="$3"
-          backgroundColor="$background"
+          backgroundColor={theme.cardBackground}
           elevation="$1"
+          borderColor={theme.borderColor}
+          borderWidth={1}
           icon={<Ionicons 
             name={isFavorite ? "heart" : "heart-outline"} 
             size={18} 
-            color={isFavorite ? theme.error : "$colorSecondary"} 
+            color={isFavorite ? theme.error : theme.textSecondary} 
           />}
           onPress={(e) => {
             e.stopPropagation();

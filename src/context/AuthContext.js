@@ -105,6 +105,13 @@ const AuthProvider = ({ children }) => {
       setError(null);
       await GoogleSignin.hasPlayServices();
       
+      // Force account selection by signing out first
+      try {
+        await GoogleSignin.signOut();
+      } catch (e) {
+        // Ignore if not signed in
+      }
+
       const userInfo = await GoogleSignin.signIn();
       const { idToken } = userInfo.data || userInfo; // Handle different versions of lib
       
@@ -113,6 +120,26 @@ const AuthProvider = ({ children }) => {
       const credential = GoogleAuthProvider.credential(idToken);
       const result = await signInWithCredential(auth, credential);
       
+      // Ensure user document exists in Firestore
+      if (result.user) {
+        const { doc, getDoc, setDoc, serverTimestamp } = require('firebase/firestore');
+        const { db } = require('../config/firebase.config');
+        const docRef = doc(db, 'users', result.user.uid);
+        const docSnap = await getDoc(docRef);
+        
+        if (!docSnap.exists()) {
+          // Create initial profile if it doesn't exist
+          await setDoc(docRef, {
+            displayName: result.user.displayName || 'User',
+            email: result.user.email,
+            photoURL: result.user.photoURL,
+            createdAt: serverTimestamp(),
+            lastLogin: serverTimestamp(),
+            provider: 'google'
+          });
+        }
+      }
+
       return { success: true, user: result.user };
     } catch (err) {
       if (err.message && err.message.includes('CANCELED')) {
@@ -157,7 +184,7 @@ const AuthProvider = ({ children }) => {
     }
   };
 
-  const value = {
+  const value = React.useMemo(() => ({
     user,
     profileData,
     loading,
@@ -170,7 +197,7 @@ const AuthProvider = ({ children }) => {
     updateProfilePicture,
     isAuthenticated: !!user && !user.isAnonymous,
     isAnonymous: user?.isAnonymous || false,
-  };
+  }), [user, profileData, loading, error, signUp, signIn, signInWithGoogle, signInAsGuest, logOut, updateProfilePicture]);
 
   return (
     <AuthContext.Provider value={value}>

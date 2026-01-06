@@ -49,7 +49,7 @@ const FavoritesScreen = ({ navigation }) => {
   ), []);
 
   return (
-    <YStack f={1} backgroundColor={theme.background || "$background"} paddingTop={insets.top}>
+    <YStack f={1} backgroundColor={theme.background} paddingTop={insets.top}>
       <XStack 
         paddingHorizontal="$5" 
         paddingVertical="$3"
@@ -83,7 +83,7 @@ const FavoritesScreen = ({ navigation }) => {
             fontStyle="italic"
             opacity={0.6}
           >
-            {t('noFavorites') || 'No favorite hymns yet.'}
+            {t('noFavorites')}
           </Text>
         </YStack>
       ) : (

@@ -1,17 +1,15 @@
 const React = require('react');
 const { useState, useEffect } = React;
 const { YStack, XStack, Text, Input, Button } = require('tamagui');
-const { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, TouchableWithoutFeedback, Keyboard } = require('react-native');
+const { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, TouchableWithoutFeedback, Keyboard, Image } = require('react-native');
 const { useSafeAreaInsets } = require('react-native-safe-area-context');
 const { Ionicons } = require('@expo/vector-icons');
 const { useAppTheme } = require('../context/ThemeContext');
-const { useLanguage } = require('../context/LanguageContext');
 const { useAuth } = require('../context/AuthContext');
 
 const AuthScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const { theme } = useAppTheme();
-  const { t } = useLanguage();
   const { signIn, signUp, signInAsGuest, signInWithGoogle, user } = useAuth();
 
   const [isLogin, setIsLogin] = useState(true);
@@ -32,51 +30,47 @@ const AuthScreen = ({ navigation }) => {
   const formatError = (errorMessage) => {
     if (!errorMessage) return '';
     
-    // Firebase error codes mapping to localized keys
+    // Firebase error codes mapping to English strings
     if (errorMessage.includes('auth/invalid-email')) {
-      return t('invalidEmail');
+      return 'Please enter a valid email address';
     }
     if (errorMessage.includes('auth/user-not-found') || errorMessage.includes('auth/invalid-credential')) {
-      // Modern safety: often combined to prevent account enumeration
-      return t('userNotFound');
+      return 'No account found with this email';
     }
     if (errorMessage.includes('auth/wrong-password')) {
-      return t('wrongPassword');
+      return 'Incorrect password';
     }
     if (errorMessage.includes('auth/email-already-in-use')) {
-      return t('emailInUse');
+      return 'An account with this email already exists';
     }
     if (errorMessage.includes('auth/weak-password')) {
-      return t('weakPassword');
+      return 'Password should be at least 6 characters';
     }
     if (errorMessage.includes('auth/network-request-failed')) {
-      return t('networkError');
+      return 'Network error. Please check your connection';
     }
     if (errorMessage.includes('auth/too-many-requests')) {
-      return t('tooManyRequests');
+      return 'Too many attempts. Please try again later';
     }
     
-    // Generic error
-    return t('genericError');
+    return 'Something went wrong. Please try again';
   };
 
   const handleSubmit = async () => {
-    // Dismiss keyboard
     Keyboard.dismiss();
     
-    // Validation
     if (!email || !password) {
-      setError(t('fillAllFields'));
+      setError('Please fill in all fields');
       return;
     }
 
     if (!isLogin && !displayName) {
-      setError(t('nameRequired'));
+      setError('Please enter your name');
       return;
     }
 
     if (password.length < 6) {
-      setError(t('passwordTooShort'));
+      setError('Password should be at least 6 characters');
       return;
     }
 
@@ -92,7 +86,6 @@ const AuthScreen = ({ navigation }) => {
     if (!result.success) {
       setError(formatError(result.error));
     }
-    // Navigation is handled by useEffect when user state changes
   };
 
   const handleGuestMode = async () => {
@@ -129,7 +122,7 @@ const AuthScreen = ({ navigation }) => {
 
   const handleTabSwitch = (loginMode) => {
     setIsLogin(loginMode);
-    setError(''); // Clear error when switching tabs
+    setError('');
   };
 
   return (
@@ -207,7 +200,7 @@ const AuthScreen = ({ navigation }) => {
                     size="$5"
                     fontFamily="$ethiopic"
                     backgroundColor={theme.surface}
-                    placeholder="Your name"
+                    placeholder="Your Name"
                     value={displayName}
                     placeholderTextColor={theme.textSecondary}
                     borderColor={error && !displayName && !isLogin ? theme.error : theme.borderColor}
@@ -232,12 +225,12 @@ const AuthScreen = ({ navigation }) => {
                   value={email}
                   onChangeText={(text) => {
                     setEmail(text.trim().toLowerCase());
-                    setError(''); // Clear error on input
+                    setError('');
                   }}
                   keyboardType="email-address"
                   autoCapitalize="none"
                   placeholderTextColor={theme.textSecondary}
-                  borderColor={(error && !email) || (error && error.includes(t('invalidEmail'))) ? theme.error : theme.borderColor}
+                  borderColor={(error && !email) || (error && error.includes('valid email')) ? theme.error : theme.borderColor}
                   focusStyle={{ borderColor: theme.primary, borderWidth: 2 }}
                 />
               </YStack>
@@ -254,11 +247,11 @@ const AuthScreen = ({ navigation }) => {
                   value={password}
                   onChangeText={(text) => {
                     setPassword(text);
-                    setError(''); // Clear error on input
+                    setError('');
                   }}
                   secureTextEntry
                   placeholderTextColor={theme.textSecondary}
-                  borderColor={(error && !password) || (error && (error.includes(t('passwordTooShort')) || error.includes(t('wrongPassword')))) ? theme.error : theme.borderColor}
+                  borderColor={(error && !password) || (error && (error.includes('6 characters') || error.includes('Incorrect password'))) ? theme.error : theme.borderColor}
                   focusStyle={{ borderColor: theme.primary, borderWidth: 2 }}
                 />
               </YStack>
@@ -295,25 +288,36 @@ const AuthScreen = ({ navigation }) => {
                   <ActivityIndicator color="white" />
                 ) : (
                   <Text fontFamily="$ethiopicSerif" fontSize="$5" fontWeight="800" color="white">
-                    {isLogin ? 'Sign In' : 'Create Account'}
+                    {isLogin ? 'Sign In' : 'Register'}
                   </Text>
                 )}
               </Button>
 
               <Button
-                size="$4"
-                backgroundColor="white"
-                borderWidth={1}
-                borderColor="#ddd"
+                size="$5"
+                backgroundColor={theme.surface}
+                borderWidth={1.5}
+                borderColor={theme.borderColor}
+                paddingHorizontal="$4"
                 marginTop="$4"
                 onPress={handleGoogleLogin}
                 disabled={loading}
-                pressStyle={{ opacity: 0.8 }}
-                elevation="$2"
+                pressStyle={{ opacity: 0.8, backgroundColor: theme.borderColor }}
+                borderRadius={12}
+                elevation="$1"
               >
-                <XStack space="$2" alignItems="center">
-                  <Ionicons name="logo-google" size={20} color="black" />
-                  <Text fontFamily="$ethiopic" fontSize="$3" color="black" fontWeight="600">
+                <XStack space="$3" alignItems="center" justifyContent="center">
+                  <Image 
+                    source={require('../../assets/google_logo.png')} 
+                    style={{ width: 20, height: 20 }}
+                    resizeMode="contain"
+                  />
+                  <Text 
+                    color={theme.text} 
+                    fontSize={15} 
+                    fontWeight="600"
+                    fontFamily="$ethiopic"
+                  >
                     Continue with Google
                   </Text>
                 </XStack>
@@ -322,16 +326,17 @@ const AuthScreen = ({ navigation }) => {
               <Button
                 size="$4"
                 backgroundColor="transparent"
-                borderWidth={1}
-                borderColor={theme.borderColor}
+                borderWidth={1.5}
+                borderColor={theme.textSecondary + '40'} // More visible but still subtle
                 marginTop="$2"
                 onPress={handleGuestMode}
                 disabled={loading}
-                pressStyle={{ opacity: 0.8 }}
+                pressStyle={{ opacity: 0.6, backgroundColor: theme.borderColor }}
+                borderRadius={12}
               >
                 <XStack space="$2" alignItems="center">
                   <Ionicons name="person-outline" size={20} color={theme.textSecondary} />
-                  <Text fontFamily="$ethiopic" fontSize="$3" color={theme.textSecondary}>
+                  <Text fontFamily="$ethiopic" fontSize="$3" color={theme.textSecondary} fontWeight="600">
                     Continue as Guest
                   </Text>
                 </XStack>
@@ -341,7 +346,7 @@ const AuthScreen = ({ navigation }) => {
             {/* Footer */}
             <YStack paddingVertical="$5" paddingBottom={insets.bottom + 20} alignItems="center">
               <Text fontFamily="$body" fontSize="$2" color={theme.textSecondary} opacity={0.6} textAlign="center" paddingHorizontal="$6">
-                By continuing, you agree to our Terms & Privacy Policy
+                By continuing, you agree to our Terms and Privacy Policy.
               </Text>
             </YStack>
           </ScrollView>

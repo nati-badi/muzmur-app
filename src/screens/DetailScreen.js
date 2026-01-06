@@ -7,7 +7,7 @@ const AsyncStorage = require('@react-native-async-storage/async-storage').defaul
 const { useAppTheme } = require('../context/ThemeContext');
 const { useLanguage } = require('../context/LanguageContext');
 const { useFavorites } = require('../context/FavoritesContext');
-const { useAudio } = require('../context/GlobalAudioState.js');
+const { useAudio, useAudioProgress } = require('../context/GlobalAudioState.js');
 const { Ionicons } = require('@expo/vector-icons');
 const { useSafeAreaInsets } = require('react-native-safe-area-context');
 const { TouchableOpacity } = require('react-native');
@@ -20,10 +20,12 @@ const DetailScreen = ({ route, navigation }) => {
   const { mezmur } = route.params;
   const { isFavorite, toggleFavorite } = useFavorites();
   const { 
-    currentMezmur, isPlaying, isLoading, position, duration, 
-    isLooping, isShuffle, setIsSeeking,
-    playMezmur, togglePlayback, toggleLoop, toggleShuffle, skip, seek
+    currentMezmur, isPlaying, isLoading,
+    isLooping, isShuffle, 
+    playMezmur, togglePlayback, toggleLoop, toggleShuffle, handleSkip, handleSeek 
   } = useAudio();
+  
+  const { position, duration } = useAudioProgress();
 
 
   const isCurrentPlaying = currentMezmur?.id === mezmur.id;
@@ -36,18 +38,19 @@ const DetailScreen = ({ route, navigation }) => {
     }
   };
 
-  const getCategoryByLines = (lyrics = '') => {
-    if (!lyrics) return 'አጭር';
+  const getCategoryLabel = (lyrics = '') => {
+    if (!lyrics) return t('short');
     const lineCount = lyrics.split('\n').length;
-    return lineCount > 8 ? 'ረጅም' : 'አጭር';
+    return lineCount > 8 ? t('long') : t('short');
   };
 
-  const getStatusColor = (category) => {
-    return category === 'ረጅም' ? theme.error : theme.success;
+  const getStatusColor = (lengthType) => {
+    return lengthType === 'long' ? theme.error : theme.success;
   };
 
-  const category = getCategoryByLines(mezmur.lyrics);
-  const statusColor = getStatusColor(category);
+  const lineCount = mezmur.lyrics ? mezmur.lyrics.split('\n').length : 0;
+  const categoryLabel = getCategoryLabel(mezmur.lyrics);
+  const statusColor = categoryLabel === t('long') ? theme.error : theme.success;
   const formatTime = (millis) => {
     if (!millis || isNaN(millis)) return '0:00';
     const totalSeconds = millis / 1000;
@@ -57,7 +60,7 @@ const DetailScreen = ({ route, navigation }) => {
   };
 
   return (
-    <YStack f={1} backgroundColor="$background" paddingTop={insets.top}>
+    <YStack f={1} backgroundColor={theme.background} paddingTop={insets.top}>
       <XStack 
         paddingHorizontal="$5" 
         paddingVertical="$3"
@@ -86,7 +89,11 @@ const DetailScreen = ({ route, navigation }) => {
         />
       </XStack>
 
-      <ScrollView contentContainerStyle={{ padding: 24, paddingBottom: 280 }}>
+      <ScrollView 
+        style={{ flex: 1 }} 
+        contentContainerStyle={{ padding: 24, paddingBottom: 340 }}
+        showsVerticalScrollIndicator={false}
+      >
         <Text 
           fontFamily="$ethiopicSerif" 
           fontSize="$8" 
@@ -100,20 +107,20 @@ const DetailScreen = ({ route, navigation }) => {
         </Text>
         
         <XStack 
-          backgroundColor="$background" 
+          backgroundColor={theme.cardBackground} 
           paddingHorizontal="$4" 
           paddingVertical="$2" 
           borderRadius={20} 
           alignSelf="center" 
           borderWidth={1} 
-          borderColor={theme.accent} 
+          borderColor={theme.borderColor} 
           alignItems="center" 
           space="$2"
           marginBottom="$6"
         >
           <Circle size={8} backgroundColor={statusColor} />
           <Text fontFamily="$ethiopicSerif" fontSize="$2" fontWeight="bold" color={statusColor} textTransform="uppercase">
-            {category}
+            {categoryLabel}
           </Text>
         </XStack>
         
@@ -125,7 +132,7 @@ const DetailScreen = ({ route, navigation }) => {
         <Text 
           fontFamily="$ethiopic" 
           fontSize="$5" 
-          color={theme.primary} 
+          color={theme.text} 
           lineHeight={32} 
           textAlign="center"
           fontWeight="500"
@@ -135,7 +142,7 @@ const DetailScreen = ({ route, navigation }) => {
         
         {mezmur.translation && (
           <YStack marginTop="$8">
-            <YStack height={1} backgroundColor={theme.accent} width="40%" alignSelf="center" marginBottom="$6" opacity={0.3} />
+            <YStack height={1} backgroundColor={theme.borderColor} width="40%" alignSelf="center" marginBottom="$6" opacity={0.5} />
             <Text 
               fontFamily="$ethiopicSerif" 
               fontSize="$5" 
@@ -151,11 +158,11 @@ const DetailScreen = ({ route, navigation }) => {
             <Text 
               fontFamily="$ethiopicSerif" 
               fontSize="$5" 
-              color={theme.textSecondary || "$colorSecondary"} 
+              color={theme.text} 
               lineHeight={30} 
               textAlign="center" 
               fontStyle="italic"
-              opacity={0.95}
+              opacity={0.8}
             >
               {mezmur.translation}
             </Text>
@@ -172,7 +179,7 @@ const DetailScreen = ({ route, navigation }) => {
         backgroundColor={theme.playerBackground} 
         borderTopLeftRadius={24}
         borderTopRightRadius={24}
-        paddingTop="$5"
+        paddingTop="$2"
         paddingBottom={insets.bottom + 20}
         elevation="$5"
         shadowColor="black"
@@ -180,6 +187,16 @@ const DetailScreen = ({ route, navigation }) => {
         shadowOpacity={0.3}
         shadowRadius={15}
       >
+        {/* Style Handle */}
+        <YStack 
+          width={40} 
+          height={4} 
+          backgroundColor={theme.playerAccent} 
+          borderRadius={2} 
+          alignSelf="center" 
+          marginVertical="$3"
+          opacity={0.4}
+        />
         {/* Top Info Row */}
         <XStack paddingHorizontal="$5" alignItems="center" justifyContent="space-between" marginBottom="$4">
           <XStack space="$4" alignItems="center" f={1}>
@@ -195,11 +212,11 @@ const DetailScreen = ({ route, navigation }) => {
                 <Ionicons name="musical-notes" size={24} color={theme.playerBackground} />
             </YStack>
             <YStack space="$1" f={1}>
-                <Text color="white" fontFamily="$ethiopicSerif" fontSize="$4" fontWeight="800" numberOfLines={1}>
+                <Text color={theme.playerText} fontFamily="$ethiopicSerif" fontSize="$4" fontWeight="800" numberOfLines={1}>
                     {mezmur.title}
                 </Text>
-                <Text color={theme.playerAccent} fontFamily="$ethiopicSerif" fontSize="$2" fontWeight="700" opacity={1}>
-                    {mezmur.section}
+                <Text color={theme.playerAccent} fontFamily="$ethiopicSerif" fontSize="$2" fontWeight="700" opacity={0.9}>
+                    {t(mezmur.section)}
                 </Text>
             </YStack>
           </XStack>
@@ -221,7 +238,7 @@ const DetailScreen = ({ route, navigation }) => {
             <SmoothSlider 
               position={isCurrentPlaying ? position : 0}
               duration={isCurrentPlaying ? duration : 0}
-              onSeek={seek}
+              onSeek={handleSeek}
               theme={theme}
             />
         </YStack>
@@ -243,7 +260,7 @@ const DetailScreen = ({ route, navigation }) => {
                     size="$4"
                     backgroundColor="transparent"
                     icon={<Ionicons name="play-back" size={28} color="white" />}
-                    onPress={() => isCurrentPlaying && skip(-5)}
+                    onPress={() => isCurrentPlaying && handleSkip(-5)}
                     pressStyle={{ opacity: 0.6 }}
                 />
 
@@ -263,7 +280,7 @@ const DetailScreen = ({ route, navigation }) => {
                     size="$4"
                     backgroundColor="transparent"
                     icon={<Ionicons name="play-forward" size={28} color="white" />}
-                    onPress={() => isCurrentPlaying && skip(5)}
+                    onPress={() => isCurrentPlaying && handleSkip(5)}
                     pressStyle={{ opacity: 0.6 }}
                 />
             </XStack>

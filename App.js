@@ -18,6 +18,16 @@ const SplashScreen = require('expo-splash-screen');
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
+const { useAppTheme } = require('./src/context/ThemeContext');
+
+// Internal component to handle dynamic status bar based on theme
+const DynamicStatusBar = () => {
+  const { theme } = useAppTheme();
+  // If the theme background is dark (Midnight), use 'light' icons, otherwise 'dark'
+  const statusBarStyle = theme.id === 'midnight' ? 'light' : 'dark';
+  return <StatusBar style={statusBarStyle} />;
+};
+
 // Wrapper to pass userId to FavoritesProvider
 const AppContent = ({ onLayoutRootView }) => {
   const { user, isAnonymous } = useAuth();
@@ -29,7 +39,7 @@ const AppContent = ({ onLayoutRootView }) => {
           <FavoritesProvider userId={user?.uid} isAnonymous={isAnonymous}>
             <PortalProvider>
               <SafeAreaProvider onLayout={onLayoutRootView}>
-                <StatusBar style="dark" />
+                <DynamicStatusBar />
                 <AppNavigator />
               </SafeAreaProvider>
             </PortalProvider>

@@ -4,6 +4,7 @@ const AsyncStorage = require('@react-native-async-storage/async-storage').defaul
 const audioService = require('../services/audioService');
 
 const AudioContext = createContext();
+const AudioProgressContext = createContext();
 
 const RECENTLY_PLAYED_KEY = 'recently_played_hymns';
 
@@ -141,14 +142,11 @@ const AudioProvider = ({ children }) => {
     await audioService.seek(millis);
   }, []);
 
-  // Memoize the context value to prevent re-renders of all consumers on every position update
-  // unless they specifically use the updated values.
-  const contextValue = useMemo(() => ({
+  // Context 1: Control & Metadata (STABLE)
+  const controlValue = useMemo(() => ({
     currentMezmur,
     isPlaying,
     isLoading,
-    position,
-    duration,
     isLooping,
     isShuffle,
     recentlyPlayed,
@@ -156,17 +154,26 @@ const AudioProvider = ({ children }) => {
     togglePlayback,
     toggleLoop,
     toggleShuffle,
-    skip,
-    seek
+    handleSkip: skip, // Renamed to avoid confusion
+    handleSeek: seek  // Renamed to avoid confusion
   }), [
-    currentMezmur, isPlaying, isLoading, position, duration, 
-    isLooping, isShuffle, recentlyPlayed, playMezmur, togglePlayback, 
-    toggleLoop, toggleShuffle, skip, seek
+    currentMezmur, isPlaying, isLoading, isLooping, isShuffle, recentlyPlayed, 
+    playMezmur, togglePlayback, toggleLoop, toggleShuffle, skip, seek
   ]);
 
+  // Context 2: Progress (HIGH-FREQUENCY)
+  const progressValue = useMemo(() => ({
+    position,
+    duration,
+    isSeeking,
+    setIsSeeking
+  }), [position, duration, isSeeking]);
+
   return (
-    <AudioContext.Provider value={contextValue}>
-      {children}
+    <AudioContext.Provider value={controlValue}>
+      <AudioProgressContext.Provider value={progressValue}>
+        {children}
+      </AudioProgressContext.Provider>
     </AudioContext.Provider>
   );
 };
@@ -179,7 +186,16 @@ const useAudio = () => {
   return context;
 };
 
+const useAudioProgress = () => {
+  const context = useContext(AudioProgressContext);
+  if (!context) {
+    throw new Error('useAudioProgress must be used within an AudioProvider');
+  }
+  return context;
+};
+
 module.exports = {
   AudioProvider,
-  useAudio
+  useAudio,
+  useAudioProgress
 };

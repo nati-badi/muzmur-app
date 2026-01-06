@@ -8,7 +8,7 @@ const { useSafeAreaInsets } = require('react-native-safe-area-context');
 const { useAppTheme } = require('../context/ThemeContext');
 const { useLanguage } = require('../context/LanguageContext');
 const { useFavorites } = require('../context/FavoritesContext');
-const { useAudio } = require('../context/GlobalAudioState.js');
+const { useAudio, useAudioProgress } = require('../context/GlobalAudioState.js');
 const { Ionicons } = require('@expo/vector-icons');
 const SmoothSlider = require('../components/SmoothSlider');
 
@@ -19,10 +19,12 @@ const HymnPlayerScreen = ({ navigation }) => {
   
   const { isFavorite, toggleFavorite } = useFavorites();
   const { 
-    currentMezmur, isPlaying, isLoading, position, duration, 
-    isLooping, isShuffle, setIsSeeking,
-    togglePlayback, toggleLoop, toggleShuffle, skip, seek
+    currentMezmur, isPlaying, isLoading,
+    isLooping, isShuffle, 
+    togglePlayback, toggleLoop, toggleShuffle, handleSkip, handleSeek
   } = useAudio();
+
+  const { position, duration } = useAudioProgress();
 
   const formatTime = (millis) => {
     if (!millis || isNaN(millis)) return '0:00';
@@ -51,11 +53,11 @@ const HymnPlayerScreen = ({ navigation }) => {
           </Text>
         </XStack>
         <YStack f={1} justifyContent="center" alignItems="center" padding="$10">
-          <Ionicons name="musical-notes-outline" size={100} color={theme.primary} opacity={0.2} />
-          <Text fontFamily="$ethiopicSerif" fontSize="$6" fontWeight="800" color={theme.primary} opacity={0.5} textAlign="center" marginTop="$4">
+          <Ionicons name="musical-notes-outline" size={100} color={theme.primary} opacity={0.3} />
+          <Text fontFamily="$ethiopicSerif" fontSize="$6" fontWeight="800" color={theme.primary} opacity={0.6} textAlign="center" marginTop="$4">
             {t('noHymnSelected')}
           </Text>
-          <Text fontFamily="$ethiopic" fontSize="$4" color={theme.textSecondary} textAlign="center" marginTop="$2" opacity={0.7}>
+          <Text fontFamily="$ethiopic" fontSize="$4" color={theme.textSecondary} textAlign="center" marginTop="$2" opacity={0.8}>
             {t('selectHymnDetail')}
           </Text>
           <Button 
@@ -119,29 +121,39 @@ const HymnPlayerScreen = ({ navigation }) => {
         <Text 
           fontFamily="$ethiopic" 
           fontSize="$5" 
-          color={theme.primary}
-          opacity={0.85}
+          color={theme.text}
+          opacity={0.9}
           fontWeight="600"
         >
-          {mezmur.section}
+          {t(mezmur.section)}
         </Text>
       </YStack>
 
       {/* Controls Container */}
       <YStack 
-        backgroundColor={theme.surface}
-        padding="$6"
+        backgroundColor={theme.cardBackground}
+        padding="$4"
         paddingBottom={insets.bottom + 20}
         borderTopLeftRadius={40}
         borderTopRightRadius={40}
         elevation="$5"
       >
+        {/* Style Handle */}
+        <YStack 
+          width={40} 
+          height={4} 
+          backgroundColor={theme.playerAccent} 
+          borderRadius={2} 
+          alignSelf="center" 
+          marginVertical="$3"
+          opacity={0.4}
+        />
         {/* Progress Slider */}
         <YStack paddingHorizontal="$2" marginBottom="$4">
           <SmoothSlider 
             position={position}
             duration={duration}
-            onSeek={seek}
+            onSeek={handleSeek}
             theme={theme}
             isCurrentPlaying={true}
           />
@@ -165,7 +177,7 @@ const HymnPlayerScreen = ({ navigation }) => {
               size="$5"
               backgroundColor="transparent"
               icon={<Ionicons name="play-back" size={34} color={theme.primary} />}
-              onPress={() => skip(-5)} // Exactly 5 seconds as requested
+              onPress={() => handleSkip(-5)} // Exactly 5 seconds as requested
               pressStyle={{ opacity: 0.6 }}
             />
 
@@ -173,7 +185,7 @@ const HymnPlayerScreen = ({ navigation }) => {
               circular
               size="$8"
               backgroundColor={theme.primary}
-              icon={isLoading ? <ActivityIndicator color="white" /> : <Ionicons name={isPlaying ? "pause" : "play"} size={42} color="white" />}
+              icon={isLoading ? <ActivityIndicator color={theme.background} /> : <Ionicons name={isPlaying ? "pause" : "play"} size={42} color={theme.background} />}
               onPress={togglePlayback}
               disabled={isLoading}
               pressStyle={{ scale: 0.9 }}
@@ -185,7 +197,7 @@ const HymnPlayerScreen = ({ navigation }) => {
               size="$5"
               backgroundColor="transparent"
               icon={<Ionicons name="play-forward" size={34} color={theme.primary} />}
-              onPress={() => skip(5)} // Exactly 5 seconds as requested
+              onPress={() => handleSkip(5)} // Exactly 5 seconds as requested
               pressStyle={{ opacity: 0.6 }}
             />
           </XStack>

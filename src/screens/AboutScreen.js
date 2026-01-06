@@ -87,13 +87,13 @@ const AboutScreen = ({ navigation }) => {
              <Ionicons name="musical-notes" size={50} color={theme.accent} />
            </View>
            <Text fontFamily="$ethiopicSerif" fontSize="$8" fontWeight="900" color={theme.text} textAlign="center">
-             ቅዱስ ዜማ
+             {t('appTitle')}
            </Text>
            <Text fontFamily="$body" fontSize="$3" color={theme.textSecondary} textAlign="center" opacity={0.7} marginTop="$2">
-             Orthodox Mezmur Collection
+             {t('appTagline')}
            </Text>
            <Text fontFamily="$body" fontSize="$2" color={theme.primary} textAlign="center" fontWeight="700" marginTop="$2" opacity={0.5} letterSpacing={1}>
-             VERSION 1.0.0
+             {t('version').toUpperCase()} 1.0.0
            </Text>
         </YStack>
 
@@ -131,7 +131,7 @@ const AboutScreen = ({ navigation }) => {
 
         <YStack alignItems="center" marginTop="$4" opacity={0.4}>
           <Text fontFamily="$body" fontSize="$2" color={theme.textSecondary}>
-            © 2025 ቅዱስ ዜማ. All rights reserved.
+            © 2025 {t('appTitle')}. All rights reserved.
           </Text>
         </YStack>
 

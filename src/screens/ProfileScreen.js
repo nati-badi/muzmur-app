@@ -99,7 +99,7 @@ const ProfileScreen = ({ navigation }) => {
   };
 
   return (
-    <YStack f={1} backgroundColor={theme.background || '#F5F5F5'} paddingTop={insets.top}>
+    <YStack f={1} backgroundColor={theme.background} paddingTop={insets.top}>
       {/* Minimal Header */}
       <XStack 
         paddingHorizontal="$5" 
@@ -184,7 +184,7 @@ const ProfileScreen = ({ navigation }) => {
         </Modal>
       </XStack>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 140 }}>
         {/* Profile Card */}
         <YStack padding="$5" alignItems="center">
           <YStack position="relative">
@@ -230,10 +230,10 @@ const ProfileScreen = ({ navigation }) => {
 
           <YStack alignItems="center" marginTop="$4" space="$1">
             <Text fontFamily="$ethiopic" fontSize="$6" fontWeight="700" color={theme.text}>
-              {isAuthenticated ? (user.displayName || 'User') : isAnonymous ? 'Guest User' : t('user')}
+              {isAuthenticated ? (user.displayName || t('user')) : isAnonymous ? t('guestUser') : t('user')}
             </Text>
             {isAuthenticated && (
-              <Text fontFamily="$body" fontSize="$2" color={theme.textSecondary} opacity={0.7}>
+              <Text fontFamily="$body" fontSize="$2" color={theme.textSecondary} opacity={0.8}>
                 {user.email}
               </Text>
             )}
@@ -251,7 +251,7 @@ const ProfileScreen = ({ navigation }) => {
             </Text>
           </YStack>
           <YStack width={1} backgroundColor={theme.borderColor} height="60%" alignSelf="center" opacity={0.3} />
-          <YStack alignItems="center" opacity={0.35}>
+          <YStack alignItems="center" opacity={0.6}>
             <Text fontFamily="$body" fontSize="$8" fontWeight="800" color={theme.primary}>
               -
             </Text>
@@ -260,7 +260,7 @@ const ProfileScreen = ({ navigation }) => {
             </Text>
           </YStack>
           <YStack width={1} backgroundColor={theme.borderColor} height="60%" alignSelf="center" opacity={0.3} />
-          <YStack alignItems="center" opacity={0.35}>
+          <YStack alignItems="center" opacity={0.6}>
             <Text fontFamily="$body" fontSize="$8" fontWeight="800" color={theme.primary}>
               -
             </Text>
@@ -291,7 +291,7 @@ const ProfileScreen = ({ navigation }) => {
               <Text fontFamily="$ethiopic" fontSize="$4" fontWeight="600" color={theme.text} f={1}>
                 {t('favorites')}
               </Text>
-              <Ionicons name="chevron-forward" size={18} color={theme.textSecondary} opacity={0.3} />
+              <Ionicons name="chevron-forward" size={18} color={theme.textSecondary} opacity={0.5} />
             </View>
           </TouchableOpacity>
 
@@ -363,7 +363,7 @@ const ProfileScreen = ({ navigation }) => {
                 fontWeight="600" 
                 color={theme.error}
               >
-                {isAuthenticated ? t('logout') : 'Sign In'}
+                {isAuthenticated ? t('logout') : t('signIn')}
               </Text>
             </View>
           </TouchableOpacity>

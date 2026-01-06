@@ -6,6 +6,7 @@ const THEMES = {
     accent: '#C5A028',  // Antique Gold
     background: '#F9F9F7',
     surface: '#FFFFFF',
+    cardBackground: '#FFFFFF',
     text: '#2C2B2A',
     textSecondary: '#6D6A66',
     playerBackground: '#45271E',
@@ -14,7 +15,8 @@ const THEMES = {
     swatches: ['#45271E', '#734D41', '#C5A028'],
     error: '#B03A2E',
     success: '#27AE60',
-    borderColor: 'rgba(69, 39, 30, 0.08)'
+    borderColor: 'rgba(69, 39, 30, 0.08)',
+    shadowColor: '#000000'
   },
   forest: {
     id: 'forest',
@@ -23,6 +25,7 @@ const THEMES = {
     accent: '#4A8B6F',  // Sage Emerald
     background: '#F5F7F6',
     surface: '#FFFFFF',
+    cardBackground: '#FFFFFF',
     text: '#1A2922',
     textSecondary: '#5A7366',
     playerBackground: '#1B3B2B',
@@ -31,7 +34,8 @@ const THEMES = {
     swatches: ['#1B3B2B', '#345E49', '#4A8B6F'],
     error: '#B03A2E',
     success: '#27AE60',
-    borderColor: 'rgba(27, 59, 43, 0.08)'
+    borderColor: 'rgba(27, 59, 43, 0.08)',
+    shadowColor: '#000000'
   },
   serene: {
     id: 'serene',
@@ -40,6 +44,7 @@ const THEMES = {
     accent: '#5D80A6',  // Muted Steel Blue
     background: '#F4F7F9',
     surface: '#FFFFFF',
+    cardBackground: '#FFFFFF',
     text: '#1C2833',
     textSecondary: '#5D6D7E',
     playerBackground: '#2C3E50',
@@ -48,7 +53,8 @@ const THEMES = {
     swatches: ['#2C3E50', '#4A647E', '#5D80A6'],
     error: '#B03A2E',
     success: '#27AE60',
-    borderColor: 'rgba(44, 62, 80, 0.08)'
+    borderColor: 'rgba(44, 62, 80, 0.08)',
+    shadowColor: '#000000'
   },
   royal: {
     id: 'royal',
@@ -57,6 +63,7 @@ const THEMES = {
     accent: '#8E6F9F',  // Muted Mauve
     background: '#F7F4F9',
     surface: '#FFFFFF',
+    cardBackground: '#FFFFFF',
     text: '#24142E',
     textSecondary: '#6D5D7E',
     playerBackground: '#3B1E54',
@@ -65,7 +72,8 @@ const THEMES = {
     swatches: ['#3B1E54', '#5D3B73', '#8E6F9F'],
     error: '#B03A2E',
     success: '#27AE60',
-    borderColor: 'rgba(59, 30, 84, 0.08)'
+    borderColor: 'rgba(59, 30, 84, 0.08)',
+    shadowColor: '#000000'
   },
   rose: {
     id: 'rose',
@@ -74,6 +82,7 @@ const THEMES = {
     accent: '#E098AD',  // Dusty Rose
     background: '#F9F5F6',
     surface: '#FFFFFF',
+    cardBackground: '#FFFFFF',
     text: '#3D1F2E',
     textSecondary: '#7A5C6B',
     playerBackground: '#5D2E46',
@@ -82,7 +91,27 @@ const THEMES = {
     swatches: ['#5D2E46', '#8E4A6F', '#E098AD'],
     error: '#B03A2E',
     success: '#27AE60',
-    borderColor: 'rgba(93, 46, 70, 0.08)'
+    borderColor: 'rgba(93, 46, 70, 0.08)',
+    shadowColor: '#000000'
+  },
+  midnight: {
+    id: 'midnight',
+    name: 'ጥቁር',
+    primary: '#948979',  // Muted Taupe Gold
+    accent: '#DFD0B8',   // Light Cream (for high-contrast details)
+    background: '#222831', // Deep Charcoal
+    surface: '#222831',
+    cardBackground: '#393E46', // Slate Grey (Cards)
+    text: '#DFD0B8',     // Light Cream (Primary Text)
+    textSecondary: '#948979',
+    playerBackground: '#222831',
+    playerText: '#DFD0B8',
+    playerAccent: '#948979',
+    swatches: ['#222831', '#393E46', '#948979'],
+    error: '#CF6679',
+    success: '#03DAC6',
+    borderColor: 'rgba(148, 137, 121, 0.25)',
+    shadowColor: '#000000'
   }
 };
 

@@ -41,9 +41,11 @@ const PROCESSED_DATA = mezmursData.map(item => {
 });
 
 // Skeleton loader for a premium feel during "fetching"
-const SkeletonCard = memo(() => (
-  <YStack 
-    backgroundColor="$background"
+const SkeletonCard = memo(() => {
+  const { theme } = useAppTheme();
+  return (
+    <YStack 
+      backgroundColor={theme.cardBackground}
     padding="$4"
     borderRadius="$4"
     marginBottom="$3"
@@ -52,11 +54,12 @@ const SkeletonCard = memo(() => (
     opacity={0.5}
   >
     <XStack space="$3" alignItems="center">
-      <Circle size={10} backgroundColor="$borderColor" />
-      <YStack backgroundColor="$borderColor" height={16} width="60%" borderRadius="$2" />
+      <Circle size={10} backgroundColor={theme.borderColor} />
+      <YStack backgroundColor={theme.borderColor} height={16} width="60%" borderRadius="$2" opacity={0.3} />
     </XStack>
   </YStack>
-));
+  );
+});
 
 // Memoized filter component to prevent list renders from blocking button clicks
 const FilterToggles = memo(({ options, activeId, onSelect, theme }) => {
@@ -159,7 +162,7 @@ const HomeScreen = ({ navigation, route }) => {
     const uniqueSections = [...new Set(mezmursData.map(item => item.section))].filter(Boolean);
     return [
       { id: SECTION_ALL_ID, label: t('all') },
-      ...uniqueSections.map(s => ({ id: s, label: s }))
+      ...uniqueSections.map(s => ({ id: s, label: t(s) || s }))
     ];
   }, [t]);
 
@@ -179,8 +182,8 @@ const HomeScreen = ({ navigation, route }) => {
     setVisibleCount(calculatedInitialCount);
   }, [searchQuery, appliedFilterId, selectedSectionId, calculatedInitialCount]);
 
-  const getStatusColor = useCallback((category) => {
-    return category === 'ረጅም' ? theme.error : theme.success;
+  const getStatusColor = useCallback((lengthType) => {
+    return lengthType === FILTER_IDS.LONG ? theme.error : theme.success;
   }, [theme]);
 
   const handlePress = useCallback((item) => {
@@ -271,7 +274,7 @@ const HomeScreen = ({ navigation, route }) => {
       isFavorite={isFavorite(item.id)}
       onToggleFavorite={toggleFavorite}
       onPress={handlePress}
-      getStatusColor={getStatusColor}
+      getStatusColor={() => getStatusColor(item.lengthType)}
       theme={theme}
     />
   ), [isFavorite, toggleFavorite, handlePress, getStatusColor, theme]);
@@ -281,7 +284,7 @@ const HomeScreen = ({ navigation, route }) => {
   ), []);
 
   return (
-    <YStack f={1} backgroundColor={theme.background || '#F5F5F5'} paddingTop={insets.top}>
+    <YStack f={1} backgroundColor={theme.background} paddingTop={insets.top}>
       <XStack 
         paddingHorizontal="$5" 
         paddingVertical="$3"
@@ -403,7 +406,7 @@ const HomeScreen = ({ navigation, route }) => {
         maxToRenderPerBatch={5}
         windowSize={7}
         updateCellsBatchingPeriod={50}
-        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40 }}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 140 }}
         ListFooterComponent={
            !isLoadingData && filteredMezmurs.length > visibleCount && (
              <YStack alignItems="center" marginTop="$4" marginBottom="$6">
@@ -423,7 +426,7 @@ const HomeScreen = ({ navigation, route }) => {
                      {t('loadMore')}
                   </Text>
                 </Button>
-               <Text fontFamily="$body" fontSize="$1" color="$colorSecondary" marginTop="$2" opacity={0.6}>
+               <Text fontFamily="$body" fontSize="$1" color={theme.textSecondary} marginTop="$2" opacity={0.6}>
                  {visibleCount} / {filteredMezmurs.length}
                </Text>
              </YStack>
@@ -440,9 +443,9 @@ const HomeScreen = ({ navigation, route }) => {
 
             <FilterToggles 
               options={[
-                { id: FILTER_IDS.ALL, label: t('all') || 'All' },
-                { id: FILTER_IDS.LONG, label: t('long') || 'Long' },
-                { id: FILTER_IDS.SHORT, label: t('short') || 'Short' }
+                { id: FILTER_IDS.ALL, label: t('all') },
+                { id: FILTER_IDS.LONG, label: t('long') },
+                { id: FILTER_IDS.SHORT, label: t('short') }
               ]}
               activeId={selectedFilterId}
               onSelect={setSelectedFilterId}
@@ -451,7 +454,7 @@ const HomeScreen = ({ navigation, route }) => {
 
             {!isDrillDown && (
               <YStack space="$2">
-                 <Text fontFamily="$ethiopicSerif" fontSize="$3" color="$colorSecondary" opacity={0.7} marginLeft="$2">
+                 <Text fontFamily="$ethiopicSerif" fontSize="$3" color={theme.textSecondary} opacity={0.7} marginLeft="$2">
                    {t('sections')}
                  </Text>
                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingRight: 20 }}>
@@ -486,8 +489,8 @@ const HomeScreen = ({ navigation, route }) => {
         ListEmptyComponent={
           !isLoadingData && (
             <YStack py="$10" ai="center" jc="center" space="$4">
-              <Ionicons name="musical-notes-outline" size={64} color="$colorSecondary" opacity={0.3} />
-              <Text fontFamily="$ethiopicSerif" color="$colorSecondary" fontSize="$5" textAlign="center" fontStyle="italic">
+              <Ionicons name="musical-notes-outline" size={64} color={theme.textSecondary} opacity={0.3} />
+              <Text fontFamily="$ethiopicSerif" color={theme.textSecondary} fontSize="$5" textAlign="center" fontStyle="italic">
                 {t('noResults')}
               </Text>
             </YStack>

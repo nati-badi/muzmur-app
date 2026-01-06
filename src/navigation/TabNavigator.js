@@ -13,10 +13,12 @@ const { useLanguage } = require('../context/LanguageContext');
 const TopTab = createMaterialTopTabNavigator();
 
 const CustomBottomPill = ({ state, descriptors, navigation, theme, t }) => {
+  const insets = require('react-native-safe-area-context').useSafeAreaInsets();
+  
   return (
     <XStack
       position="absolute"
-      bottom={20}
+      bottom={Math.max(insets.bottom, 15)}
       left={15}
       right={15}
       backgroundColor={theme.primary}

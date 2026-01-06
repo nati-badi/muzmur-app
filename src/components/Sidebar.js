@@ -8,34 +8,84 @@ const { useAuth } = require('../context/AuthContext');
 const { useSafeAreaInsets } = require('react-native-safe-area-context');
 const { View, Image } = require('react-native');
 
+// Lift static data outside component to prevent recreation on every render
+const MENU_ITEMS = [
+  { id: 1, labelKey: 'home', icon: 'home-outline', activeIcon: 'home', screen: 'Tabs', params: { screen: 'Home' } },
+  { id: 2, labelKey: 'favorites', icon: 'heart-outline', activeIcon: 'heart', screen: 'Favorites' },
+  { id: 5, labelKey: 'calendar', icon: 'calendar-number-outline', activeIcon: 'calendar-number', screen: 'Calendar' },
+];
+
+const SECONDARY_ITEMS = [
+  { id: 4, labelKey: 'settings', icon: 'settings-outline', activeIcon: 'settings', screen: 'Settings' },
+  { id: 6, labelKey: 'aboutUs', icon: 'information-circle-outline', activeIcon: 'information-circle', screen: 'About' },
+];
+
+const MenuItem = React.memo(({ item, t, theme, navigation, language }) => {
+  const isDisabled = !item.screen;
+  // Handle localized labels or translation keys
+  const label = t(item.labelKey);
+  
+  return (
+    <Button
+      backgroundColor="transparent"
+      paddingVertical="$4"
+      paddingHorizontal="$4"
+      minHeight={60}
+      borderRadius="$4"
+      justifyContent="flex-start"
+      opacity={isDisabled ? 0.4 : 1}
+      onPress={() => {
+        if (isDisabled) return;
+        if (item.params) {
+          navigation.navigate(item.screen, item.params);
+        } else {
+          navigation.navigate(item.screen);
+        }
+        setTimeout(() => navigation.closeDrawer(), 100);
+      }}
+      pressStyle={isDisabled ? {} : { backgroundColor: `${theme.primary}08`, scale: 0.98 }}
+      group 
+    >
+      <XStack alignItems="center" space="$4">
+        <Circle 
+          size={42} 
+          backgroundColor={`${theme.text}05`} 
+          alignItems="center" 
+          justifyContent="center"
+        >
+          <Ionicons name={item.icon} size={22} color={theme.textSecondary} />
+        </Circle>
+        <Text 
+          fontFamily="$ethiopic" 
+          fontSize={16} 
+          fontWeight="500" 
+          color={theme.text}
+          letterSpacing={0.5}
+        >
+          {label}
+        </Text>
+      </XStack>
+    </Button>
+  );
+});
+
 const Sidebar = (props) => {
   const { theme } = useAppTheme();
   const { t, language } = useLanguage();
   const { user, profileData, isAuthenticated, isAnonymous } = useAuth();
-  const insets = useSafeAreaInsets();
+  const rawInsets = useSafeAreaInsets();
   
-  const capitalize = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
-
-  // Determine active route to style the selected item
-  const activeRoute = props.state.routeNames[props.state.index];
-  const activeParams = props.state.routes[props.state.index].params;
+  // Stabilize insets to prevent jumping on mount
+  const insets = {
+    top: Math.max(rawInsets.top, 20),
+    bottom: Math.max(rawInsets.bottom, 20)
+  };
   
-  const menuItems = [
-    { id: 1, label: t('home'), icon: 'home-outline', activeIcon: 'home', screen: 'Tabs', params: { screen: 'Home' } },
-    { id: 2, label: t('favorites'), icon: 'heart-outline', activeIcon: 'heart', screen: 'Favorites' },
-    { id: 5, label: language === 'am' ? 'የቀን መቁጠሪያ' : 'Calendar', icon: 'calendar-number-outline', activeIcon: 'calendar-number', screen: 'Tabs', params: { screen: 'Calendar' } },
-  ];
-
-  const secondaryItems = [
-    { id: 4, label: t('settings'), icon: 'settings-outline', activeIcon: 'settings', screen: 'Settings' },
-    { id: 6, label: t('aboutUs'), icon: 'information-circle-outline', activeIcon: 'information-circle', screen: 'About' },
-  ];
-
   // Get user display name and subtitle
-  const getUserInfo = () => {
-    if (isAuthenticated && user?.displayName) {
+  const userInfo = React.useMemo(() => {
+    if (isAuthenticated && (user?.displayName || profileData?.displayName)) {
       return {
-        name: user.displayName,
+        name: profileData?.displayName || user.displayName,
         subtitle: user.email || t('viewProfile')
       };
     } else if (isAnonymous) {
@@ -49,55 +99,8 @@ const Sidebar = (props) => {
         subtitle: t('viewProfile')
       };
     }
-  };
+  }, [isAuthenticated, user?.displayName, profileData?.displayName, isAnonymous, t]);
 
-  const userInfo = getUserInfo();
-
-  const MenuItem = ({ item }) => {
-    const isDisabled = !item.screen;
-    return (
-      <Button
-        backgroundColor="transparent"
-        paddingVertical="$4"
-        paddingHorizontal="$4"
-        minHeight={60}
-        borderRadius="$4"
-        justifyContent="flex-start"
-        opacity={isDisabled ? 0.4 : 1}
-        onPress={() => {
-          if (isDisabled) return;
-          if (item.params) {
-            props.navigation.navigate(item.screen, item.params);
-          } else {
-            props.navigation.navigate(item.screen);
-          }
-           setTimeout(() => props.navigation.closeDrawer(), 100);
-        }}
-        pressStyle={isDisabled ? {} : { backgroundColor: `${theme.primary}08`, scale: 0.98 }}
-        group 
-      >
-        <XStack alignItems="center" space="$4">
-          <Circle 
-            size={42} 
-            backgroundColor={`${theme.text}05`} 
-            alignItems="center" 
-            justifyContent="center"
-          >
-            <Ionicons name={item.icon} size={22} color={theme.textSecondary} />
-          </Circle>
-          <Text 
-            fontFamily="$ethiopic" 
-            fontSize={16} 
-            fontWeight="500" 
-            color={theme.text}
-            letterSpacing={0.5}
-          >
-            {item.label}
-          </Text>
-        </XStack>
-      </Button>
-    );
-  };
 
   return (
     <YStack f={1} backgroundColor={theme.background} paddingTop={insets.top} overflow="hidden">
@@ -121,10 +124,10 @@ const Sidebar = (props) => {
           </Circle>
           <YStack>
             <Text fontFamily="$ethiopicSerif" fontSize={24} fontWeight="900" color={theme.text} letterSpacing={-0.5}>
-              ቅዱስ ዜማ
+              {t('appTitle')}
             </Text>
             <Text fontFamily="$body" fontSize={11} color={theme.primary} opacity={0.8} letterSpacing={2} fontWeight="700">
-              ORTHODOX HYMNS
+              {t('appTagline')}
             </Text>
           </YStack>
         </XStack>
@@ -140,21 +143,30 @@ const Sidebar = (props) => {
             fontFamily="$body" 
             fontSize={11} 
             color={theme.textSecondary} 
-            opacity={0.5} 
-            marginBottom="$" 
+            opacity={0.7} 
+            marginBottom="$2" 
             fontWeight="700" 
             textTransform="uppercase"
             letterSpacing={1.5}
             marginLeft="$4"
           >
-            Menu
+            {t('menu')}
           </Text>
-          {menuItems.map((item) => <MenuItem key={item.id} item={item} />)}
+          {MENU_ITEMS.map((item) => (
+            <MenuItem 
+              key={item.id} 
+              item={item} 
+              t={t} 
+              theme={theme} 
+              navigation={props.navigation} 
+              language={language} 
+            />
+          ))}
         </YStack>
 
         {/* Premium Section Divider with Spacious Gap */}
         <YStack height={70} justifyContent="center" marginTop="$8">
-          <Separator marginHorizontal="$10" borderColor={theme.text} opacity={0.06} />
+          <Separator marginHorizontal="$10" borderColor={theme.text} opacity={0.12} />
         </YStack>
 
         {/* 3. Secondary Navigation */}
@@ -164,34 +176,38 @@ const Sidebar = (props) => {
             fontFamily="$body" 
             fontSize={11} 
             color={theme.textSecondary} 
-            opacity={0.5} 
+            opacity={0.7} 
             marginBottom="$2" 
             fontWeight="700" 
-            textTransform="uppercase"
+            textTransform="uppercase" 
             letterSpacing={1.5}
             marginLeft="$4"
           >
-            Preferences
+            {t('preferences')}
           </Text>
-          {secondaryItems.map((item) => <MenuItem key={item.id} item={item} />)}
+          {SECONDARY_ITEMS.map((item) => (
+            <MenuItem 
+              key={item.id} 
+              item={item} 
+              t={t} 
+              theme={theme} 
+              navigation={props.navigation} 
+              language={language} 
+            />
+          ))}
         </YStack>
 
       </DrawerContentScrollView>
 
-      {/* 3.5 Version Display: Clean & Professional */}
-      <YStack paddingBottom="$2" alignItems="center" opacity={0.4}>
-        <Text fontFamily="$body" fontSize={10} color={theme.textSecondary} letterSpacing={1}>
-          {t('version').toUpperCase()} 1.0.0
-        </Text>
-      </YStack>
-
-      {/* 4. Footer: Clean Docked User Profile */}
+      {/* 4. Footer: Clean Docked User Profile - Stabilized Height */}
       <YStack 
-        padding="$5" 
-        paddingBottom={insets.bottom + 20}
+        padding="$4" 
+        paddingBottom={insets.bottom + 10}
         backgroundColor={theme.surface}
         borderTopWidth={1}
         borderTopColor={theme.borderColor}
+        minHeight={90}
+        justifyContent="center"
       >
         <Button
           backgroundColor="transparent"

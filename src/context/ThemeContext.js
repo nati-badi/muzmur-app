@@ -2,11 +2,13 @@ const React = require('react');
 const { createContext, useState, useContext, useEffect } = React;
 const AsyncStorage = require('@react-native-async-storage/async-storage').default || require('@react-native-async-storage/async-storage');
 const { THEMES } = require('../constants/theme');
+const { useColorScheme } = require('react-native');
 
 const ThemeContext = createContext();
 
 const ThemeProvider = ({ children }) => {
-  const [currentTheme, setCurrentTheme] = useState(THEMES.classic);
+  const systemColorScheme = useColorScheme(); // 'light' or 'dark'
+  const [themeMode, setThemeMode] = useState('system'); // 'classic', 'midnight', 'system'
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -15,33 +17,42 @@ const ThemeProvider = ({ children }) => {
 
   const loadTheme = async () => {
     try {
-      const savedThemeId = await AsyncStorage.getItem('app_theme');
-      if (savedThemeId && THEMES[savedThemeId]) {
-        setCurrentTheme(THEMES[savedThemeId]);
+      const savedMode = await AsyncStorage.getItem('app_theme_mode');
+      if (savedMode) {
+        setThemeMode(savedMode);
       }
     } catch (e) {
-      console.error('Failed to load theme:', e);
+      console.error('Failed to load theme mode:', e);
     } finally {
       setIsLoaded(true);
     }
   };
 
-  const updateTheme = async (themeId) => {
-    if (THEMES[themeId]) {
-      setCurrentTheme(THEMES[themeId]);
+  const updateThemeMode = async (mode) => {
+    if (THEMES[mode] || mode === 'system') {
+      setThemeMode(mode);
       try {
-        await AsyncStorage.setItem('app_theme', themeId);
+        await AsyncStorage.setItem('app_theme_mode', mode);
       } catch (e) {
-        console.error('Failed to save theme:', e);
+        console.error('Failed to save theme mode:', e);
       }
     }
   };
 
+  // Determine the actual theme object to provide
+  const theme = React.useMemo(() => {
+    if (themeMode === 'system') {
+      return systemColorScheme === 'dark' ? THEMES.midnight : THEMES.classic;
+    }
+    return THEMES[themeMode] || THEMES.classic;
+  }, [themeMode, systemColorScheme]);
+
   const contextValue = React.useMemo(() => ({
-    theme: currentTheme,
-    setTheme: updateTheme,
+    theme,
+    themeMode,
+    setTheme: updateThemeMode,
     isLoaded
-  }), [currentTheme, isLoaded]);
+  }), [theme, themeMode, isLoaded]);
 
   return (
     <ThemeContext.Provider value={contextValue}>

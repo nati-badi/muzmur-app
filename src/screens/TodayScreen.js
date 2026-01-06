@@ -32,7 +32,7 @@ const TodayScreen = ({ navigation }) => {
   ), []);
 
   const { day, month, year } = ethDayObj;
-  const monthName = language === 'am' ? ETHIOPIC_MONTHS[month - 1] : ETHIOPIC_MONTHS_EN[month - 1];
+  const monthName = t(`month${month}`);
   const geezDay = toGeez(day);
 
   // 2. Resolve Today's Feast
@@ -99,10 +99,10 @@ const TodayScreen = ({ navigation }) => {
         />
         <YStack alignItems="center">
            <Text fontFamily="$ethiopicSerif" fontSize={22} fontWeight="800" color={theme.primary}>
-             {t('appTitle') || 'ቅዱስ ዜማ'}
+             {t('appTitle')}
            </Text>
-           <Text fontFamily="$body" fontSize={11} color={theme.primary} opacity={0.6} textTransform="uppercase" letterSpacing={1}>
-             {language === 'am' ? 'ሰላም ላንተ ይሁን' : 'Welcome back'}, {userDisplayName}
+           <Text fontFamily="$body" fontSize={11} color={theme.text} opacity={0.5} textTransform="uppercase" letterSpacing={1}>
+             {t('goodMorningPrompt')}, {userDisplayName}
            </Text>
         </YStack>
         <Button 
@@ -178,10 +178,10 @@ const TodayScreen = ({ navigation }) => {
                   style={{ position: 'absolute', width: '100%', height: '100%' }} 
                   resizeMode="cover"
                 />
-                <YStack f={1} p="$4" jc="flex-end" backgroundColor="rgba(0,0,0,0.2)">
+                <YStack f={1} p="$4" jc="flex-end" backgroundColor="rgba(0,0,0,0.45)">
                     <YStack>
-                      <Text fontFamily="$ethiopicSerif" color="white" fontWeight="900" fontSize="$5">{t('explore') || 'Explore'}</Text>
-                      <Text color="white" opacity={0.9} fontSize="$2" fontWeight="600">{t('categories') || 'Categories'}</Text>
+                       <Text fontFamily="$ethiopicSerif" color="white" fontWeight="900" fontSize="$5">{t('explore')}</Text>
+                       <Text color="white" opacity={0.9} fontSize="$2" fontWeight="600">{t('categories')}</Text>
                     </YStack>
                 </YStack>
              </Card>
@@ -191,12 +191,12 @@ const TodayScreen = ({ navigation }) => {
           {recentlyPlayed.length > 0 && (
             <YStack space="$3" marginTop="$2">
               <XStack justifyContent="space-between" alignItems="center" paddingHorizontal="$1">
-                <Text fontFamily="$ethiopicSerif" fontSize={20} fontWeight="900" color={theme.text}>
-                  {t('recentlyPlayed') || 'Recently Played'}
-                </Text>
+                 <Text fontFamily="$ethiopicSerif" fontSize={20} fontWeight="900" color={theme.text}>
+                   {t('recentlyPlayed')}
+                 </Text>
                 <Button chromeless p="$2" onPress={() => navigation.navigate('Mezmurs')} borderRadius="$8">
                    <XStack ai="center" space="$1">
-                      <Text fontSize="$3" color={theme.primary} fontWeight="700">{t('seeAll') || 'See All'}</Text>
+                      <Text fontSize="$3" color={theme.primary} fontWeight="700">{t('seeAll')}</Text>
                       <Ionicons name="chevron-forward" size={16} color={theme.primary} />
                    </XStack>
                 </Button>
@@ -236,8 +236,8 @@ const TodayScreen = ({ navigation }) => {
                     <Text fontFamily="$ethiopic" fontSize={15} fontWeight="800" color={theme.text} numberOfLines={2} lineHeight={20}>
                       {item.title}
                     </Text>
-                    <Text fontFamily="$ethiopic" fontSize={12} color={theme.textSecondary} opacity={0.7} numberOfLines={1} marginTop="$1">
-                      {item.section}
+                    <Text fontFamily="$ethiopic" fontSize={12} color={theme.textSecondary} opacity={0.9} numberOfLines={1} marginTop="$1">
+                      {t(item.section)}
                     </Text>
                   </YStack>
                 ) )}
@@ -251,7 +251,7 @@ const TodayScreen = ({ navigation }) => {
             marginVertical="$4"
             borderRadius="$5"
             backgroundColor={theme.cardBackground}
-            borderColor={`${theme.primary}25`}
+            borderColor={theme.borderColor}
             borderWidth={1}
             elevation="$2"
             shadowColor="$shadowColor"
@@ -262,37 +262,37 @@ const TodayScreen = ({ navigation }) => {
             {/* Date Section */}
             <XStack space="$4" alignItems="center" marginBottom="$4">
               <Text fontFamily="$ethiopicSerif" fontSize={56} fontWeight="900" color={theme.primary}>
-                {geezDay}
+                {language === 'am' || language === 'ti' ? geezDay : (toEthiopian(new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate()).day)}
               </Text>
-              <YStack space="$1">
-                <Text fontFamily="$ethiopic" fontSize={24} fontWeight="800" color={theme.text}>
+              <YStack space={0}>
+                <Text fontFamily="$ethiopic" fontSize={26} fontWeight="900" color={theme.text}>
                   {monthName}
                 </Text>
-                <Text fontFamily="$body" fontSize={15} color={theme.textSecondary} opacity={0.65} fontWeight="600">
-                  {year} ዓ.ም
+                <Text fontFamily="$body" fontSize={16} color={theme.primary} fontWeight="700" opacity={0.9}>
+                  {year} {t('yearSuffix')}
                 </Text>
               </YStack>
             </XStack>
 
             {/* Simple Divider */}
-            <YStack height={1} backgroundColor={`${theme.primary}15`} marginVertical="$3" />
+            <YStack height={1} backgroundColor={theme.borderColor} marginVertical="$3" opacity={0.5} />
 
             {/* Feast Section */}
             <YStack space="$3">
-              <Text fontFamily="$ethiopicSerif" fontSize={12} fontWeight="800" color={theme.primary} opacity={0.7} textTransform="uppercase" letterSpacing={1}>
-                {t('todaysFeast') || "Today's Feast"}
+              <Text fontFamily="$ethiopicSerif" fontSize={12} fontWeight="800" color={theme.primary} opacity={0.8} textTransform="uppercase" letterSpacing={1}>
+                {t('todaysFeast')}
               </Text>
               
-              {feastSummary.major && (
-                <Text fontFamily="$ethiopic" fontSize={20} fontWeight="900" color={theme.primary} lineHeight={28}>
-                  {feastSummary.major.am}
-                </Text>
-              )}
-              {feastSummary.monthly && (
-                <Text fontFamily="$ethiopic" fontSize={16} color={theme.text} lineHeight={24} opacity={0.85}>
-                  {feastSummary.monthly.am}
-                </Text>
-              )}
+               {feastSummary.major && (
+                 <Text fontFamily="$ethiopicSerif" fontSize={22} fontWeight="900" color={theme.text} lineHeight={30}>
+                   {t(feastSummary.major['am'] || feastSummary.major['en'] || '')}
+                 </Text>
+               )}
+               {feastSummary.monthly && (
+                 <Text fontFamily="$ethiopic" fontSize={16} color={theme.textSecondary} lineHeight={24} opacity={0.9}>
+                   {t(feastSummary.monthly['am'] || feastSummary.monthly['en'] || '')}
+                 </Text>
+               )}
             </YStack>
           </Card>
 
@@ -327,8 +327,8 @@ const TodayScreen = ({ navigation }) => {
                       <Text fontFamily="$ethiopic" fontSize={17} fontWeight="700" color={theme.text} numberOfLines={1}>
                         {hymn.title}
                       </Text>
-                      <Text fontFamily="$ethiopic" fontSize={13} color={theme.textSecondary} opacity={0.6} numberOfLines={1}>
-                        {hymn.section}
+                      <Text fontFamily="$ethiopic" fontSize={13} color={theme.textSecondary} opacity={0.9} numberOfLines={1}>
+                        {t(hymn.section)}
                       </Text>
                     </YStack>
 
@@ -341,9 +341,9 @@ const TodayScreen = ({ navigation }) => {
 
           <Separator marginVertical="$4" opacity={0.1} />
           
-          <Text textAlign="center" fontFamily="$body" fontSize={12} color={theme.textSecondary} opacity={0.4} marginBottom="$10">
-            {t('version') || 'Version'} 1.0.0
-          </Text>
+           <Text textAlign="center" fontFamily="$body" fontSize={12} color={theme.textSecondary} opacity={0.6} marginBottom="$10">
+             {t('version')} 1.0.0
+           </Text>
         </YStack>
       </ScrollView>
     </YStack>

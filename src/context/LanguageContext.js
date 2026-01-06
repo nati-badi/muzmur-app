@@ -31,6 +31,8 @@ const translations = {
     // Settings labels
     amharic: 'Amharic',
     english: 'English',
+    tigrigna: 'Tigrigna',
+    afanOromo: 'Afan Oromo',
     
     // Today Screen
     todaysFeatured: "Today's Featured Hymns",
@@ -109,6 +111,113 @@ const translations = {
     imagePickFailed: 'Failed to pick image',
     imageUploadFailed: 'Failed to upload image',
     error: 'Error',
+    preferences: 'Preferences',
+    menu: 'Menu',
+    system: 'System (Auto)',
+    midnight: 'Midnight',
+    signIn: 'Sign In',
+    register: 'Register',
+    guestUser: 'Guest User',
+    welcomeBack: 'Welcome Back',
+    createAccount: 'Create Account',
+    yourNamePlaceholder: 'Your Name',
+    email: 'Email',
+    password: 'Password',
+    name: 'Name',
+    termsAndPrivacy: 'By continuing, you agree to our Terms & Privacy Policy',
+    
+    // Calendar Weekdays
+    monday: 'Mon',
+    tuesday: 'Tue',
+    wednesday: 'Wed',
+    thursday: 'Thu',
+    friday: 'Fri',
+    saturday: 'Sat',
+    sunday: 'Sun',
+    
+    // Feast/Calendar
+    todaysFeast: "Today's Feast",
+    annualFeast: 'Annual Feast',
+    monthlyFeast: 'Monthly Commemoration',
+    noFeastToday: 'No registered feast today',
+    feastSecret: 'The Secret of the Day',
+    todayLabel: 'Today',
+    
+    // Auth
+    continueAsGuest: 'Continue as Guest',
+    continueWithGoogle: 'Continue with Google',
+    
+    // Ethiopian Months
+    month1: 'Meskerem',
+    month2: 'Tikimt',
+    month3: 'Hidar',
+    month4: 'Tahsas',
+    month5: 'Tir',
+    month6: 'Yekatit',
+    month7: 'Megabit',
+    month8: 'Miyazia',
+    month9: 'Ginbot',
+    month10: 'Sene',
+    month11: 'Hamle',
+    month12: 'Nehase',
+    month13: 'Pagume',
+
+    // UI Labels
+    showMore: 'Show More',
+    showLess: 'Show Less',
+    welcomeBackPrompt: 'Welcome Back',
+    goodMorningPrompt: 'Good Morning',
+    searchMezmurs: 'Search Mezmurs...',
+    searchSections: 'Search Sections...',
+    searchSuggestionsLabel: 'Search Suggestions',
+    mezmurSectionsTitle: 'Mezmur Sections',
+    confirmLogout: 'Are you sure you want to logout?',
+    
+    // Auth Labels
+    guest: 'Guest',
+    
+    // Section Names (Data-driven)
+    "የእመቤታችን የምስጋና መዝሙራት": "Hymns of St. Mary",
+    "የቅዱስ ሚካኤል መዝሙራት": "Hymns of St. Michael",
+    "የቅዱስ ገብርኤል መዝሙራት": "Hymns of St. Gabriel",
+    "የከተራና የጥምቀት መዝሙራት": "Hymns of Epiphany",
+    "የመድኃኔዓለም የምስጋና መዝሙራት": "Hymns of Medhane Alem",
+    "የቅዱስ ጊዮርጊስ መዝሙራት": "Hymns of St. George",
+    "የአቡነ ተክለ ሃይማኖት መዝሙራት": "Hymns of Abune Tekle H.",
+    "የቃና ዘገሊላ መዝሙራት": "Hymns of Cana of Galilee",
+    "የአቡነ ገብረ መንፈስ ቅዱስ መዝሙራት": "Hymns of Abune G. Menfes",
+    "ስለ ቤተ ክርስቲያን": "About the Church",
+    "የቅድስት አርሴማ": "Hymns of St. Arsema",
+    
+    // Section Short Labels
+    'የእመቤታችን': 'St. Mary',
+    'የቅዱስ ሚካኤል': 'St. Michael',
+    'የቅዱስ ገብርኤል': 'St. Gabriel',
+    'የጥምቀት': 'Epiphany',
+    'የመድኃኔዓለም': 'Medhane Alem',
+    'የቅዱስ ጊዮርጊስ': 'St. George',
+    'የአቡነ ተክለ ሃይማኖት': 'Abune Tekle H.',
+    'የቃና ዘገሊላ': 'Cana Galilee',
+    'የአቡነ ገብረ መንፈስ ቅዱስ': 'Abune Gabre M.',
+    'ስለ ቤተ ክርስቲያን': 'Church',
+    'የቅድስት አርሴማ': 'St. Arsema',
+
+    // Categories
+    'አጭር': 'Short',
+    'ረጅም': 'Long',
+    yearSuffix: 'E.C.',
+    
+    // Theme Names
+    classic: 'Classic',
+    forest: 'Forest',
+    serene: 'Serene',
+    royal: 'Royal',
+    rose: 'Rose',
+    midnight: 'Midnight',
+    system: 'System (Auto)',
+    
+    // Footer
+    madeWithLove: 'Made with ❤️ for the Church',
   },
   am: {
     // Screen Titles
@@ -136,6 +245,8 @@ const translations = {
     // Settings labels
     amharic: 'አማርኛ',
     english: 'English',
+    tigrigna: 'ትግርኛ',
+    afanOromo: 'አፋን ኦሮሞ',
     
     // Today Screen
     todaysFeatured: 'የዕለቱ መዝሙራት',
@@ -149,7 +260,7 @@ const translations = {
     long: 'ረጅም',
     loadMore: 'ተጨማሪ አሳይ',
     noResults: 'ምንም መዝሙር አልተገኘም',
-    playlists: 'ስብስቦች',
+    playlists: 'የመዝሙር ዝርዝሮች',
     recent: 'የቅርብ ጊዜ',
     explore: 'ማሰሻ',
     categories: 'ምድቦች',
@@ -214,7 +325,554 @@ const translations = {
     imagePickFailed: 'ፎቶ መምረጥ አልተቻለም',
     imageUploadFailed: 'ፎቶ መጫን አልተቻለም',
     error: 'ስህተት',
-  }
+    preferences: 'ምርጫዎች',
+    menu: 'ማውጫ',
+    system: 'ሲስተም (ራስ-ሰር)',
+    midnight: 'ጥቁር',
+    signIn: 'ግባ',
+    register: 'ተመዝገብ',
+    guestUser: 'እንግዳ ተጠቃሚ',
+    welcomeBack: 'እንኳን ደህና መጡ',
+    createAccount: 'አካውንት ይፍጠሩ',
+    yourNamePlaceholder: 'የእርስዎ ስም',
+    email: 'ኢሜይል',
+    password: 'የይለፍ ቃል',
+    name: 'ስም',
+    termsAndPrivacy: 'በመቀጠልህ በውላችን እና በግላዊነት ፖሊሲያችን ተስማምተሃል።',
+    
+    // Calendar Weekdays
+    monday: 'ሰኞ',
+    tuesday: 'ማክሰ',
+    wednesday: 'ረቡዕ',
+    thursday: 'ሐሙስ',
+    friday: 'ዓርብ',
+    saturday: 'ቅዳሜ',
+    sunday: 'እሁድ',
+    
+    // Feast/Calendar
+    todaysFeast: 'የዕለቱ መታሰቢያ',
+    annualFeast: 'ዓመታዊ በዓል',
+    monthlyFeast: 'የዕለቱ መታሰቢያ',
+    noFeastToday: 'የተመዘገበ በዓል የለም',
+    feastSecret: 'የዕለቱ ምስጢር',
+    todayLabel: 'ዛሬ',
+
+    // Auth
+    continueAsGuest: 'እንደ እንግዳ ቀጥል',
+    continueWithGoogle: 'በጎግል ቀጥል',
+    
+    // Ethiopian Months
+    month1: 'መስከረም',
+    month2: 'ጥቅምት',
+    month3: 'ህዳር',
+    month4: 'ታህሳስ',
+    month5: 'ጥር',
+    month6: 'የካቲት',
+    month7: 'መጋቢት',
+    month8: 'ሚያዚያ',
+    month9: 'ግንቦት',
+    month10: 'ሰኔ',
+    month11: 'ሐምሌ',
+    month12: 'ነሐሴ',
+    month13: 'ጳጉሜ',
+
+    // UI Labels
+    showMore: 'ተጨማሪ አሳይ',
+    showLess: 'ቀንስ',
+    welcomeBackPrompt: 'እንኳን ደህና መጡ',
+    goodMorningPrompt: 'ሰላም ላንተ ይሁን',
+    searchMezmurs: 'መዝሙራትን ይፈልጉ...',
+    searchSections: 'ክፍላትን ይፈልጉ...',
+    searchSuggestionsLabel: 'የፍለጋ ጥቆማዎች',
+    mezmurSectionsTitle: 'የመዝሙር ክፍላት',
+    confirmLogout: 'በእርግጥ መውጣት ይፈልጋሉ?',
+
+    // Auth Labels
+    guest: 'እንግዳ',
+
+    // Section Names (Data-driven) - Amharic stays same as it is the key
+    "የእመቤታችን የምስጋና መዝሙራት": "የእመቤታችን የምስጋና መዝሙራት",
+    "የቅዱስ ሚካኤል መዝሙራት": "የቅዱስ ሚካኤል መዝሙራት",
+    "የቅዱስ ገብርኤል መዝሙራት": "የቅዱስ ገብርኤል መዝሙራት",
+    "የከተራና የጥምቀት መዝሙራት": "የከተራና የጥምቀት መዝሙራት",
+    "የመድኃኔዓለም የምስጋና መዝሙራት": "የመድኃኔዓለም የምስጋና መዝሙራት",
+    "የቅዱስ ጊዮርጊስ መዝሙራት": "የቅዱስ ጊዮርጊስ መዝሙራት",
+    "የአቡነ ተክለ ሃይማኖት መዝሙራት": "የአቡነ ተክለ ሃይማኖት መዝሙራት",
+    "የቃና ዘገሊላ መዝሙራት": "የቃና ዘገሊላ መዝሙራት",
+    "የአቡነ ገብረ መንፈስ ቅዱስ መዝሙራት": "የአቡነ ገብረ መንፈስ ቅዱስ መዝሙራት",
+    "ስለ ቤተ ክርስቲያን": "ስለ ቤተ ክርስቲያን",
+    "የቅድስት አርሴማ": "የቅድስት አርሴማ",
+
+    // Section Short Labels
+    'የእመቤታችን': 'የእመቤታችን',
+    'የቅዱስ ሚካኤል': 'የቅዱስ ሚካኤል',
+    'የቅዱስ ገብርኤል': 'የቅዱስ ገብርኤል',
+    'የጥምቀት': 'የጥምቀት',
+    'የመድኃኔዓለም': 'የመድኃኔዓለም',
+    'የቅዱስ ጊዮርጊስ': 'የቅዱስ ጊዮርጊስ',
+    'የአቡነ ተክለ ሃይማኖት': 'የአቡነ ተክለ ሃይማኖት',
+    'የቃና ዘገሊላ': 'የቃና ዘገሊላ',
+    'የአቡነ ገብረ መንፈስ ቅዱስ': 'የአቡነ ገብረ መንፈስ ቅዱስ',
+    'የቅድስት አርሴማ': 'የቅድስት አርሴማ',
+
+    // Categories
+    'አጭር': 'አጭር',
+    'ረጅም': 'ረጅም',
+    yearSuffix: 'ዓ.ም',
+
+    // Theme Names
+    classic: 'ክላሲክ',
+    forest: 'አረንጓዴ',
+    serene: 'ሰማያዊ',
+    royal: 'ወይን ጠጅ',
+    rose: 'ሮዝ',
+    midnight: 'ጥቁር',
+    system: 'ሲስተም (ራስ-ሰር)',
+
+    // Footer
+    madeWithLove: 'ለቤተክርስቲያን በፍቅር የተሰራ',
+  },
+  ti: {
+    profile: 'መገለጺ',
+    today: 'ሎሚ',
+    settings: 'ቅንብር',
+    favorites: 'ዝተመርጹ',
+    home: 'ገዛ',
+    mezmurs: 'መዝሙራት',
+    player: 'መጻወቲ',
+    appTitle: 'ቅዱስ ዜማ',
+    appTagline: 'ኦርቶዶክስ መዝሙራት',
+    calendar: 'መቁጸሪ',
+    user: 'ተጠቃሚ',
+    appearance: 'ትርኢት',
+    language: 'ቛንቋ',
+    notifications: 'መፍለጢታት',
+    helpSupport: 'ሓገዝን ደገፍን',
+    aboutUs: 'ብዛዕባና',
+    logout: 'ውጻእ',
+    amharic: 'አማርኛ',
+    english: 'English',
+    tigrigna: 'ትግርኛ',
+    afanOromo: 'ኦሮምኛ',
+    searchPlaceholder: 'ብአርእስቲ ወይ ግጥሚ ድለ...',
+    sections: 'ክፍልታት',
+    all: 'ኩሉ',
+    short: 'ሓጺር',
+    long: 'ነዊሕ',
+    loadMore: 'ተወሳኺ አርኢ',
+    noResults: 'ዝተረኽበ መዝሙር የለን',
+    translation: 'ትርጉም',
+    ok: 'እሺ',
+    cancel: 'ሰርዝ',
+    viewProfile: 'መገለጺ ርአ',
+    version: 'ስሪት',
+    preferences: 'ምርጫታት',
+    menu: 'ዝርዝር',
+    system: 'ሲስተም',
+    midnight: 'ጥቁር',
+    
+    // Ethiopian Months (Amharic used as default for Ti/Om if unknown, but providing Ti)
+    month1: 'መስከረም',
+    month2: 'ጥቅምቲ',
+    month3: 'ሕዳር',
+    month4: 'ታሕሳስ',
+    month5: 'ጥሪ',
+    month6: 'ለካቲት',
+    month7: 'መጋቢት',
+    month8: 'ሚያዝያ',
+    month9: 'ግንቦት',
+    month10: 'ሰነ',
+    month11: 'ሓምለ',
+    month12: 'ነሓሰ',
+    month13: 'ጳጉሜን',
+
+    showMore: 'ተወሳኺ አርኢ',
+    showLess: 'ቀንስ',
+    welcomeBackPrompt: 'እንቋዕ ደሓን መጻእኩም',
+    goodMorningPrompt: 'ሰላም ንዓኻ ይኹን',
+    
+    // Calendar Weekdays
+    monday: 'ሰኑይ',
+    tuesday: 'ሰሉስ',
+    wednesday: 'ረቡዕ',
+    thursday: 'ሓሙስ',
+    friday: 'ዓርቢ',
+    saturday: 'ቀዳም',
+    sunday: 'ሰንበት',
+    
+    // Feast/Calendar
+    todaysFeast: 'ናይ ሎሚ መዘከርታ',
+    annualFeast: 'ዓመታዊ በዓል',
+    monthlyFeast: 'ናይ ወርሒ መዘከርታ',
+    noFeastToday: 'ዝተመዝገበ በዓል የለን',
+    feastSecret: 'ምስጢር እታ ዕለት',
+    todayLabel: 'ሎሚ',
+    commemoration: 'መዘከርታ እታ ዕለት',
+
+    // Missing Today/Home titles
+    todaysFeatured: 'ንሎሚ ዝተመርጹ መዝሙራት',
+    recentlyPlayed: 'ቅድሚ ሕጂ ዝተጻወቱ',
+    seeAll: 'ኩሉ አርኢ',
+    explore: 'ምድህሳስ',
+    categories: 'ምድባት',
+    searchHint: 'ኩሉ መዝሙራት ድለ...',
+
+    // Auth Labels
+    guest: 'ጋሻ',
+    signIn: 'እቶ',
+    guestUser: 'ጋሻ ተጠቃሚ',
+    register: 'ተመዝገብ',
+    email: 'ኢሜይል',
+    password: 'መፍትሕ ምስጢር',
+    name: 'ስም',
+    termsAndPrivacy: 'ብምቕጻልካ ኣብ ውዕልናን ፖሊሲ ግላውነትናን ተሰማሚዕካ ኣለኻ።',
+    playlists: 'ዝርዝር መዝሙራት',
+    
+    // Overflow Menu
+    shareApp: 'መተግበሪ ኣካፍል',
+    feedback: 'ርእይቶ',
+    checkUpdates: 'ሓድሽ ስሪት ኣለዎ ድዩ',
+    shareMessage: 'ነዚ መተግበሪ ተመልከት! ዝወደድካዮም መዝሙራት ንምስማዕ ሕጂ ኣውርዶ።',
+    feedbackAlertTitle: 'ርእይቶ',
+    feedbackAlertMessage: 'ርእይቶኹም ኣገዳሲ እዩ! ሓሳባትኩም ናብ natibadideb@gmail.com ስደዱልና።',
+    updatesAlertTitle: 'ሓድሽ ስሪት ምርመራ',
+    updatesAlertMessage: 'ድሮ ኣብ ዝሓደሸ ስሪት (v1.0.0) ኣለኹም።',
+    moreOptions: 'ተወሳኺ ኣማራጺታት',
+    chooseAction: 'ሓደ ተግባር ምረጽ:',
+    great: 'ጽቡቕ',
+
+    // Section Names (Data-driven)
+    "የእመቤታችን የምስጋና መዝሙራት": "ናይ እመቤትና ምስጋና መዝሙራት",
+    "የቅዱስ ሚካኤል መዝሙራት": "ናይ ቅዱስ ሚካኤል መዝሙራት",
+    "የቅዱስ ገብርኤል መዝሙራት": "ናይ ቅዱስ ገብርኤል መዝሙራት",
+    "የከተራና የጥምቀት መዝሙራት": "ናይ ጥምቀት መዝሙራት",
+    "የመድኃኔዓለም የምስጋና መዝሙራት": "ናይ መድኃኔዓለም መዝሙራት",
+    "የቅዱስ ጊዮርጊስ መዝሙራት": "ናይ ቅዱስ ጊዮርጊስ መዝሙራት",
+    "የአቡነ ተክለ ሃይማኖት መዝሙራት": "ናይ አቡነ ተክለ ሃይማኖት",
+    "የቃና ዘገሊላ መዝሙራት": "ናይ ቃና ዘገሊላ መዝሙራት",
+    "የአቡነ ገብረ መንፈስ ቅዱስ መዝሙራት": "ናይ አቡነ ገብረ መንፈስ ቅዱስ",
+    "ስለ ቤተ ክርስቲያን": "ብዛዕባ ቤተ ክርስቲያን",
+    "የቅድስት አርሴማ": "ናይ ቅድስት አርሴማ",
+
+    // Section Short Labels
+    'የእመቤታችን': 'እመቤትና',
+    'የቅዱስ ሚካኤል': 'ቅዱስ ሚካኤል',
+    'የቅዱስ ገብርኤል': 'ቅዱስ ገብርኤል',
+    'የጥምቀት': 'ጥምቀት',
+    'የመድኃኔዓለም': 'መድኃኔዓለም',
+    'የቅዱስ ጊዮርጊስ': 'ቅዱስ ጊዮርጊስ',
+    'የአቡነ ተክለ ሃይማኖት': 'ተክለ ሃይማኖት',
+    'የቃና ዘገሊላ': 'ቃና ዘገሊላ',
+    'የአቡነ ገብረ መንፈስ ቅዱስ': 'ገብረ መንፈስ',
+    'ስለ ቤተ ክርስቲያን': 'ቤተ ክርስቲያን',
+    'የቅድስት አርሴማ': 'አርሴማ',
+
+    // Categories
+    'አጭር': 'ሓጺር',
+    'ረጅም': 'ነዊሕ',
+ 
+    // Feast Names (Common keys for data-level translation)
+    "መድኃኔዓለም": "መድኃኔዓለም",
+    "ልደታ ማርያም": "ልደታ ማርያም",
+    "ብሥራት": "ብሥራት",
+    "በአታ ማርያም": "በአታ ማርያም",
+    "ከና ዘገሊላ": "ቃና ዘገሊላ",
+    "አስተርዮ ማርያም": "አስተርዮ ማርያም",
+    "ኪዳነ ምሕረት": "ኪዳነ ምሕረት",
+    "ደብረ ታቦር": "ደብረ ታቦር",
+    "ፍልሰታ ለማርያም": "ፍልሰታ ለማርያም",
+    "መስቀል": "መስቀል",
+    "ሆሣዕና": "ሆሣዕና",
+    "ስቅለት": "ስቅለት",
+    "ትንሣኤ": "ትንሣኤ",
+    "ዕርገት": "ዕርገት",
+    "ጰራቅሊጦስ": "ጰራቅሊጦስ",
+    "ቅዱስ ሚካኤል": "ቅዱስ ሚካኤል",
+    "ቅዱስ ገብርኤል": "ቅዱስ ገብርኤል",
+    "ቅዱስ ሩፋኤል": "ቅዱስ ሩፋኤል",
+    "ቅዱስ ዑራኤል": "ቅዱስ ዑራኤል",
+    "ቅዱስ ቂርቆስ": "ቅዱስ ቂርቆስ",
+    "ቅዱስ እስጢፋኖስ": "ቅዱስ እስጢፋኖስ",
+    "ቅዱስ ጊዮርጊስ": "ቅዱስ ጊዮርጊስ",
+    "አቡነ ተክለ ሃይማኖት": "አቡነ ተክለ ሃይማኖት",
+    "አቡነ ገብረ መንፈስ ቅዱስ": "አቡነ ገብረ መንፈስ ቅዱስ",
+    "አቡነ አረጋዊ": "አቡነ አረጋዊ",
+    "ሐና እና ኢያቄም": "ሐና እና ኢያቄም",
+    "ጻድቃን": "ጻድቃን",
+    "ሰማዕታት": "ሰማዕታት",
+    "መላእክት": "መላእክት",
+    "ልደተ ክርስቶስ": "ልደተ ክርስቶስ",
+    "ጥምቀት": "ጥምቀት",
+    "ልደታ ለማርያም": "ልደታ ለማርያም",
+    "ጽዮን ማርያም": "ጽዮን ማርያም",
+    "ቁስቋም": "ቁስቋም",
+    "ሕንፀተ ቤተክርስቲያን": "ሕንፀተ ቤተክርስቲያን",
+    "ቅድስት ሥላሴ": "ቅድስት ሥላሴ",
+    "ተዘከረ መስቀሉ": "ተዘከረ መስቀሉ",
+    "ኪዳነ ምሕረት (የካቲት 16)": "ኪዳነ ምሕረት (የካቲት 16)",
+    "እንቁጣጣሽ (አዲስ ዓመት)": "አዲስ ዓመት (እንቁጣጣሽ)",
+    "ዮሐንስ መጥምቅ": "ዮሐንስ መጥምቅ",
+    "ጥንተ ስቅለቱ": "ጥንተ ስቅለቱ",
+    "የደምራ በዓል": "የደምራ በዓል",
+    "ቁልቢ": "ቁልቢ",
+    "የገና ዋዜማ": "ናይ ገና ዋዜማ",
+    "ልደት": "ልደት",
+    "ቡሄ": "ቡሄ",
+    "ጳጉሜ": "ጳጉሜን",
+
+    "እንቁጣጣሽ (አዲስ ዓመት)፣ ዮሐንስ መጥምቅ": "አዲስ ዓመት (እንቁጣጣሽ)፡ ዮሃንስ መጥምቕ",
+    "መስቀል (የደምራ በዓል)": "መስቀል (ናይ ደምራ በዓል)",
+    "ቅዱስ ሚካኤል (ህዳር ሚካኤል)": "ቅዱስ ሚካኤል (ሕዳር ሚካኤል)",
+    "በዓለ ገና (ልደት)": "በዓለ ገና (ልደት)",
+    "ኪዳነ ምሕረት (የካቲት 16)": "ኪዳነ ምሕረት (ለካቲት 16)",
+    "ቅዱስ ገብርኤል (ቁልቢ)": "ቅዱስ ገብርኤል (ቁልቢ)",
+    "ደብረ ታቦር (ቡሄ)": "ደብረ ታቦር (ቡሄ)",
+ 
+    // Feast Description keys
+    "ቅዱስ ሚካኤል ሕዝበ እስራኤልን ከግብፅ ባርነት የመራበትና ባሕረ ኤርትራን የከፈለበት ዕለት ነው።": "ቅዱስ ሚካኤል ንህዝቢ እስራኤል ካብ ባርነት ግብጺ ዝመርሓሉን ባህረ ኤርትራ ዝኸፈለሉን ዕለት እዩ።",
+    "እመቤታችን ንፅህናዋ ተጠብቆ እንዲኖር በሦስት ዓመቷ ወደ ቤተ መቅደስ የገባችበት ዕለት ነው።": "እመቤታችን ንፅህናኣ ተሓልዩ ክትነብር ኣብ ሰለስተ ዓመታ ናብ ቤተ መቅደስ ዝአተወትሉ ዕለት እዩ።",
+    "ቅዱስ ገብርኤል ሠለስቱ ደቂቅን (ሦስቱን ወጣቶች) ከሚነድ እሳት ያዳነበት ዕለት ነው።": "ቅዱስ ገብርኤል ንሰለስቱ ደቂቅ ካብ ዝነድድ ሓዊ ዘድሓነሉ ዕለት እዩ።",
+    "እመቤታችን ቅድስት ድንግል ማርያም የተወለደችበት ዕለት ነው።": "እመቤታችን ቅድስት ድንግል ማርያም ዝተወለደትሉ ዕለት እዩ።",
+    "ንግሥት እሌኒ በጸሎትና በሱባኤ የእውነተኛውን መስቀል የተቀበረበትን ቦታ ያገኘችበትን ዕለት ለማስታወስ ይከበራል።": "ንግሥቲ እሌኒ ብጸሎትን ብሱባኤን ነቲ ዝተቐበረ ናይ ሓቂ መስቀል ዝረኸበትሉ ዕለት ንምዝካር ይኽበር።",
+    "ጌታችን መድኃኒታችን ኢየሱስ ክርስቶስ ለዓለም ድኅነት በዕፀ መስቀል ላይ የፈጸመው የማዳን ሥራ ይታሰባል::": "ጐይታናን መድሓኒናን ኢየሱስ ክርስቶስ ንድሕነት ዓለም ኣብ ዕፀ መስቀል ዝፈጸሞ ናይ ምድሓን ስራሕ ይዝከር።",
+    "ጌታችን መድኃኒታችን ኢየሱስ ክርስቶስ ለዓለም ድኅነት በዕፀ መስቀል ላይ የፈጸመው የማዳን ሥራ ይታሰባል::": "ጐይታናን መድሓኒናን ኢየሱስ ክርስቶስ ንድሕነት ዓለም ኣብ ዕፀ መስቀል ዝፈጸሞ ናይ ምድሓን ስራሕ ይዝከር።",
+    "ጌታችን መድኃኒታችን ኢየሱስ ክርስቶስ በቤተልሔም የተወለደበት ታላቅ የደስታ ዕለት ነው።": "ጐይታናን መድሓኒናን ኢየሱስ ክርስቶስ ኣብ ቤትልሔም ዝተወለደሉ ዓብዪ ናይ ሓጐስ ዕለት እዩ።",
+    "ጌታችን በዮርዳኖስ ባሕር በዮሐንስ እጅ ለመጠመቁ መታሰቢያ የሚከበር ታላቅ በዓል ነው።": "ጐይታና ኣብ ባሕረ ዮርዳኖስ ብኢድ ዮሃንስ ንዝተጠመቖ መዘከርታ ዝኽበር ዓብዪ በዓል እዩ።",
+    "ታላቁ ሰማዕት ቅዱስ ጊዮርጊስ በሰማዕትነት ያለፈበት ዓመታዊ በዓል ነው።": "እቲ ዓብዪ ሰማዕት ቅዱስ ጊዮርጊስ ብሰማዕትነት ዝሓለፈሉ ዓመታዊ በዓል እዩ።",
+
+    yearSuffix: 'ዓ.ም',
+    
+    // UI Labels
+    searchMezmurs: 'መዝሙራት ድለ...',
+    searchSections: 'ክፍልታት ድለ...',
+    searchSuggestionsLabel: 'ጥቆማታት ድለያ',
+    mezmurSectionsTitle: 'ክፍልታት መዝሙር',
+    confirmLogout: 'ርግጸኛ ዲኻ ክትወጽእ?',
+    playlists: 'ዝርዝር መዝሙራት',
+    recent: 'ቀረባ ግዜ',
+    
+    // Theme Names
+    classic: 'ክላሲክ',
+    forest: 'ቀጠልያ',
+    serene: 'ሰማያዊ',
+    royal: 'ወይን ጠጅ',
+    rose: 'ሮዝ',
+    midnight: 'ጥቁር',
+    system: 'ሲስተም (ባዕላዊ)',
+
+    // Footer
+    madeWithLove: 'ንቤተክርስቲያን ብፍቕሪ ዝተዳለወ',
+  },
+  om: {
+    profile: 'Ibsa',
+    today: 'Harr’a',
+    settings: 'Sajataa',
+    favorites: 'Filatamaa',
+    home: 'Mana',
+    mezmurs: 'Faaruu',
+    player: 'Taphattuu',
+    appTitle: 'ቅዱስ ዜማ',
+    appTagline: 'Faaruu Ortodoksii',
+    calendar: 'Kaalandarii',
+    user: 'Fayyadamaa',
+    appearance: 'Bifa',
+    language: 'Afaan',
+    notifications: 'Beeksisa',
+    helpSupport: 'Gargaarsaa',
+    aboutUs: 'Waa’ee Keenya',
+    logout: 'Ba’i',
+    amharic: 'Afaan Amaaraa',
+    english: 'Afaan Ingiliffaa',
+    tigrigna: 'Afaan Tigree',
+    afanOromo: 'Afaan Oromoo',
+    searchPlaceholder: 'Mata dureen barbaadi...',
+    sections: 'Kutaalee',
+    all: 'Hunda',
+    short: 'Gabaabaa',
+    long: 'Dheeraa',
+    loadMore: 'Dabalata',
+    noResults: 'Faaruun hin argamne',
+    translation: 'Hiika',
+    ok: 'Toole',
+    cancel: 'Haqi',
+    viewProfile: 'Ibsa rarr’i',
+    version: 'Lakkoofsa',
+    preferences: 'Filannoo',
+    menu: 'Mana',
+    system: 'Sirna',
+    midnight: 'Dukkana',
+    
+    // Ethiopian Months (OM)
+    month1: 'Fulbaana',
+    month2: 'Onkololeessa',
+    month3: 'Sadaasa',
+    month4: 'Muddee',
+    month5: 'Amajjii',
+    month6: 'Gurraandhala',
+    month7: 'Bitootessa',
+    month8: 'Eebila',
+    month9: 'Caamsaa',
+    month10: 'Waxabajjii',
+    month11: 'Adooleessa',
+    month12: 'Hagayya',
+    month13: 'Qaammee',
+
+    showMore: 'Dabalata',
+    showLess: 'Xinnayi',
+    welcomeBackPrompt: 'Baga nagaan dhuftan',
+    goodMorningPrompt: 'Nagaan siif haa tahu',
+    searchMezmurs: 'Faaruu barbaadi...',
+    searchSections: 'Kutaalee barbaadi...',
+    searchSuggestionsLabel: 'Yaada barbaadduu',
+    mezmurSectionsTitle: 'Kutaalee Faaruu',
+    confirmLogout: 'Dhuguma ba’uu barbaadduu?',
+
+    // Calendar Weekdays
+    monday: 'Wiixata',
+    tuesday: 'Kibxata',
+    wednesday: 'Roobii',
+    thursday: 'Kamisa',
+    friday: 'Jimmata',
+    saturday: 'Sanbata',
+    sunday: 'Dilbata',
+    
+    // Feast/Calendar
+    todaysFeast: 'Ayyaana Har’aa',
+    annualFeast: 'Ayyaana Waggaa',
+    monthlyFeast: 'Yaadannoo Ji’aa',
+    noFeastToday: 'Ayyaanni galmeeffame hin jiru',
+    feastSecret: 'Iccitii Guyyaa',
+    todayLabel: 'Har’a',
+    commemoration: 'Yaadannoo Guyyaa',
+
+    // Missing Today/Home titles
+    todaysFeatured: 'Faaruu Filatamaa Har’aa',
+    recentlyPlayed: 'Dhiyootti kan Taphatame',
+    seeAll: 'Hunda Argisiisi',
+    explore: 'Sakatta’i',
+    categories: 'Ramaddiiwwan',
+    searchHint: 'Faaruu hunda barbaadi...',
+
+    // Auth Labels
+    guest: 'Keessummaa',
+    signIn: 'Seeni',
+    guestUser: 'Keessummaa',
+    register: 'Galmaa’i',
+    email: 'Iimeeyilii',
+    password: 'Jecha Icchitii',
+    name: 'Maqaa',
+    termsAndPrivacy: 'Itti fufuun kee, Imaammata dhuunfaa fi waadaa keenya irratti walii galuu kee agarsiisa.',
+    playlists: 'Tarree Taphaa',
+    
+    // Overflow Menu
+    shareApp: 'Appii Qoodi',
+    feedback: 'Yaada',
+    checkUpdates: 'Haaromsa Ilaali',
+    shareMessage: 'Appii kana ilaali! Faaruu jaallattu dhaggeeffachuuf amma buufadhu.',
+    feedbackAlertTitle: 'Yaada',
+    feedbackAlertMessage: 'Yaada keessan ni kabajina! Yaada keessan gara natibadideb@gmail.com nuu ergaa.',
+    updatesAlertTitle: 'Haaromsa Sakatta\'uu',
+    updatesAlertMessage: 'Duraan dursitee fooyya\'aa isa haaraa (v1.0.0) irra jirta.',
+    moreOptions: 'Filannoo Dabalataa',
+    chooseAction: 'Gocha tokko filadhu:',
+    great: 'Gaarii',
+
+    // Section Names (Data-driven)
+    "የእመቤታችን የምስጋና መዝሙራት": "Faaruu Galataa Dubroo Maariyaam",
+    "የቅዱስ ሚካኤል መዝሙራት": "Faaruu Qulqulluu Miikaa’el",
+    "የቅዱስ ገብርኤል መዝሙራት": "Faaruu Qulqulluu Gabri’eel",
+    "የከተራና የጥምቀት መዝሙራት": "Faaruu Cuuphaa",
+    "የመድኃኔዓለም የምስጋና መዝሙራት": "Faaruu Madhaanee-Aalam",
+    "የቅዱስ ጊዮርጊስ መዝሙራት": "Faaruu Qulqulluu Giyoorgis",
+    "የአቡነ ተክለ ሃይማኖት መዝሙራት": "Faaruu Abuna Takla Haymaanot",
+    "የቃና ዘገሊላ መዝሙራት": "Faaruu Kaanaazegaliilaa",
+    "የአቡነ ገብረ መንፈስ ቅዱስ መዝሙራት": "Faaruu Abuna Gabramenfes Qudus",
+    "ስለ ቤተ ክርስቲያን": "Waa’ee Mana Kiristaanaa",
+    "የቅድስት አርሴማ": "Faaruu Qulqulleettii Arseemaa",
+
+    // Section Short Labels
+    'የእመቤታችን': 'Dubroo Maariyaam',
+    'የቅዱስ ሚካኤል': 'Maikaa’el',
+    'የቅዱስ ገብርኤል': 'Gabri’eel',
+    'የጥምቀት': 'Cuuphaa',
+    'የመድኃኔዓለም': 'Madhaanee-Aalam',
+    'የቅዱስ ጊዮርጊስ': 'Giyoorgis',
+    'የአቡነ ተክለ ሃይማኖት': 'Takla Haymaanot',
+    'የቃና ዘገሊላ': 'Kaanaazegaliilaa',
+    'የአቡነ ገብረ መንፈስ ቅዱስ': 'Gabramenfes',
+    'ስለ ቤተ ክርስቲያን': 'Mana Kiristaanaa',
+    'የቅድስት አርሴማ': 'Arseemaa',
+
+    // Categories
+    'አጭር': 'Gabaabaa',
+    'ረጅም': 'Dheeraa',
+
+    // Feast Names (Common keys for data-level translation in Oromo)
+    "መድኃኔዓለም": "Madhaanee-Aalam",
+    "ልደታ ማርያም": "Lideta Mariyam",
+    "ብሥራት": "Bishraat",
+    "በአታ ማርያም": "Ba'ata Mariyam",
+    "ከና ዘገሊላ": "Kaanaazegaliilaa",
+    "አስተርዮ ማርያም": "Asteriyo Mariyam",
+    "ኪዳነ ምሕረት": "Kidane Mehret",
+    "ደብረ ታቦር": "Debre Tabor",
+    "ፍልሰታ ለማርያም": "Filseta Mariyam",
+    "መስቀል": "Meskel",
+    "ሆሣዕና": "Hosa'ina",
+    "ስቅለት": "Siqlat",
+    "ትንሣኤ": "Tinsa'ee",
+    "ዕርገት": "Irget",
+    "ጰራቅሊጦስ": "Paraklitos",
+    "ቅዱስ ሚካኤል": "Kidus Miikaa'el",
+    "ቅዱስ ገብርኤል": "Kidus Gabri'eel",
+    "ቅዱስ ሩፋኤል": "Kidus Rupha'eel",
+    "ቅዱስ ዑራኤል": "Kidus Uura'eel",
+    "ቅዱስ ቂርቆስ": "Kidus Qirqos",
+    "ቅዱስ እስጢፋኖስ": "Kidus Estifanos",
+    "ቅዱስ ጊዮርጊስ": "Kidus Giyoorgis",
+    "አቡነ ተክለ ሃይማኖት": "Abuna Takla Haymaanot",
+    "አቡነ ገብረ መንፈስ ቅዱስ": "Abuna Gabramenfes Qudus",
+    "አቡነ አረጋዊ": "Abuna Aregaawii",
+    "ልደተ ክርስቶስ": "Lideta Kristos",
+    "ጥምቀት": "Cuuphaa",
+    "ጽዮን ማርያም": "Tsion Mariyam",
+
+    // UI Labels
+    playlists: 'Tarree Taphaa',
+    recent: 'Dhiyootti',
+    yearSuffix: 'E.C.',
+
+    // Feast Descriptions (OM)
+    "እመቤታችን ቅድስት ድንግል ማርያም የተወለደችበት ዕለት ነው።": "Guyyaa dhaloota Dubroo Maariyaam itti yaadatamu.",
+    "ጌታችን መድኃኒታችን ኢየሱስ ክርስቶስ ለዓለም ድኅነት በዕፀ መስቀል ላይ የፈጸመው የማዳን ሥራ ይታሰባል::": "Hojii fayyina Gooftaa keenya Yesuus Kiristoos fayyina addunyaatiif hojjete yaadachuu.",
+    "ቅዱስ ሚካኤል ሕዝበ እስራኤልን ከግብፅ ባርነት የመራበትና ባሕረ ኤርትራን የከፈለበት ዕለት ነው።": "Ayyaana ji’aa Qulqulluu Miikaa’el, kan Israa’eloota biyya Masirii keessaa baasee geggeesse.",
+    "እመቤታችን ንፅህናዋ ተጠብቆ እንዲኖር በሦስት ዓመቷ ወደ ቤተ መቅደስ የገባችበት ዕለት ነው።": "Yaadannoo Dubroo Maariyaam ganna sadiitti gara mana qulqullummaa itti seente.",
+    "ቅዱስ ገብርኤል ሠለስቱ ደቂቅን (ሦስቱን ወጣቶች) ከሚነድ እሳት ያዳነበት ዕለት ነው።": "Guyyaa Qulqulluu Gabri’eel dargaggoota sadan ibidda boba’u keessaa oolche.",
+    "ንግሥት እሌኒ በጸሎትና በሱባኤ የእውነተኛውን መስቀል የተቀበረበትን ቦታ ያገኘችበትን ዕለት ለማስታወስ ይከበራል።": "Yaadannoo fannoo dhugaa mootitti Heleenaan argamuu isaa kabajama.",
+    "ጌታችን መድኃኒታችን ኢየሱስ ክርስቶስ በቤተልሔም የተወለደበት ታላቅ የደስታ ዕለት ነው።": "Guyyaa gammachuu dhaloota Gooftaa keenyaa fi Fayyisaa keenya Yesuus Kiristoos Beetalihemitti dhalate.",
+    "ጌታችን በዮርዳኖስ ባሕር በዮሐንስ እጅ ለመጠመቁ መታሰቢያ የሚከበር ታላቅ በዓል ነው።": "Ayyaana guddaa cuuphaa Gooftaa keenyaa laga Yordaanositti Harka Yohaannisiin raawwatame.",
+    "ታላቁ ሰማዕት ቅዱስ ጊዮርጊስ በሰማዕትነት ያለፈበት ዓመታዊ በዓል ነው።": "Ayyaana waggaa wareegamtoota gurguddoo Qulqulluu Giyoorgis yaadachuuf kabajamu.",
+    "በዓለ ገና (ልደት)": "Dhaloota Kiristoos (Genaa)",
+    "ጥምቀት": "Cuuphaa",
+    "እንቁጣጣሽ (አዲስ ዓመት)፣ ዮሐንስ መጥምቅ": "Ayyaana Enqutaataash (Waggaa Haaraa)",
+    "መስቀል (የደምራ በዓል)": "Ayyaana Masqalaa",
+    "ቅዱስ ሚካኤል (ህዳር ሚካኤል)": "Ayyaana Qulqulluu Miikaa’el (Hidaar)",
+    "ኪዳነ ምሕረት (የካቲት 16)": "Kidane Mehret (Guraandhala 16)",
+    "ቅዱስ ገብርኤል (ቁልቢ)": "Qulqulluu Gabri’eel (Kulubii)",
+    "ደብረ ታቦር (ቡሄ)": "Ayyaana Debre Tabor (Buhee)",
+    
+    // Theme Names
+    classic: 'Kilaasikii',
+    forest: 'Magariisa',
+    serene: 'Cuquliisa',
+    royal: 'Waatoo',
+    rose: 'Roozii',
+    midnight: 'Dukkana',
+    system: 'Sirna (Of-danda’aa)',
+
+    // Footer
+    madeWithLove: 'Mana Kiristaanaaf jaalalaan kan hojjetame',
+  },
 };
 
 const LanguageProvider = ({ children }) => {
@@ -228,7 +886,8 @@ const LanguageProvider = ({ children }) => {
   const loadLanguage = async () => {
     try {
       const stored = await AsyncStorage.getItem('app_language');
-      if (stored && (stored === 'am' || stored === 'en')) {
+      const validLangs = ['am', 'en', 'ti', 'om'];
+      if (stored && validLangs.includes(stored)) {
         setLanguage(stored);
       }
       setIsLoaded(true);
@@ -240,7 +899,8 @@ const LanguageProvider = ({ children }) => {
 
   const changeLanguage = async (newLang) => {
     try {
-      if (newLang === 'am' || newLang === 'en') {
+      const validLangs = ['am', 'en', 'ti', 'om'];
+      if (validLangs.includes(newLang)) {
         setLanguage(newLang);
         await AsyncStorage.setItem('app_language', newLang);
       }
