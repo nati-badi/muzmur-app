@@ -4,6 +4,7 @@ const { Ionicons } = require('@expo/vector-icons');
 const { useSafeAreaInsets } = require('react-native-safe-area-context');
 const { useAppTheme } = require('../context/ThemeContext');
 const { useLanguage } = require('../context/LanguageContext');
+const DataService = require('../services/DataService');
 const SearchBar = require('../components/SearchBar');
 const { SECTIONS } = require('../constants/sections');
 const MEZMURS = require('../data/mezmurs.json');
@@ -18,7 +19,16 @@ const SectionListScreen = ({ navigation }) => {
   const [searchSuggestions, setSearchSuggestions] = React.useState([]);
   const [showSuggestions, setShowSuggestions] = React.useState(false);
   const [searchBarLayout, setSearchBarLayout] = React.useState(null);
-  
+  const [isLoading, setIsLoading] = React.useState(!DataService.isReady);
+
+  // Sync with general app hydration
+  React.useEffect(() => {
+    if (!DataService.isReady) {
+      DataService.waitForReady().then(() => setIsLoading(false));
+    } else {
+      setIsLoading(false);
+    }
+  }, []);
   
   // Effect to disable parent swipe when search is active
   React.useEffect(() => {
@@ -38,7 +48,7 @@ const SectionListScreen = ({ navigation }) => {
     setSearchQuery(text);
     if (text.trim().length > 1) {
       const normalizedQuery = normalizeAmharic(text.toLowerCase());
-      const suggestions = MEZMURS
+      const suggestions = DataService.getAll()
         .filter(m => normalizeAmharic(m.title.toLowerCase()).includes(normalizedQuery))
         .slice(0, 10);
       setSearchSuggestions(suggestions);
@@ -48,6 +58,21 @@ const SectionListScreen = ({ navigation }) => {
       setShowSuggestions(false);
     }
   };
+
+  const SkeletonItem = () => (
+    <Card 
+      width={cardWidth} 
+      height={cardWidth * 1.35} 
+      backgroundColor={theme.cardBackground} 
+      marginBottom="$5" 
+      borderRadius="$6"
+      style={{ opacity: 0.6 }}
+    >
+       <YStack f={1} ai="center" jc="flex-end" padding="$3" paddingBottom="$4" space="$2" backgroundColor={theme.borderColor} opacity={0.1}>
+          <YStack height={14} width="70%" backgroundColor={theme.borderColor} borderRadius="$1" opacity={0.3} />
+       </YStack>
+    </Card>
+  );
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
@@ -157,116 +182,128 @@ const SectionListScreen = ({ navigation }) => {
          </XStack>
       </YStack>
 
-      {/* Search Suggestions Dropdown - Root Level for Touch Handling */}
-      {showSuggestions && searchSuggestions.length > 0 && searchBarLayout && (
-         <YStack 
-           position="absolute"
-           top={searchBarLayout.y + 60} // Offset based on search bar position
-           left={20}
-           right={20}
-           backgroundColor={theme.background}
-           borderRadius="$5"
-           borderWidth={1}
-           borderColor={theme.borderColor}
-           elevation="$10"
-           maxHeight={350}
-           overflow="hidden"
-           zIndex={2000} // Highest Z-Index
-         >
-           <ScrollView 
-             keyboardShouldPersistTaps="handled"
-             keyboardDismissMode='none'
-             nestedScrollEnabled={true}
-             bounces={true}
-           >
-             {searchSuggestions.map((hymn, index) => (
-               <YStack
-                 key={hymn.id}
-                 paddingHorizontal="$4"
-                 paddingVertical="$3.5"
-                 borderBottomWidth={index < searchSuggestions.length - 1 ? 1 : 0}
-                 borderBottomColor={theme.borderColor}
-                 onPress={() => selectSuggestion(hymn)}
-                 pressStyle={{ backgroundColor: `${theme.primary}08` }}
+      {/* Modern Skeleton Grid */}
+      {isLoading ? (
+        <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 100 }}>
+           <YStack height={22} width={150} backgroundColor={theme.borderColor} borderRadius="$2" opacity={0.2} marginBottom="$4" />
+           <XStack fw="wrap" jc="space-between">
+              {[1, 2, 4, 5, 6, 7, 8, 9].map(i => <SkeletonItem key={i} />)}
+           </XStack>
+        </ScrollView>
+      ) : (
+        <>
+          {/* Search Suggestions Dropdown - Root Level for Touch Handling */}
+          {showSuggestions && searchSuggestions.length > 0 && searchBarLayout && (
+             <YStack 
+               position="absolute"
+               top={searchBarLayout.y + 60} 
+               left={20}
+               right={20}
+               backgroundColor={theme.background}
+               borderRadius="$5"
+               borderWidth={1}
+               borderColor={theme.borderColor}
+               elevation="$10"
+               maxHeight={350}
+               overflow="hidden"
+               zIndex={2000}
+             >
+               <ScrollView 
+                 keyboardShouldPersistTaps="handled"
+                 keyboardDismissMode='none'
+                 nestedScrollEnabled={true}
+                 bounces={true}
                >
-                 <XStack ai="center" space="$3">
-                    <Circle size={32} backgroundColor={`${theme.primary}12`}>
-                       <Ionicons name="musical-note" size={16} color={theme.primary} />
-                    </Circle>
-                    <YStack f={1} space="$0.5">
-                       <Text fontFamily="$ethiopic" fontSize={15} fontWeight="700" color={theme.text} numberOfLines={1}>
-                         {hymn.title}
-                       </Text>
-                       <Text fontFamily="$ethiopic" fontSize={11} color={theme.textSecondary} opacity={0.8}>
-                         {hymn.section}
-                       </Text>
-                    </YStack>
-                    <Ionicons name="chevron-forward" size={14} color={theme.textSecondary} opacity={0.3} />
-                 </XStack>
-               </YStack>
-             ))}
-           </ScrollView>
-         </YStack>
-      )}
+                 {searchSuggestions.map((hymn, index) => (
+                   <YStack
+                     key={hymn.id}
+                     paddingHorizontal="$4"
+                     paddingVertical="$3.5"
+                     borderBottomWidth={index < searchSuggestions.length - 1 ? 1 : 0}
+                     borderBottomColor={theme.borderColor}
+                     onPress={() => selectSuggestion(hymn)}
+                     pressStyle={{ backgroundColor: `${theme.primary}08` }}
+                   >
+                     <XStack ai="center" space="$3">
+                        <Circle size={32} backgroundColor={`${theme.primary}12`}>
+                           <Ionicons name="musical-note" size={16} color={theme.primary} />
+                        </Circle>
+                        <YStack f={1} space="$0.5">
+                           <Text fontFamily="$ethiopic" fontSize={15} fontWeight="700" color={theme.text} numberOfLines={1}>
+                             {hymn.title}
+                           </Text>
+                           <Text fontFamily="$ethiopic" fontSize={11} color={theme.textSecondary} opacity={0.8}>
+                             {hymn.section}
+                           </Text>
+                        </YStack>
+                        <Ionicons name="chevron-forward" size={14} color={theme.textSecondary} opacity={0.3} />
+                     </XStack>
+                   </YStack>
+                 ))}
+               </ScrollView>
+             </YStack>
+          )}
 
-      <ScrollView 
-        contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
-        keyboardShouldPersistTaps="handled"
-        scrollEnabled={!showSuggestions}
-      >
-         <Text fontFamily="$ethiopicSerif" fontSize={20} fontWeight="800" color={theme.text} marginBottom="$4">
-            {t('categories')}
-         </Text>
-        <XStack fw="wrap" jc="space-between">
-          {sections.map((section) => (
-            <Card
-              key={section.id}
-              width={cardWidth}
-              height={cardWidth * 1.35}
-              backgroundColor={theme.cardBackground}
-              marginBottom="$5"
-              borderRadius="$6"
-              elevate
-              bordered
-              borderColor={theme.borderColor}
-              onPress={() => navigation.navigate('MezmurList', { sectionId: section.id, sectionTitle: section.label })}
-              pressStyle={{ scale: 0.96, opacity: 0.9 }}
-              overflow="hidden"
-            >
-              {section.image && (
-                <Image 
-                  source={section.image} 
-                  style={{ position: 'absolute', width: '100%', height: '100%' }} 
-                  resizeMode="cover"
-                />
-              )}
-              <YStack 
-                f={1} 
-                ai="center" 
-                jc="flex-end" 
-                padding="$3" 
-                paddingBottom="$4"
-                space="$2" 
-                backgroundColor="rgba(0,0,0,0.25)"
-              >
-                <Text 
-                  fontFamily="$ethiopicSerif" 
-                  fontSize={15} 
-                  fontWeight="900" 
-                  color="white" 
-                  textAlign="center"
-                  numberOfLines={2}
-                  textShadowColor="rgba(0,0,0,0.9)"
-                  textShadowOffset={{ width: 0, height: 1 }}
-                  textShadowRadius={4}
+          <ScrollView 
+            contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
+            keyboardShouldPersistTaps="handled"
+            scrollEnabled={!showSuggestions}
+          >
+             <Text fontFamily="$ethiopicSerif" fontSize={20} fontWeight="800" color={theme.text} marginBottom="$4">
+                {t('categories')}
+             </Text>
+            <XStack fw="wrap" jc="space-between">
+              {sections.map((section) => (
+                <Card
+                  key={section.id}
+                  width={cardWidth}
+                  height={cardWidth * 1.35}
+                  backgroundColor={theme.cardBackground}
+                  marginBottom="$5"
+                  borderRadius="$6"
+                  elevate
+                  bordered
+                  borderColor={theme.borderColor}
+                  onPress={() => navigation.navigate('MezmurList', { sectionId: section.id, sectionTitle: section.label })}
+                  pressStyle={{ scale: 0.96, opacity: 0.9 }}
+                  overflow="hidden"
                 >
-                  {section.label}
-                </Text>
-              </YStack>
-            </Card>
-          ))}
-        </XStack>
-      </ScrollView>
+                  {section.image && (
+                    <Image 
+                      source={section.image} 
+                      style={{ position: 'absolute', width: '100%', height: '100%' }} 
+                      resizeMode="cover"
+                    />
+                  )}
+                  <YStack 
+                    f={1} 
+                    ai="center" 
+                    jc="flex-end" 
+                    padding="$3" 
+                    paddingBottom="$4"
+                    space="$2" 
+                    backgroundColor="rgba(0,0,0,0.25)"
+                  >
+                    <Text 
+                      fontFamily="$ethiopicSerif" 
+                      fontSize={15} 
+                      fontWeight="900" 
+                      color="white" 
+                      textAlign="center"
+                      numberOfLines={2}
+                      textShadowColor="rgba(0,0,0,0.9)"
+                      textShadowOffset={{ width: 0, height: 1 }}
+                      textShadowRadius={4}
+                    >
+                      {section.label}
+                    </Text>
+                  </YStack>
+                </Card>
+              ))}
+            </XStack>
+          </ScrollView>
+        </>
+      )}
     </YStack>
   );
 };

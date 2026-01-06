@@ -16,6 +16,7 @@ const { useFavorites } = require('../context/FavoritesContext');
 const { useAuth } = require('../context/AuthContext');
 const MezmurListCard = require('../components/MezmurListCard');
 const { normalizeAmharic } = require('../utils/textUtils');
+const DataService = require('../services/DataService');
 
 // Constants
 const FILTER_IDS = {
@@ -27,20 +28,8 @@ const FILTER_IDS = {
 const SECTION_ALL_ID = 'ALL_SECTIONS';
 const LOAD_INCREMENT = 10;
 
-// Pre-calculate data metadata for high performance filtering
-// This runs once on module load, removing O(N) string splitting from the render path
-const PROCESSED_DATA = mezmursData.map(item => {
-  let lengthType = FILTER_IDS.SHORT;
-  if (item.lyrics) {
-     const count = item.lyrics.split('\n').length;
-     if (count > 8) lengthType = FILTER_IDS.LONG;
-  }
-  // Add searchable text string for faster search - now normalized for Amharic namesake chars
-  const rawSearchText = (item.title + ' ' + (item.lyrics || '') + ' ' + item.id).toLowerCase();
-  const searchText = normalizeAmharic(rawSearchText);
-  
-  return { ...item, lengthType, searchText };
-});
+// Data is now pre-processed and managed by DataService.js
+// Removing redundant module-level O(N) calculation to save memory and startup time.
 
 // Skeleton loader for a premium feel during "fetching"
 const SkeletonCard = memo(() => {
@@ -116,11 +105,20 @@ const HomeScreen = ({ navigation, route }) => {
   
   // State uses IDs for stable logic
   const [selectedFilterId, setSelectedFilterId] = useState(FILTER_IDS.ALL);
-  const [appliedFilterId, setAppliedFilterId] = useState(FILTER_IDS.ALL); // For deferred filtering
+  const [appliedFilterId, setAppliedFilterId] = useState(FILTER_IDS.ALL); 
   const [selectedSectionId, setSelectedSectionId] = useState(initialSectionId); 
   
-  const [isLoadingData, setIsLoadingData] = useState(true);
+  const [isLoadingData, setIsLoadingData] = useState(!DataService.isReady);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Sync with DataService readiness
+  useEffect(() => {
+    if (!DataService.isReady) {
+      DataService.waitForReady().then(() => setIsLoadingData(false));
+    } else {
+      setIsLoadingData(false);
+    }
+  }, []);
 
   // Debounce search query to prevent excessive filtering during typing
   // Debounce search query to prevent excessive filtering during typing
@@ -159,16 +157,12 @@ const HomeScreen = ({ navigation, route }) => {
   ], [t]);
 
   const sectionOptions = useMemo(() => {
-    const uniqueSections = [...new Set(mezmursData.map(item => item.section))].filter(Boolean);
+    const sections = DataService.getSections();
     return [
       { id: SECTION_ALL_ID, label: t('all') },
-      ...uniqueSections.map(s => ({ id: s, label: t(s) || s }))
+      ...sections.map(s => ({ id: s.id, label: t(s.label) || s.label }))
     ];
   }, [t]);
-
-  useEffect(() => {
-    setTimeout(() => setIsLoadingData(false), 800); 
-  }, []);
 
   // Update visibleCount if screen height changes
   useEffect(() => {
@@ -242,11 +236,11 @@ const HomeScreen = ({ navigation, route }) => {
   };
 
   const filteredMezmurs = useMemo(() => {
-    let result = PROCESSED_DATA;
+    let result = DataService.getAll();
 
     // 1. Filter by Section
     if (selectedSectionId !== SECTION_ALL_ID) {
-      result = result.filter(item => item.section === selectedSectionId);
+      result = DataService.getBySection(selectedSectionId);
     }
 
     // 2. Filter by Length (optimized with pre-calculated field)

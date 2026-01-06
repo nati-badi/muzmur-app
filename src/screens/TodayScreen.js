@@ -12,6 +12,7 @@ const MEZMURS = require('../data/mezmurs.json');
 const { useAudio } = require('../context/GlobalAudioState.js');
 const { useFavorites } = require('../context/FavoritesContext');
 const { useAuth } = require('../context/AuthContext');
+const DataService = require('../services/DataService');
 
 const TodayScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
@@ -19,7 +20,19 @@ const TodayScreen = ({ navigation }) => {
   const { t, language } = useLanguage();
   const { recentlyPlayed } = useAudio();
   const { favoritesCount } = useFavorites();
-  const { user, profileData } = useAuth();
+  const { user, profileData, loading: authLoading } = useAuth();
+  
+  const [dataReady, setDataReady] = useState(DataService.isReady);
+
+  useEffect(() => {
+    let mounted = true;
+    DataService.waitForReady().then(() => {
+      if (mounted) setDataReady(true);
+    });
+    return () => { mounted = false; };
+  }, []);
+
+  const isLoading = authLoading || !dataReady;
 
   const userDisplayName = user?.displayName || user?.email?.split('@')[0] || t('guest') || 'Guest';
 
@@ -43,7 +56,7 @@ const TodayScreen = ({ navigation }) => {
     const feastText = (feastSummary.major?.en || "") + " " + (feastSummary.monthly?.en || "");
     const feastTextAm = (feastSummary.major?.am || "") + " " + (feastSummary.monthly?.am || "");
     
-    // Keyword Mapping
+    // 2. Keyword Mapping to Sections
     let sectionMatch = "";
     if (feastText.includes("Mariam") || feastTextAm.includes("ማርያም")) sectionMatch = "የእመቤታችን የምስጋና መዝሙራት";
     else if (feastText.includes("Mikael") || feastTextAm.includes("ሚካኤል")) sectionMatch = "የቅዱስ ሚካኤል መዝሙራት";
@@ -54,29 +67,90 @@ const TodayScreen = ({ navigation }) => {
     else if (feastText.includes("Timket") || feastTextAm.includes("ጥምቀት")) sectionMatch = "የከተራና የጥምቀት መዝሙራት";
     else if (feastText.includes("Kana ZeGalila") || feastTextAm.includes("ቃና ዘገሊላ")) sectionMatch = "የቃና ዘገሊላ መዝሙራት";
     
-    // 1. Get Feast-Specific Hymns (Strict Priority)
-    let feastHymns = [];
-    if (sectionMatch) {
-      feastHymns = MEZMURS.filter(m => m.section === sectionMatch).sort(() => 0.5 - Math.random());
-    }
+    // 3. High-Performance Retrieval via DataService
+    const pool = DataService.getFeaturedForFeast(sectionMatch);
     
-    // 2. If we have less than 5, prepare Buffer (Maryam & Medhane Alem)
-    let finalSelection = [...feastHymns.slice(0, 5)];
-    
-    if (finalSelection.length < 5) {
-      const remainingCount = 5 - finalSelection.length;
-      
-      // Get Maryam and Medhane Alem pools (excluding already selected if they were the feast)
-      const bufferPool = MEZMURS.filter(m => 
-        (m.section === "የእመቤታችን የምስጋና መዝሙራት" || m.section === "የመድኃኔዓለም የምስጋና መዝሙራት") &&
-        !finalSelection.some(sel => sel.id === m.id)
-      ).sort(() => 0.5 - Math.random());
-      
-      finalSelection = [...finalSelection, ...bufferPool.slice(0, remainingCount)];
-    }
+    // Stable shuffle for variety without O(N) filtering
+    return [...pool].sort(() => 0.5 - Math.random()).slice(0, 5);
+  }, [month, day, t]);
 
-    return finalSelection;
-  }, [feastSummary]);
+  // Premium Skeleton Components
+  const SkeletonHeader = () => (
+    <XStack paddingHorizontal="$5" paddingVertical="$3" alignItems="center" justifyContent="center">
+      <Circle size={40} backgroundColor={theme.borderColor} opacity={0.2} position="absolute" left={16} />
+      <YStack space="$1" alignItems="center">
+        <YStack height={20} width={120} backgroundColor={theme.borderColor} borderRadius="$2" opacity={0.2} />
+        <YStack height={10} width={80} backgroundColor={theme.borderColor} borderRadius="$1" opacity={0.1} />
+      </YStack>
+      <Circle size={34} backgroundColor={theme.borderColor} opacity={0.2} position="absolute" right={16} />
+    </XStack>
+  );
+
+  const SkeletonSmallCard = () => (
+    <YStack width={150} marginRight="$4">
+      <Card width={150} height={150} backgroundColor={theme.cardBackground} borderRadius="$5" ai="center" jc="center" marginBottom="$2.5">
+        <Ionicons name="musical-note" size={60} color={theme.borderColor} opacity={0.08} />
+      </Card>
+      <YStack height={14} width="80%" backgroundColor={theme.borderColor} borderRadius="$1" opacity={0.2} marginBottom="$1" />
+      <YStack height={10} width="60%" backgroundColor={theme.borderColor} borderRadius="$1" opacity={0.1} />
+    </YStack>
+  );
+
+  const SkeletonFeaturedRow = () => (
+    <Card padding="$5" marginVertical="$4" borderRadius="$5" backgroundColor={theme.cardBackground} style={{ opacity: 0.6 }}>
+      <XStack space="$4" alignItems="center" marginBottom="$4">
+        <YStack height={60} width={60} backgroundColor={theme.borderColor} borderRadius="$2" opacity={0.2} />
+        <YStack space="$2" f={1}>
+          <YStack height={24} width="70%" backgroundColor={theme.borderColor} borderRadius="$2" opacity={0.2} />
+          <YStack height={14} width="40%" backgroundColor={theme.borderColor} borderRadius="$1" opacity={0.1} />
+        </YStack>
+      </XStack>
+      <YStack height={1} backgroundColor={theme.borderColor} marginVertical="$3" opacity={0.2} />
+      <YStack space="$2">
+        <YStack height={10} width="30%" backgroundColor={theme.borderColor} borderRadius="$1" opacity={0.1} />
+        <YStack height={24} width="85%" backgroundColor={theme.borderColor} borderRadius="$2" opacity={0.2} />
+      </YStack>
+    </Card>
+  );
+
+  if (isLoading) {
+    return (
+      <YStack f={1} backgroundColor={theme.background} paddingTop={insets.top}>
+        <SkeletonHeader />
+        <ScrollView f={1} showsVerticalScrollIndicator={false}>
+          <YStack padding="$5" space="$5">
+            <XStack space="$3" paddingBottom="$3">
+              <Card f={1} height={130} borderRadius="$5" backgroundColor={theme.borderColor} opacity={0.1} />
+              <Card f={1} height={130} borderRadius="$5" backgroundColor={theme.borderColor} opacity={0.1} />
+            </XStack>
+            <YStack space="$3">
+              <YStack height={22} width={150} backgroundColor={theme.borderColor} borderRadius="$2" opacity={0.2} />
+              <XStack>
+                <SkeletonSmallCard />
+                <SkeletonSmallCard />
+                <SkeletonSmallCard />
+              </XStack>
+            </YStack>
+            <SkeletonFeaturedRow />
+            <YStack space="$4">
+               <YStack height={22} width={180} backgroundColor={theme.borderColor} borderRadius="$2" opacity={0.2} />
+               {[1, 2, 3].map(i => (
+                 <YStack key={i} height={85} backgroundColor={theme.cardBackground} borderRadius="$4" paddingHorizontal="$4" justifyContent="center">
+                   <XStack ai="center" space="$4">
+                      <YStack height={45} width={45} borderRadius={10} backgroundColor={theme.borderColor} opacity={0.1} />
+                      <YStack f={1} space="$2">
+                        <YStack height={14} width="60%" backgroundColor={theme.borderColor} borderRadius="$1" opacity={0.2} />
+                        <YStack height={10} width="40%" backgroundColor={theme.borderColor} borderRadius="$1" opacity={0.1} />
+                      </YStack>
+                   </XStack>
+                 </YStack>
+               ))}
+            </YStack>
+          </YStack>
+        </ScrollView>
+      </YStack>
+    );
+  }
 
   return (
     <YStack f={1} backgroundColor={theme.background} paddingTop={insets.top}>

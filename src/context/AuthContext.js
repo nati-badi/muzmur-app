@@ -19,6 +19,7 @@ const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isDataReady, setIsDataReady] = useState(false);
   const [error, setError] = useState(null);
 
   // Fetch Firestore profile data
@@ -39,22 +40,32 @@ const AuthProvider = ({ children }) => {
 
   // Listen to auth state changes
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
-        fetchProfile(currentUser.uid);
+        await fetchProfile(currentUser.uid);
       } else {
         setProfileData(null);
       }
+      setIsDataReady(true);
       setLoading(false);
     });
+
+    // Safety timeout to ensure loading eventually clears 
+    const safetyTimer = setTimeout(() => {
+      setLoading(false);
+      setIsDataReady(true);
+    }, 5000);
 
     // Configure Google Sign-In
     GoogleSignin.configure({
         webClientId: '696692999848-fh9ajem00u585o8989jainpqn0nmcdo1.apps.googleusercontent.com',
     });
 
-    return unsubscribe;
+    return () => {
+      unsubscribe();
+      clearTimeout(safetyTimer);
+    };
   }, []);
 
   // Sign up with email and password
@@ -188,6 +199,7 @@ const AuthProvider = ({ children }) => {
     user,
     profileData,
     loading,
+    isDataReady,
     error,
     signUp,
     signIn,
