@@ -121,57 +121,50 @@ const SettingsScreen = ({ navigation }) => {
                 {themeOptions.map((opt) => (
                   <TouchableOpacity key={opt.id} onPress={() => setTheme(opt.id)} style={{ width: '48%', marginBottom: 12 }}>
                     <View style={{
-                      height: 70,
+                      backgroundColor: opt.isSystem ? '#F0F0F0' : opt.background,
+                      height: 60, // Slightly taller for swatches
                       borderRadius: 12,
-                      borderWidth: themeMode === opt.id ? 3 : 1.5,
+                      borderWidth: themeMode === opt.id ? 2 : 1.5,
                       borderColor: themeMode === opt.id ? theme.accent : theme.borderColor,
                       overflow: 'hidden',
-                      elevation: 3,
+                      justifyContent: 'center',
+                      elevation: 3, // Make them pop
                       shadowColor: '#000',
                       shadowOffset: { width: 0, height: 2 },
                       shadowOpacity: 0.1,
                       shadowRadius: 4,
                     }}>
-                      {/* Color Display - Split view showing primary and accent */}
+                      {/* Background Visuals */}
                       {opt.isSystem ? (
-                        <View style={{ flex: 1, flexDirection: 'row' }}>
-                          <View style={{ flex: 1, backgroundColor: '#F9F9F7' }} />
-                          <View style={{ flex: 1, backgroundColor: '#222831' }} />
-                        </View>
+                        <View style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: '50%', backgroundColor: '#1A1A1A' }} />
                       ) : (
-                        <View style={{ flex: 1, flexDirection: 'row' }}>
-                          <View style={{ flex: 0.6, backgroundColor: opt.primary }} />
-                          <View style={{ flex: 0.4, backgroundColor: opt.accent }} />
-                        </View>
+                        <XStack position="absolute" right={8} top={8} space="$1">
+                          <Circle size={8} backgroundColor={opt.primary} borderWidth={1} borderColor="rgba(255,255,255,0.2)" />
+                          <Circle size={8} backgroundColor={opt.accent} borderWidth={1} borderColor="rgba(255,255,255,0.2)" />
+                        </XStack>
                       )}
 
-                      {/* Label overlay at bottom */}
-                      <View style={{ 
-                        position: 'absolute', 
-                        bottom: 0, 
-                        left: 0, 
-                        right: 0, 
-                        backgroundColor: 'rgba(0,0,0,0.75)', 
-                        paddingVertical: 6,
-                        paddingHorizontal: 8,
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'center'
-                      }}>
+                      {/* Label with dark backdrop for guaranteed visibility */}
+                      <YStack px="$2.5" py="$1" backgroundColor="rgba(0,0,0,0.6)" borderRadius={20} alignSelf="center" zIndex={10}>
                         <Text 
                           color="#FFFFFF" 
                           fontFamily="$ethiopic" 
-                          fontSize={12} 
+                          fontSize={11} 
                           fontWeight="800"
+                          textAlign="center"
                         >
-                          {opt.name}
+                          {opt.name.toUpperCase()}
                         </Text>
-                        {themeMode === opt.id && (
-                          <Circle size={16} backgroundColor="#FFFFFF">
-                            <Ionicons name="checkmark" size={10} color="#000000" />
+                      </YStack>
+
+                      {/* Selection Indicator */}
+                      {themeMode === opt.id && (
+                        <View style={{ position: 'absolute', right: 6, bottom: 6 }}>
+                          <Circle size={18} backgroundColor={theme.accent}>
+                            <Ionicons name="checkmark" size={12} color="white" />
                           </Circle>
-                        )}
-                      </View>
+                        </View>
+                      )}
                     </View>
                   </TouchableOpacity>
                 ))}

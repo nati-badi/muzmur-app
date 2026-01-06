@@ -10,9 +10,9 @@ const { View, Image } = require('react-native');
 
 // Lift static data outside component to prevent recreation on every render
 const MENU_ITEMS = [
-  { id: 1, labelKey: 'home', icon: 'home-outline', activeIcon: 'home', screen: 'Tabs', params: { screen: 'Home' } },
-  { id: 2, labelKey: 'favorites', icon: 'heart-outline', activeIcon: 'heart', screen: 'Favorites' },
-  { id: 5, labelKey: 'calendar', icon: 'calendar-number-outline', activeIcon: 'calendar-number', screen: 'Calendar' },
+  { id: 1, labelKey: 'home', icon: 'home-outline', activeIcon: 'home', screen: 'Main', params: { screen: 'Home' } },
+  { id: 2, labelKey: 'favorites', icon: 'heart-outline', activeIcon: 'heart', screen: 'Main', params: { screen: 'Favorites' } },
+  { id: 5, labelKey: 'calendar', icon: 'calendar-number-outline', activeIcon: 'calendar-number', screen: 'Main', params: { screen: 'Calendar' } },
 ];
 
 const SECONDARY_ITEMS = [
@@ -36,11 +36,13 @@ const MenuItem = React.memo(({ item, t, theme, navigation, language }) => {
       opacity={isDisabled ? 0.4 : 1}
       onPress={() => {
         if (isDisabled) return;
+        
         if (item.params) {
           navigation.navigate(item.screen, item.params);
         } else {
           navigation.navigate(item.screen);
         }
+        
         setTimeout(() => navigation.closeDrawer(), 100);
       }}
       pressStyle={isDisabled ? {} : { backgroundColor: `${theme.primary}08`, scale: 0.98 }}
@@ -213,8 +215,8 @@ const Sidebar = (props) => {
           backgroundColor="transparent"
           padding={0}
           onPress={() => {
-            props.navigation.navigate('Profile');
-            props.navigation.closeDrawer();
+            props.navigation.navigate('Main', { screen: 'Profile' });
+            setTimeout(() => props.navigation.closeDrawer(), 100);
           }}
           pressStyle={{ opacity: 0.6 }}
         >

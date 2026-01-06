@@ -36,7 +36,9 @@ const DrawerNavigator = () => {
         },
       }}
     >
-      <Drawer.Screen name="Tabs" component={TabNavigator} />
+      <Drawer.Screen name="Main" component={TabNavigator} />
+      <Drawer.Screen name="Settings" component={SettingsScreen} />
+      <Drawer.Screen name="About" component={AboutScreen} />
     </Drawer.Navigator>
   );
 };
@@ -102,7 +104,7 @@ const AppNavigator = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator 
-        initialRouteName={!hasSeenWelcome ? "Welcome" : (user ? "Main" : "Auth")}
+        initialRouteName={!hasSeenWelcome ? "Welcome" : (user ? "Root" : "Auth")}
         screenOptions={{
           headerShown: false,
         }}
@@ -121,17 +123,11 @@ const AppNavigator = () => {
         
         {/* Main App Flow */}
         <Stack.Screen 
-          name="Main" 
+          name="Root" 
           component={DrawerNavigator}
           options={{ gestureEnabled: false }}
         />
         <Stack.Screen name="Detail" component={DetailScreen} />
-        <Stack.Screen name="MezmurList" component={HomeScreen} />
-        <Stack.Screen name="Favorites" component={FavoritesScreen} />
-        <Stack.Screen name="Profile" component={ProfileScreen} />
-        <Stack.Screen name="Settings" component={SettingsScreen} />
-        <Stack.Screen name="About" component={AboutScreen} />
-        <Stack.Screen name="Calendar" component={CalendarScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

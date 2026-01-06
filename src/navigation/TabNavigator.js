@@ -7,6 +7,7 @@ const TodayScreen = require('../screens/TodayScreen').default || require('../scr
 const ProfileScreen = require('../screens/ProfileScreen').default || require('../screens/ProfileScreen');
 const CalendarScreen = require('../screens/CalendarScreen').default || require('../screens/CalendarScreen');
 const SectionListScreen = require('../screens/SectionListScreen').default || require('../screens/SectionListScreen');
+const FavoritesScreen = require('../screens/FavoritesScreen').default || require('../screens/FavoritesScreen');
 const { useAppTheme } = require('../context/ThemeContext');
 const { useLanguage } = require('../context/LanguageContext');
 
@@ -56,6 +57,7 @@ const CustomBottomPill = ({ state, descriptors, navigation, theme, t }) => {
         if (route.name === 'Home') iconName = isFocused ? 'home' : 'home-outline';
         else if (route.name === 'Mezmurs') iconName = isFocused ? 'musical-notes' : 'musical-notes-outline';
         else if (route.name === 'Calendar') iconName = isFocused ? 'calendar-number' : 'calendar-number-outline';
+        else if (route.name === 'Favorites') iconName = isFocused ? 'heart' : 'heart-outline';
         else if (route.name === 'Profile') iconName = isFocused ? 'person' : 'person-outline';
 
         return (
@@ -117,6 +119,11 @@ const TabNavigator = () => {
         name="Calendar" 
         component={CalendarScreen} 
         options={{ tabBarLabel: t('calendar') }}
+      />
+      <TopTab.Screen 
+        name="Favorites" 
+        component={FavoritesScreen} 
+        options={{ tabBarLabel: t('favorites') }}
       />
       <TopTab.Screen 
         name="Profile" 
