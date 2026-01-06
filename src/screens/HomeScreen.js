@@ -15,6 +15,7 @@ const SearchBar = require('../components/SearchBar');
 const { useFavorites } = require('../context/FavoritesContext');
 const { useAuth } = require('../context/AuthContext');
 const MezmurListCard = require('../components/MezmurListCard');
+const { normalizeAmharic } = require('../utils/textUtils');
 
 // Constants
 const FILTER_IDS = {
@@ -34,8 +35,9 @@ const PROCESSED_DATA = mezmursData.map(item => {
      const count = item.lyrics.split('\n').length;
      if (count > 8) lengthType = FILTER_IDS.LONG;
   }
-  // Add searchable text string for faster search
-  const searchText = (item.title + ' ' + (item.lyrics || '') + ' ' + item.id).toLowerCase();
+  // Add searchable text string for faster search - now normalized for Amharic namesake chars
+  const rawSearchText = (item.title + ' ' + (item.lyrics || '') + ' ' + item.id).toLowerCase();
+  const searchText = normalizeAmharic(rawSearchText);
   
   return { ...item, lengthType, searchText };
 });
@@ -49,8 +51,6 @@ const SkeletonCard = memo(() => {
     padding="$4"
     borderRadius="$4"
     marginBottom="$3"
-    borderWidth={1}
-    borderColor="$borderColor"
     opacity={0.5}
   >
     <XStack space="$3" alignItems="center">
@@ -254,10 +254,10 @@ const HomeScreen = ({ navigation, route }) => {
       result = result.filter(item => item.lengthType === appliedFilterId);
     }
 
-    // 3. Search (using pre-calculated searchText)
+    // 3. Search (using pre-calculated and normalized searchText)
     if (debouncedQuery) {
-      const lowerQuery = debouncedQuery.toLowerCase();
-      result = result.filter(item => item.searchText.includes(lowerQuery));
+      const normalizedQuery = normalizeAmharic(debouncedQuery.toLowerCase());
+      result = result.filter(item => item.searchText.includes(normalizedQuery));
     }
 
     return result;
@@ -397,7 +397,7 @@ const HomeScreen = ({ navigation, route }) => {
       </XStack>
 
       <FlatList
-        data={isLoadingData ? [1, 2, 3, 4, 5, 6] : paginatedData}
+        data={isLoadingData ? [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] : paginatedData}
         keyExtractor={(item, index) => isLoadingData ? `skeleton-${index}` : String(item.id)}
         renderItem={isLoadingData ? () => <SkeletonCard /> : renderItem}
         getItemLayout={getItemLayout}
@@ -406,7 +406,7 @@ const HomeScreen = ({ navigation, route }) => {
         maxToRenderPerBatch={5}
         windowSize={7}
         updateCellsBatchingPeriod={50}
-        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 140 }}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 100 }}
         ListFooterComponent={
            !isLoadingData && filteredMezmurs.length > visibleCount && (
              <YStack alignItems="center" marginTop="$4" marginBottom="$6">

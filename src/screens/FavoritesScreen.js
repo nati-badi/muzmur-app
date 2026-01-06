@@ -97,7 +97,7 @@ const FavoritesScreen = ({ navigation }) => {
           windowSize={7}
           updateCellsBatchingPeriod={50}
           removeClippedSubviews={true}
-          contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 10, paddingBottom: 32 }}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 10, paddingBottom: 100 }}
         />
       )}
     </YStack>

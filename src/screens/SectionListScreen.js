@@ -7,6 +7,7 @@ const { useLanguage } = require('../context/LanguageContext');
 const SearchBar = require('../components/SearchBar');
 const { SECTIONS } = require('../constants/sections');
 const MEZMURS = require('../data/mezmurs.json');
+const { normalizeAmharic } = require('../utils/textUtils');
 
 const SectionListScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
@@ -36,8 +37,9 @@ const SectionListScreen = ({ navigation }) => {
   const handleSearchChange = (text) => {
     setSearchQuery(text);
     if (text.trim().length > 1) {
+      const normalizedQuery = normalizeAmharic(text.toLowerCase());
       const suggestions = MEZMURS
-        .filter(m => m.title.toLowerCase().includes(text.toLowerCase()))
+        .filter(m => normalizeAmharic(m.title.toLowerCase()).includes(normalizedQuery))
         .slice(0, 10);
       setSearchSuggestions(suggestions);
       setShowSuggestions(suggestions.length > 0);
@@ -208,7 +210,7 @@ const SectionListScreen = ({ navigation }) => {
       )}
 
       <ScrollView 
-        contentContainerStyle={{ padding: 20, paddingBottom: 140 }}
+        contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
         keyboardShouldPersistTaps="handled"
         scrollEnabled={!showSuggestions}
       >

@@ -29,15 +29,19 @@ const CustomBottomPill = ({ state, descriptors, navigation, theme, t }) => {
       shadowColor="#000"
       shadowOffset={{ width: 0, height: 4 }}
       shadowOpacity={0.4}
-      shadowRadius={10}
+      shadowRadius={12}
       paddingHorizontal={10}
       alignItems="center"
       justifyContent="space-around"
+      borderWidth={theme.id === 'midnight' ? 1 : 0}
+      borderColor="rgba(255,255,255,0.15)"
     >
-      {state.routes.map((route, index) => {
+      {state.routes.filter(route => route.name !== 'Favorites').map((route) => {
+        // Find actual index in original state for focused check
+        const originalIndex = state.routes.findIndex(r => r.name === route.name);
         const { options } = descriptors[route.key];
         const label = options.tabBarLabel !== undefined ? options.tabBarLabel : route.name;
-        const isFocused = state.index === index;
+        const isFocused = state.index === originalIndex;
 
         const onPress = () => {
           const event = navigation.emit({
@@ -51,7 +55,7 @@ const CustomBottomPill = ({ state, descriptors, navigation, theme, t }) => {
           }
         };
 
-        const color = isFocused ? '#FFFFFF' : 'rgba(255,255,255,0.5)';
+        const color = isFocused ? '#FFFFFF' : 'rgba(255,255,255,0.7)';
         
         let iconName;
         if (route.name === 'Home') iconName = isFocused ? 'home' : 'home-outline';

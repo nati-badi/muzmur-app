@@ -10,9 +10,9 @@ const { View, Image } = require('react-native');
 
 // Lift static data outside component to prevent recreation on every render
 const MENU_ITEMS = [
-  { id: 1, labelKey: 'home', icon: 'home-outline', activeIcon: 'home', screen: 'Main', params: { screen: 'Home' } },
-  { id: 2, labelKey: 'favorites', icon: 'heart-outline', activeIcon: 'heart', screen: 'Main', params: { screen: 'Favorites' } },
-  { id: 5, labelKey: 'calendar', icon: 'calendar-number-outline', activeIcon: 'calendar-number', screen: 'Main', params: { screen: 'Calendar' } },
+  { id: 1, labelKey: 'home', icon: 'home-outline', activeIcon: 'home', screen: 'Tabs', params: { screen: 'Home' } },
+  { id: 2, labelKey: 'favorites', icon: 'heart-outline', activeIcon: 'heart', screen: 'Tabs', params: { screen: 'Favorites' } },
+  { id: 5, labelKey: 'calendar', icon: 'calendar-number-outline', activeIcon: 'calendar-number', screen: 'Tabs', params: { screen: 'Calendar' } },
 ];
 
 const SECONDARY_ITEMS = [
@@ -215,7 +215,11 @@ const Sidebar = (props) => {
           backgroundColor="transparent"
           padding={0}
           onPress={() => {
-            props.navigation.navigate('Main', { screen: 'Profile' });
+            props.navigation.navigate({
+              name: 'Tabs',
+              params: { screen: 'Profile' },
+              merge: true,
+            });
             setTimeout(() => props.navigation.closeDrawer(), 100);
           }}
           pressStyle={{ opacity: 0.6 }}

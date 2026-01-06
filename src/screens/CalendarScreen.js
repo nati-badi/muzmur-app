@@ -106,7 +106,7 @@ const CalendarScreen = ({ navigation }) => {
         </TouchableOpacity>
       </XStack>
 
-      <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 140 }}>
+      <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 100 }}>
         
         {/* Month Navigator */}
         <YStack backgroundColor={theme.surface} borderRadius="$4" padding="$4" elevation="$2" marginBottom="$4" borderWidth={1} borderColor={theme.borderColor}>

@@ -215,7 +215,7 @@ const TodayScreen = ({ navigation }) => {
                       height={150} 
                       backgroundColor={theme.cardBackground} 
                       borderRadius="$5" 
-                      bordered 
+                      borderWidth={0.6}
                       borderColor={theme.borderColor}
                       ai="center"
                       jc="center"
@@ -252,7 +252,7 @@ const TodayScreen = ({ navigation }) => {
             borderRadius="$5"
             backgroundColor={theme.cardBackground}
             borderColor={theme.borderColor}
-            borderWidth={1}
+            borderWidth={0.6}
             elevation="$2"
             shadowColor="$shadowColor"
             shadowOffset={{ width: 0, height: 4 }}
@@ -312,7 +312,8 @@ const TodayScreen = ({ navigation }) => {
                   padding="$0"
                   height={85}
                   backgroundColor={theme.cardBackground}
-                  bordered
+                  borderWidth={0.6}
+                  borderColor={theme.borderColor}
                   borderRadius="$4"
                   pressStyle={{ scale: 0.98, opacity: 0.9 }}
                   onPress={() => navigation.navigate('Detail', { mezmur: hymn })}

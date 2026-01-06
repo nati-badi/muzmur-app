@@ -36,7 +36,7 @@ const DrawerNavigator = () => {
         },
       }}
     >
-      <Drawer.Screen name="Main" component={TabNavigator} />
+      <Drawer.Screen name="Tabs" component={TabNavigator} />
       <Drawer.Screen name="Settings" component={SettingsScreen} />
       <Drawer.Screen name="About" component={AboutScreen} />
     </Drawer.Navigator>
@@ -128,6 +128,7 @@ const AppNavigator = () => {
           options={{ gestureEnabled: false }}
         />
         <Stack.Screen name="Detail" component={DetailScreen} />
+        <Stack.Screen name="MezmurList" component={HomeScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
