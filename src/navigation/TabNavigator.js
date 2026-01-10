@@ -2,140 +2,75 @@ const React = require('react');
 const { createMaterialTopTabNavigator } = require('@react-navigation/material-top-tabs');
 const { Ionicons } = require('@expo/vector-icons');
 const { Text, XStack, YStack } = require('tamagui');
+const { useSafeAreaInsets } = require('react-native-safe-area-context');
 
 const TodayScreen = require('../screens/TodayScreen').default || require('../screens/TodayScreen');
 const ProfileScreen = require('../screens/ProfileScreen').default || require('../screens/ProfileScreen');
 const CalendarScreen = require('../screens/CalendarScreen').default || require('../screens/CalendarScreen');
 const SectionListScreen = require('../screens/SectionListScreen').default || require('../screens/SectionListScreen');
 const FavoritesScreen = require('../screens/FavoritesScreen').default || require('../screens/FavoritesScreen');
+const MiniPlayer = require('../components/MiniPlayer').default || require('../components/MiniPlayer');
+const NavigationService = require('../services/NavigationService');
 const { useAppTheme } = require('../context/ThemeContext');
 const { useLanguage } = require('../context/LanguageContext');
 
+const CustomBottomPill = require('../components/CustomBottomPill').default || require('../components/CustomBottomPill');
+
 const TopTab = createMaterialTopTabNavigator();
 
-const CustomBottomPill = ({ state, descriptors, navigation, theme, t }) => {
-  const insets = require('react-native-safe-area-context').useSafeAreaInsets();
-  
-  return (
-    <XStack
-      position="absolute"
-      bottom={Math.max(insets.bottom, 15)}
-      left={15}
-      right={15}
-      backgroundColor={theme.primary}
-      borderRadius={25}
-      height={65}
-      elevation={10}
-      shadowColor="#000"
-      shadowOffset={{ width: 0, height: 4 }}
-      shadowOpacity={0.4}
-      shadowRadius={12}
-      paddingHorizontal={10}
-      alignItems="center"
-      justifyContent="space-around"
-      borderWidth={theme.id === 'midnight' ? 1 : 0}
-      borderColor="rgba(255,255,255,0.15)"
-    >
-      {state.routes.filter(route => route.name !== 'Favorites').map((route) => {
-        // Find actual index in original state for focused check
-        const originalIndex = state.routes.findIndex(r => r.name === route.name);
-        const { options } = descriptors[route.key];
-        const label = options.tabBarLabel !== undefined ? options.tabBarLabel : route.name;
-        const isFocused = state.index === originalIndex;
-
-        const onPress = () => {
-          const event = navigation.emit({
-            type: 'tabPress',
-            target: route.key,
-            canPreventDefault: true,
-          });
-
-          if (!isFocused && !event.defaultPrevented) {
-            navigation.navigate(route.name);
-          }
-        };
-
-        const color = isFocused ? '#FFFFFF' : 'rgba(255,255,255,0.7)';
-        
-        let iconName;
-        if (route.name === 'Home') iconName = isFocused ? 'home' : 'home-outline';
-        else if (route.name === 'Mezmurs') iconName = isFocused ? 'musical-notes' : 'musical-notes-outline';
-        else if (route.name === 'Calendar') iconName = isFocused ? 'calendar-number' : 'calendar-number-outline';
-        else if (route.name === 'Favorites') iconName = isFocused ? 'heart' : 'heart-outline';
-        else if (route.name === 'Profile') iconName = isFocused ? 'person' : 'person-outline';
-
-        return (
-          <YStack
-            key={route.key}
-            flex={1}
-            alignItems="center"
-            justifyContent="center"
-            onPress={onPress}
-            pressStyle={{ opacity: 0.7 }}
-          >
-            <Ionicons name={iconName} size={22} color={color} />
-            <Text
-              fontFamily="$ethiopic"
-              fontSize={10}
-              fontWeight="700"
-              color={color}
-              marginTop={2}
-              numberOfLines={1}
-            >
-              {label}
-            </Text>
-          </YStack>
-        );
-      })}
-    </XStack>
-  );
-};
-
-const TabNavigator = () => {
+const TabNavigator = ({ navigation }) => {
   const { theme } = useAppTheme();
   const { t } = useLanguage();
 
   const renderTabBar = React.useCallback(
-    (props) => <CustomBottomPill {...props} theme={theme} t={t} />,
+    (props) => {
+      // Register this specific tab navigator's ref with the central service
+      // props.navigation here is the actual internal navigator reference
+      NavigationService.registerTabRef(props.navigation);
+      return <CustomBottomPill {...props} theme={theme} t={t} />;
+    },
     [theme, t]
   );
 
   return (
-    <TopTab.Navigator
-      tabBarPosition="bottom"
-      tabBar={renderTabBar}
-      initialRouteName="Home"
-      screenOptions={{
-        swipeEnabled: true,
-      }}
-    >
-      <TopTab.Screen 
-        name="Home" 
-        component={TodayScreen} 
-        options={{ tabBarLabel: t('home') }}
-      />
-      <TopTab.Screen 
-        name="Mezmurs" 
-        component={SectionListScreen} 
-        options={{ tabBarLabel: t('mezmurs') }}
-      />
-      <TopTab.Screen 
-        name="Calendar" 
-        component={CalendarScreen} 
-        options={{ tabBarLabel: t('calendar') }}
-      />
-      <TopTab.Screen 
-        name="Favorites" 
-        component={FavoritesScreen} 
-        options={{ tabBarLabel: t('favorites') }}
-      />
-      <TopTab.Screen 
-        name="Profile" 
-        component={ProfileScreen} 
-        options={{ tabBarLabel: t('profile') }}
-      />
-    </TopTab.Navigator>
+    <YStack flex={1}>
+      <TopTab.Navigator
+        id="MainTabs"
+        tabBarPosition="bottom"
+        tabBar={renderTabBar}
+        initialRouteName="Home"
+        screenOptions={{
+          swipeEnabled: true,
+          animationEnabled: false, // Prevents "stuck between tabs" glitch on some Android/iOS devices
+          lazy: true,              // Only render tabs when focused for better performance
+        }}
+      >
+        <TopTab.Screen 
+          name="Home" 
+          component={TodayScreen} 
+          options={{ tabBarLabel: t('home') }}
+        />
+        <TopTab.Screen 
+          name="Mezmurs" 
+          component={SectionListScreen} 
+          options={{ tabBarLabel: t('mezmurs') }}
+        />
+        <TopTab.Screen 
+          name="Calendar" 
+          component={CalendarScreen} 
+          options={{ tabBarLabel: t('calendar') }}
+        />
+
+        <TopTab.Screen 
+          name="Profile" 
+          component={ProfileScreen} 
+          options={{ tabBarLabel: t('profile') }}
+        />
+      </TopTab.Navigator>
+      <MiniPlayer onPlayerPress={(mezmur) => NavigationService.navigateToRoot('Detail', { mezmur })} />
+    </YStack>
   );
 };
 
 module.exports = TabNavigator;
+

@@ -22,7 +22,7 @@ const AuthScreen = ({ navigation }) => {
   // Navigate to Main when user is fully authenticated (not guest)
   useEffect(() => {
     if (user && !user.isAnonymous) {
-      navigation.replace('Root');
+      navigation.replace('Drawer');
     }
   }, [user, navigation]);
 
@@ -97,7 +97,7 @@ const AuthScreen = ({ navigation }) => {
     setLoading(false);
     
     if (result.success) {
-      navigation.replace('Root');
+      navigation.replace('Drawer');
     } else {
       setError(formatError(result.error));
     }
@@ -112,7 +112,7 @@ const AuthScreen = ({ navigation }) => {
     setLoading(false);
 
     if (result.success) {
-      navigation.replace('Root');
+      navigation.replace('Drawer');
     } else {
       if (result.error !== 'Sign in cancelled') {
           setError(formatError(result.error));

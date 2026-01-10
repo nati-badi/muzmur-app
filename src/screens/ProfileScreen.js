@@ -184,7 +184,7 @@ const ProfileScreen = ({ navigation }) => {
         </Modal>
       </XStack>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 140 }}>
         {/* Profile Card */}
         <YStack padding="$5" alignItems="center">
           <YStack position="relative">

@@ -16,7 +16,7 @@ const WelcomeScreen = ({ navigation }) => {
 
   const handleContinueWithoutAccount = async () => {
     await AsyncStorage.setItem('hasSeenWelcome', 'true');
-    navigation.replace('Root');
+    navigation.replace('Drawer');
   };
 
   return (

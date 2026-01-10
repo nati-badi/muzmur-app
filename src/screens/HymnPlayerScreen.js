@@ -94,11 +94,11 @@ const HymnPlayerScreen = ({ navigation }) => {
           onPress={() => navigation.toggleDrawer()}
           pressStyle={{ opacity: 0.6 }}
         />
-        <div style={{ flex: 1, alignItems: 'center' }}>
+        <YStack flex={1} alignItems="center">
           <Text fontFamily="$ethiopicSerif" fontSize={22} fontWeight="800" color={theme.primary} textAlign="center">
             {t('player')}
           </Text>
-        </div>
+        </YStack>
       </XStack>
 
       {/* Album Art Section */}

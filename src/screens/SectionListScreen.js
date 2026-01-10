@@ -245,7 +245,7 @@ const SectionListScreen = ({ navigation }) => {
           )}
 
           <ScrollView 
-            contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
+            contentContainerStyle={{ padding: 20, paddingBottom: 140 }}
             keyboardShouldPersistTaps="handled"
             scrollEnabled={!showSuggestions}
           >

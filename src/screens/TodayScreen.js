@@ -200,7 +200,7 @@ const TodayScreen = ({ navigation }) => {
         </Button>
       </XStack>
 
-      <ScrollView f={1} showsVerticalScrollIndicator={false}>
+      <ScrollView f={1} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 140 }}>
         <YStack padding="$5" space="$5">
           
           {/* Quick Actions / Link Tiles - Enhanced Premium */}
@@ -352,21 +352,53 @@ const TodayScreen = ({ navigation }) => {
             <YStack height={1} backgroundColor={theme.borderColor} marginVertical="$3" opacity={0.5} />
 
             {/* Feast Section */}
-            <YStack space="$3">
-              <Text fontFamily="$ethiopicSerif" fontSize={12} fontWeight="800" color={theme.primary} opacity={0.8} textTransform="uppercase" letterSpacing={1}>
+            <YStack space="$2.5">
+              <Text 
+                fontFamily="$ethiopicSerif" 
+                fontSize={12} 
+                fontWeight="800" 
+                color={theme.primary} 
+                opacity={0.7} 
+                textTransform="uppercase" 
+                letterSpacing={1.2}
+              >
                 {t('todaysFeast')}
               </Text>
               
-               {feastSummary.major && (
-                 <Text fontFamily="$ethiopicSerif" fontSize={22} fontWeight="900" color={theme.text} lineHeight={30}>
-                   {t(feastSummary.major['am'] || feastSummary.major['en'] || '')}
-                 </Text>
-               )}
-               {feastSummary.monthly && (
-                 <Text fontFamily="$ethiopic" fontSize={16} color={theme.textSecondary} lineHeight={24} opacity={0.9}>
-                   {t(feastSummary.monthly['am'] || feastSummary.monthly['en'] || '')}
-                 </Text>
-               )}
+              {/* Enhanced Feast Rendering - Final Polish */}
+              <YStack space="$3">
+                {/* 1. Major Annual Feast */}
+                {feastSummary.major ? (
+                  <Text 
+                    fontFamily="$ethiopic" 
+                    fontSize={26} 
+                    fontWeight="900" 
+                    color={theme.text}
+                    lineHeight={36}
+                  >
+                    {feastSummary.major[language] || feastSummary.major['am'] || feastSummary.major['en'] || ''}
+                  </Text>
+                ) : null}
+                
+                {/* 2. Monthly Commemoration */}
+                {feastSummary.monthly ? (
+                  <Text 
+                    fontFamily="$ethiopic" 
+                    fontSize={feastSummary.major ? 20 : 25} 
+                    color={feastSummary.major ? theme.primary : theme.text} 
+                    fontWeight="900"
+                    lineHeight={feastSummary.major ? 28 : 36}
+                  >
+                    {feastSummary.monthly[language] || feastSummary.monthly['am'] || feastSummary.monthly['en'] || ''}
+                  </Text>
+                ) : null}
+
+                {(!feastSummary.major && !feastSummary.monthly) && (
+                  <Text fontFamily="$ethiopic" fontSize={16} color={theme.textSecondary} opacity={0.6}>
+                    {t('noFeastToday')}
+                  </Text>
+                )}
+              </YStack>
             </YStack>
           </Card>
 
@@ -416,7 +448,7 @@ const TodayScreen = ({ navigation }) => {
 
           <Separator marginVertical="$4" opacity={0.1} />
           
-           <Text textAlign="center" fontFamily="$body" fontSize={12} color={theme.textSecondary} opacity={0.6} marginBottom="$10">
+           <Text textAlign="center" fontFamily="$body" fontSize={12} color={theme.textSecondary} opacity={0.6}>
              {t('version')} 1.0.0
            </Text>
         </YStack>

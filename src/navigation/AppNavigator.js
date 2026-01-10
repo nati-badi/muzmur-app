@@ -15,40 +15,25 @@ const AboutScreen = require('../screens/AboutScreen').default || require('../scr
 const CalendarScreen = require('../screens/CalendarScreen').default || require('../screens/CalendarScreen');
 const TabNavigator = require('./TabNavigator').default || require('./TabNavigator');
 const Sidebar = require('../components/Sidebar').default || require('../components/Sidebar');
+const HymnPlayerScreen = require('../screens/HymnPlayerScreen').default || require('../screens/HymnPlayerScreen');
 const { useAuth } = require('../context/AuthContext');
 const { useFavorites } = require('../context/FavoritesContext');
 const MigrationService = require('../services/MigrationService');
 const AsyncStorage = require('@react-native-async-storage/async-storage').default || require('@react-native-async-storage/async-storage');
 const { useAppTheme } = require('../context/ThemeContext');
 
-const Stack = createStackNavigator();
-const Drawer = createDrawerNavigator();
+const DrawerNavigator = require('./DrawerNavigator').default || require('./DrawerNavigator');
 
-const DrawerNavigator = () => {
-  return (
-    <Drawer.Navigator
-      drawerContent={(props) => <Sidebar {...props} />}
-      screenOptions={{
-        headerShown: false,
-        drawerType: 'front',
-        drawerStyle: {
-          width: '75%',
-        },
-      }}
-    >
-      <Drawer.Screen name="Tabs" component={TabNavigator} />
-      <Drawer.Screen name="Settings" component={SettingsScreen} />
-      <Drawer.Screen name="About" component={AboutScreen} />
-    </Drawer.Navigator>
-  );
-};
+const Stack = createStackNavigator();
+
+const { navigationRef } = require('../services/NavigationService');
 
 const AppNavigator = () => {
   const { user, loading } = useAuth();
   const hasRunMigration = React.useRef(null);
   const { setFavoritesFromCloud } = useFavorites();
   const [hasSeenWelcome, setHasSeenWelcome] = React.useState(null);
-
+  
   // Check if user has seen welcome screen
   useEffect(() => {
     const checkWelcomeStatus = async () => {
@@ -102,9 +87,9 @@ const AppNavigator = () => {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       <Stack.Navigator 
-        initialRouteName={!hasSeenWelcome ? "Welcome" : (user ? "Root" : "Auth")}
+        initialRouteName={!hasSeenWelcome ? "Welcome" : (user ? "Drawer" : "Auth")}
         screenOptions={{
           headerShown: false,
         }}
@@ -122,13 +107,10 @@ const AppNavigator = () => {
         />
         
         {/* Main App Flow */}
-        <Stack.Screen 
-          name="Root" 
-          component={DrawerNavigator}
-          options={{ gestureEnabled: false }}
-        />
+        <Stack.Screen name="Drawer" component={DrawerNavigator} />
         <Stack.Screen name="Detail" component={DetailScreen} />
-        <Stack.Screen name="MezmurList" component={HomeScreen} />
+        <Stack.Screen name="Favorites" component={FavoritesScreen} />
+        <Stack.Screen name="HymnPlayer" component={HymnPlayerScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

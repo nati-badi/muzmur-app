@@ -147,7 +147,11 @@ const HOLIDAY_DATA = {
     },
     "30": {
         en: "Kidus Markos (St. Mark), Yohannes (John the Baptist)",
-        am: "ቅዱስ ማርቆስ፣ ዮሐንስ መጥምቅ"
+        am: "ቅዱስ ማርቆስ፣ ዮሐንስ መጥምቅ",
+        details: {
+            am: "ቅዱስ ማርቆስ ወንጌላዊ እና ዮሐንስ መጥምቅ የሚታሰቡበት ዕለት ነው።",
+            en: "The day commemorating St. Mark the Evangelist and John the Baptist."
+        }
     }
   },
 
