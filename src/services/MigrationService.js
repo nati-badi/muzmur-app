@@ -124,6 +124,53 @@ class MigrationService {
   }
 
   /**
+   * Migrate local guest playlists to user account
+   */
+  static async migratePlaylists(userId) {
+    try {
+      console.log('Migrating playlists for user:', userId);
+      
+      // Get guest playlists (if any) to migrate
+      const guestPlaylists = await AsyncStorage.getItem('user_playlists_guest');
+      const guestPls = guestPlaylists ? JSON.parse(guestPlaylists) : [];
+      
+      if (guestPls.length === 0) {
+        return { success: true, migrated: 0 };
+      }
+
+      // Check if cloud has playlists already
+      const cloudProfile = await UserProfileService.getProfile(userId);
+      
+      if (cloudProfile.success && cloudProfile.data?.playlists) {
+        console.log('Merging local and cloud playlists');
+        // Merge - prioritizing cloud for items with same ID, or just appending new ones
+        // For simplicity, we'll append local playlists that don't exist in cloud by name
+        const cloudPls = cloudProfile.data.playlists;
+        const mergedPlaylists = [...cloudPls];
+        
+        guestPls.forEach(localPl => {
+          if (!cloudPls.find(cp => cp.name === localPl.name)) {
+            mergedPlaylists.push({ ...localPl, id: Date.now().toString() + Math.random().toString().slice(2, 5) });
+          }
+        });
+        
+        await UserProfileService.syncPlaylists(userId, mergedPlaylists);
+        await AsyncStorage.setItem(`user_playlists_${userId}`, JSON.stringify(mergedPlaylists));
+      } else {
+        console.log('Uploading local playlists to cloud');
+        await UserProfileService.syncPlaylists(userId, guestPls);
+        await AsyncStorage.setItem(`user_playlists_${userId}`, JSON.stringify(guestPls));
+      }
+
+      await AsyncStorage.removeItem('user_playlists_guest');
+      return { success: true, migrated: guestPls.length };
+    } catch (error) {
+      console.error('Error migrating playlists:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
    * Perform full migration for a user
    */
   static async performFullMigration(userId) {
@@ -140,12 +187,14 @@ class MigrationService {
       const favoritesResult = await this.migrateFavorites(userId);
       const themeResult = await this.migrateTheme(userId);
       const languageResult = await this.migrateLanguage(userId);
+      const playlistsResult = await this.migratePlaylists(userId);
 
       return {
         success: true,
         favorites: favoritesResult,
         theme: themeResult,
-        language: languageResult
+        language: languageResult,
+        playlists: playlistsResult
       };
     } catch (error) {
       console.error('Error performing full migration:', error);
@@ -178,6 +227,11 @@ class MigrationService {
       }
       if (data.language) {
         await AsyncStorage.setItem('selectedLanguage', data.language);
+      }
+      if (data.playlists) {
+        const userKey = `user_playlists_${userId}`;
+        await AsyncStorage.setItem(userKey, JSON.stringify(data.playlists));
+        console.log('Playlists pulled from cloud:', data.playlists.length);
       }
 
       return { success: true, synced: true };

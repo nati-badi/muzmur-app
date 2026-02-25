@@ -7,20 +7,21 @@ const { useAppTheme } = require('../context/ThemeContext');
 const { useLanguage } = require('../context/LanguageContext');
 const { useFavorites } = require('../context/FavoritesContext');
 const { Ionicons } = require('@expo/vector-icons');
-const mezmursData = require('../data/mezmurs.json');
+const DataService = require('../services/DataService');
 const { TouchableOpacity } = require('react-native');
-
 const MezmurListCard = require('../components/MezmurListCard');
+
+const ScreenHeader = require('../components/ScreenHeader');
 
 const FavoritesScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const { theme } = useAppTheme();
   const { t } = useLanguage();
   const { favorites, toggleFavorite, isFavorite } = useFavorites();
-  
+
   const favoriteMezmurs = useMemo(() => {
     return favorites
-      .map(id => mezmursData.find(m => String(m.id) === String(id)))
+      .map(id => DataService.getAll().find(m => String(m.id) === String(id)))
       .filter(Boolean)
       .map(m => {
         const lineCount = (m.lyrics || '').split('\n').length;
@@ -34,15 +35,15 @@ const FavoritesScreen = ({ navigation }) => {
   }, [theme]);
 
   const renderItem = useCallback(({ item }) => (
-      <MezmurListCard
-        item={item}
-        isFavorite={isFavorite(item.id)}
-        onToggleFavorite={toggleFavorite}
-        onPress={(item) => navigation.navigate('Detail', { mezmur: item })}
-        getStatusColor={getStatusColor}
-        theme={theme}
-      />
-    ), [isFavorite, toggleFavorite, navigation, getStatusColor, theme]);
+    <MezmurListCard
+      item={item}
+      isFavorite={isFavorite(item.id)}
+      onToggleFavorite={toggleFavorite}
+      onPress={(item) => navigation.navigate('Detail', { mezmur: item })}
+      getStatusColor={getStatusColor}
+      theme={theme}
+    />
+  ), [isFavorite, toggleFavorite, navigation, getStatusColor, theme]);
 
   const getItemLayout = useCallback((data, index) => (
     { length: 140, offset: 140 * index, index }
@@ -50,35 +51,20 @@ const FavoritesScreen = ({ navigation }) => {
 
   return (
     <YStack f={1} backgroundColor={theme.background} paddingTop={insets.top}>
-      <XStack 
-        paddingHorizontal="$5" 
-        paddingVertical="$3"
-        alignItems="center"
-        justifyContent="center"
-        marginBottom="$4"
-      >
-        <TouchableOpacity 
-          onPress={() => navigation.goBack()} 
-          activeOpacity={0.7} 
-          style={{ position: 'absolute', left: 16 }}
-        >
-          <XStack alignItems="center" space="$1">
-            <Ionicons name="chevron-back" size={24} color={theme.primary} />
-          </XStack>
-        </TouchableOpacity>
-        <Text fontFamily="$ethiopicSerif" fontSize="$7" fontWeight="800" color={theme.primary}>
-          {t('favorites')}
-        </Text>
-      </XStack>
+      <ScreenHeader
+        title={t('favorites')}
+        onBack={() => navigation.goBack()}
+        theme={theme}
+      />
 
       {favoriteMezmurs.length === 0 ? (
         <YStack f={1} justifyContent="center" alignItems="center" padding="$10">
           <Ionicons name="heart-dislike-outline" size={80} color="$borderColor" opacity={0.3} />
-          <Text 
-            fontFamily="$ethiopicSerif" 
-            color="$colorSecondary" 
-            fontSize="$5" 
-            textAlign="center" 
+          <Text
+            fontFamily="$ethiopicSerif"
+            color="$colorSecondary"
+            fontSize="$5"
+            textAlign="center"
             marginTop="$4"
             fontStyle="italic"
             opacity={0.6}

@@ -9,7 +9,6 @@ const { useFocusEffect } = require('@react-navigation/native');
 const { useAppTheme } = require('../context/ThemeContext');
 const { useLanguage } = require('../context/LanguageContext');
 const { getAllSections } = require('../constants/sections');
-const mezmursData = require('../data/mezmurs.json');
 const { COLORS } = require('../constants/theme');
 const SearchBar = require('../components/SearchBar');
 const { useFavorites } = require('../context/FavoritesContext');
@@ -17,6 +16,8 @@ const { useAuth } = require('../context/AuthContext');
 const MezmurListCard = require('../components/MezmurListCard');
 const { normalizeAmharic } = require('../utils/textUtils');
 const DataService = require('../services/DataService');
+const CacheService = require('../services/CacheService');
+const ScreenHeader = require('../components/ScreenHeader');
 
 // Constants
 const FILTER_IDS = {
@@ -35,18 +36,18 @@ const LOAD_INCREMENT = 10;
 const SkeletonCard = memo(() => {
   const { theme } = useAppTheme();
   return (
-    <YStack 
+    <YStack
       backgroundColor={theme.cardBackground}
-    padding="$4"
-    borderRadius="$4"
-    marginBottom="$3"
-    opacity={0.5}
-  >
-    <XStack space="$3" alignItems="center">
-      <Circle size={10} backgroundColor={theme.borderColor} />
-      <YStack backgroundColor={theme.borderColor} height={16} width="60%" borderRadius="$2" opacity={0.3} />
-    </XStack>
-  </YStack>
+      padding="$4"
+      borderRadius="$4"
+      marginBottom="$3"
+      opacity={0.5}
+    >
+      <XStack space="$3" alignItems="center">
+        <Circle size={10} backgroundColor={theme.borderColor} />
+        <YStack backgroundColor={theme.borderColor} height={16} width="60%" borderRadius="$2" opacity={0.3} />
+      </XStack>
+    </YStack>
   );
 });
 
@@ -71,9 +72,9 @@ const FilterToggles = memo(({ options, activeId, onSelect, theme }) => {
             height={40}
             minWidth={80}
           >
-            <Text 
+            <Text
               fontFamily="$ethiopic"
-              fontSize="$3" 
+              fontSize="$3"
               fontWeight={isActive ? "700" : "600"}
               color={isActive ? "white" : theme.primary}
             >
@@ -93,7 +94,7 @@ const HomeScreen = ({ navigation, route }) => {
   const { t } = useLanguage();
   const { isFavorite, toggleFavorite } = useFavorites();
   const { profileData } = useAuth();
-  
+
   // Drill-down support
   const initialSectionId = route.params?.sectionId || SECTION_ALL_ID;
   const initialSectionTitle = route.params?.sectionTitle;
@@ -102,22 +103,46 @@ const HomeScreen = ({ navigation, route }) => {
 
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
   const [debouncedQuery, setDebouncedQuery] = useState(initialSearchQuery);
-  
+
   // State uses IDs for stable logic
   const [selectedFilterId, setSelectedFilterId] = useState(FILTER_IDS.ALL);
-  const [appliedFilterId, setAppliedFilterId] = useState(FILTER_IDS.ALL); 
-  const [selectedSectionId, setSelectedSectionId] = useState(initialSectionId); 
-  
-  const [isLoadingData, setIsLoadingData] = useState(!DataService.isReady);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [appliedFilterId, setAppliedFilterId] = useState(FILTER_IDS.ALL);
+  const [selectedSectionId, setSelectedSectionId] = useState(initialSectionId);
 
-  // Sync with DataService readiness
+  const [isLoadingData, setIsLoadingData] = useState(!DataService.isReady);
+  const [dataVersion, setDataVersion] = useState(0);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [recentSearches, setRecentSearches] = useState([]);
+  const [hymnHistory, setHymnHistory] = useState([]);
+
+  // Load history and searches on focus
+  useFocusEffect(
+    useCallback(() => {
+      const loadCache = async () => {
+        const searches = await CacheService.getRecentSearches();
+        const history = await CacheService.getHymnHistory();
+        setRecentSearches(searches);
+        setHymnHistory(history);
+      };
+      loadCache();
+    }, [])
+  );
+  // Sync with DataService readiness and background updates
   useEffect(() => {
-    if (!DataService.isReady) {
-      DataService.waitForReady().then(() => setIsLoadingData(false));
-    } else {
+    const handleUpdate = () => {
+      setDataVersion(v => v + 1);
       setIsLoadingData(false);
+    };
+
+    DataService.addListener(handleUpdate);
+
+    if (!DataService.isReady) {
+      DataService.waitForReady().then(handleUpdate);
+    } else {
+      handleUpdate();
     }
+
+    return () => DataService.removeListener(handleUpdate);
   }, []);
 
   // Debounce search query to prevent excessive filtering during typing
@@ -132,15 +157,15 @@ const HomeScreen = ({ navigation, route }) => {
   // Deferred effect to update filter without blocking UI
   useEffect(() => {
     if (selectedFilterId !== appliedFilterId) {
-       // A longer delay here ensures the UI color swap is COMPLETELY finished
-       // and the user sees the button change before the heavy list filtering starts.
-       const timer = setTimeout(() => {
-         setAppliedFilterId(selectedFilterId);
-       }, 100); 
-       return () => clearTimeout(timer);
+      // A longer delay here ensures the UI color swap is COMPLETELY finished
+      // and the user sees the button change before the heavy list filtering starts.
+      const timer = setTimeout(() => {
+        setAppliedFilterId(selectedFilterId);
+      }, 100);
+      return () => clearTimeout(timer);
     }
   }, [selectedFilterId, appliedFilterId]);
-  
+
   // Estimate how many cards fit the screen initially
   const calculatedInitialCount = useMemo(() => {
     return Math.max(2, Math.floor((height - 280 - insets.top) / 140));
@@ -167,7 +192,7 @@ const HomeScreen = ({ navigation, route }) => {
   // Update visibleCount if screen height changes
   useEffect(() => {
     if (visibleCount < calculatedInitialCount) {
-        setVisibleCount(calculatedInitialCount);
+      setVisibleCount(calculatedInitialCount);
     }
   }, [calculatedInitialCount]);
 
@@ -255,7 +280,23 @@ const HomeScreen = ({ navigation, route }) => {
     }
 
     return result;
-  }, [debouncedQuery, appliedFilterId, selectedSectionId]);
+  }, [debouncedQuery, appliedFilterId, selectedSectionId, dataVersion]);
+
+  // TIER 3: EPHEMERAL CACHE (Suggestions)
+  const searchSuggestions = useMemo(() => {
+    if (!searchQuery || searchQuery.length < 2) return [];
+
+    // Check ephemeral cache first
+    const cached = CacheService.getSuggestions(searchQuery);
+    if (cached) return cached;
+
+    const results = filteredMezmurs
+      .slice(0, 5)
+      .map(item => ({ id: item.id, title: item.title }));
+
+    CacheService.setSuggestions(searchQuery, results);
+    return results;
+  }, [searchQuery, filteredMezmurs]);
 
   // Paginated Data
   const paginatedData = useMemo(() => {
@@ -279,116 +320,94 @@ const HomeScreen = ({ navigation, route }) => {
 
   return (
     <YStack f={1} backgroundColor={theme.background} paddingTop={insets.top}>
-      <XStack 
-        paddingHorizontal="$5" 
-        paddingVertical="$3"
-        alignItems="center"
-        justifyContent="center"
-        zIndex={100}
-      >
-        <Button 
-          position="absolute"
-          left="$4"
-          circular 
-          size="$3" 
-          backgroundColor="transparent"
-          icon={<Ionicons name={isDrillDown ? "chevron-back" : "menu-outline"} size={28} color={theme.primary} />}
-          onPress={() => isDrillDown ? navigation.goBack() : navigation.toggleDrawer()}
-          pressStyle={{ opacity: 0.6 }}
-        />
-        <Text 
-          fontFamily="$ethiopicSerif" 
-          fontSize={isDrillDown ? "$6" : "$8"} 
-          fontWeight="800" 
-          color={theme.primary} 
-          letterSpacing={-0.5}
-          numberOfLines={1}
-          maxWidth="70%"
-        >
-          {initialSearchQuery ? t('searchResults') : (isDrillDown ? initialSectionTitle : t('appTitle'))}
-        </Text>
-        <Button 
-          position="absolute"
-          right="$4"
-          circular 
-          size="$3" 
-          backgroundColor="transparent"
-          onPress={() => setIsMenuOpen(!isMenuOpen)}
-          pressStyle={{ opacity: 0.6 }}
-          padding="$0"
-        >
-          {profileData?.photoURL ? (
-            <RNImage 
-              source={{ uri: profileData.photoURL }} 
-              style={{ width: 34, height: 34, borderRadius: 17 }} 
-            />
-          ) : (
-            <Ionicons name="ellipsis-vertical" size={24} color={theme.primary} />
-          )}
-        </Button>
+      <ScreenHeader
+        title={initialSearchQuery ? t('searchResults') : (isDrillDown ? initialSectionTitle : t('appTitle'))}
+        onBack={() => navigation.goBack()}
+        theme={theme}
+        rightElement={
+          <>
+            <Button
+              circular
+              size="$3"
+              backgroundColor="transparent"
+              onPress={() => setIsMenuOpen(!isMenuOpen)}
+              pressStyle={{ opacity: 0.6 }}
+              padding="$0"
+            >
+              {profileData?.photoURL ? (
+                <RNImage
+                  source={{ uri: profileData.photoURL }}
+                  style={{ width: 34, height: 34, borderRadius: 17 }}
+                />
+              ) : (
+                <Ionicons name="ellipsis-vertical" size={24} color={theme.primary} />
+              )}
+            </Button>
 
-        {/* Modal-based Modern Dropdown Menu for reliable dismiss-on-tap-outside */}
-        <Modal
-          visible={isMenuOpen}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setIsMenuOpen(false)}
-        >
-          <TouchableWithoutFeedback onPress={() => setIsMenuOpen(false)}>
-            <View style={{ flex: 1, backgroundColor: 'transparent' }}>
-               <YStack
-                position="absolute"
-                top={insets.top + 10} // Positioned right below the three-dots button
-                right={16}
-                width={200}
-                backgroundColor={theme.surface}
-                borderRadius="$4"
-                padding="$2"
-                elevation="$5"
-                zIndex={100}
-                borderWidth={1}
-                borderColor={theme.borderColor}
-                shadowColor="#000"
-                shadowOffset={{ width: 0, height: 4 }}
-                shadowOpacity={0.2}
-                shadowRadius={8}
-              >
-                <Button
-                  size="$4"
-                  chromeless
-                  justifyContent="flex-start"
-                  onPress={handleShare}
-                  icon={<Ionicons name="share-social-outline" size={20} color={theme.primary} />}
-                  pressStyle={{ backgroundColor: `${theme.primary}15` }}
-                >
-                  <Text fontFamily="$body" color={theme.text} fontSize="$3">{t('shareApp')}</Text>
-                </Button>
-                <Button
-                  size="$4"
-                  chromeless
-                  justifyContent="flex-start"
-                  onPress={handleFeedback}
-                  icon={<Ionicons name="chatbubble-ellipses-outline" size={20} color={theme.primary} />}
-                  pressStyle={{ backgroundColor: `${theme.primary}15` }}
-                >
-                  <Text fontFamily="$body" color={theme.text} fontSize="$3">{t('feedback')}</Text>
-                </Button>
-                <Separator borderColor={theme.borderColor} opacity={0.5} marginVertical="$1" />
-                <Button
-                  size="$4"
-                  chromeless
-                  justifyContent="flex-start"
-                  onPress={handleCheckUpdate}
-                  icon={<Ionicons name="cloud-download-outline" size={20} color={theme.primary} />}
-                  pressStyle={{ backgroundColor: `${theme.primary}15` }}
-                >
-                  <Text fontFamily="$body" color={theme.text} fontSize="$3">{t('checkUpdates')}</Text>
-                </Button>
-              </YStack>
-            </View>
-          </TouchableWithoutFeedback>
-        </Modal>
-      </XStack>
+            {/* Modal-based Modern Dropdown Menu for reliable dismiss-on-tap-outside */}
+            <Modal
+              visible={isMenuOpen}
+              transparent={true}
+              animationType="fade"
+              onRequestClose={() => setIsMenuOpen(false)}
+            >
+              <TouchableWithoutFeedback onPress={() => setIsMenuOpen(false)}>
+                <View style={{ flex: 1, backgroundColor: 'transparent' }}>
+                  <YStack
+                    position="absolute"
+                    top={insets.top + 10} // Positioned right below the three-dots button
+                    right={16}
+                    width={200}
+                    backgroundColor={theme.surface}
+                    borderRadius="$4"
+                    padding="$2"
+                    elevation="$5"
+                    zIndex={100}
+                    borderWidth={1}
+                    borderColor={theme.borderColor}
+                    shadowColor="#000"
+                    shadowOffset={{ width: 0, height: 4 }}
+                    shadowOpacity={0.2}
+                    shadowRadius={8}
+                  >
+                    <Button
+                      size="$4"
+                      chromeless
+                      justifyContent="flex-start"
+                      onPress={handleShare}
+                      icon={<Ionicons name="share-social-outline" size={20} color={theme.primary} />}
+                      pressStyle={{ backgroundColor: `${theme.primary}15` }}
+                    >
+                      <Text fontFamily="$body" color={theme.text} fontSize="$3">{t('shareApp')}</Text>
+                    </Button>
+                    <Button
+                      size="$4"
+                      chromeless
+                      justifyContent="flex-start"
+                      onPress={handleFeedback}
+                      icon={<Ionicons name="chatbubble-ellipses-outline" size={20} color={theme.primary} />}
+                      pressStyle={{ backgroundColor: `${theme.primary}15` }}
+                    >
+                      <Text fontFamily="$body" color={theme.text} fontSize="$3">{t('feedback')}</Text>
+                    </Button>
+                    <Separator borderColor={theme.borderColor} opacity={0.5} marginVertical="$1" />
+                    <Button
+                      size="$4"
+                      chromeless
+                      justifyContent="flex-start"
+                      onPress={handleCheckUpdate}
+                      icon={<Ionicons name="cloud-download-outline" size={20} color={theme.primary} />}
+                      pressStyle={{ backgroundColor: `${theme.primary}15` }}
+                    >
+                      <Text fontFamily="$body" color={theme.text} fontSize="$3">{t('checkUpdates')}</Text>
+                    </Button>
+                  </YStack>
+                </View>
+              </TouchableWithoutFeedback>
+            </Modal>
+          </>
+        }
+      />
 
       <FlatList
         data={isLoadingData ? [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] : paginatedData}
@@ -402,45 +421,133 @@ const HomeScreen = ({ navigation, route }) => {
         updateCellsBatchingPeriod={50}
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 100 }}
         ListFooterComponent={
-           !isLoadingData && filteredMezmurs.length > visibleCount && (
-             <YStack alignItems="center" marginTop="$4" marginBottom="$6">
-                <Button
-                  size="$4"
-                  theme="active"
-                  backgroundColor="transparent"
-                  borderColor={theme.primary}
-                  borderWidth={1.5}
-                  borderRadius="$10"
-                  onPress={handleLoadMore}
-                  disabled={isLoadingMore}
-                  opacity={isLoadingMore ? 0.6 : 1}
-                  icon={isLoadingMore ? <ActivityIndicator color={theme.primary} size="small" /> : undefined}
-                >
-                  <Text fontFamily="$ethiopicSerif" color={theme.primary} fontWeight="700">
-                     {t('loadMore')}
-                  </Text>
-                </Button>
-               <Text fontFamily="$body" fontSize="$1" color={theme.textSecondary} marginTop="$2" opacity={0.6}>
-                 {visibleCount} / {filteredMezmurs.length}
-               </Text>
-             </YStack>
-           )
+          !isLoadingData && filteredMezmurs.length > visibleCount && (
+            <YStack alignItems="center" marginTop="$4" marginBottom="$6">
+              <Button
+                size="$4"
+                theme="active"
+                backgroundColor="transparent"
+                borderColor={theme.primary}
+                borderWidth={1.5}
+                borderRadius="$10"
+                onPress={handleLoadMore}
+                disabled={isLoadingMore}
+                opacity={isLoadingMore ? 0.6 : 1}
+                icon={isLoadingMore ? <ActivityIndicator color={theme.primary} size="small" /> : undefined}
+              >
+                <Text fontFamily="$ethiopicSerif" color={theme.primary} fontWeight="700">
+                  {t('loadMore')}
+                </Text>
+              </Button>
+              <Text fontFamily="$body" fontSize="$1" color={theme.textSecondary} marginTop="$2" opacity={0.6}>
+                {visibleCount} / {filteredMezmurs.length}
+              </Text>
+            </YStack>
+          )
         }
         ListHeaderComponent={
           <YStack paddingBottom="$5" space="$4">
-            <SearchBar 
-               value={searchQuery}
-               onChangeText={setSearchQuery}
-               onClear={() => setSearchQuery('')}
-               placeholder={t('searchPlaceholder')}
+            <SearchBar
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              onClear={() => setSearchQuery('')}
+              onSubmitEditing={() => CacheService.addSearchQuery(searchQuery)}
+              placeholder={t('searchPlaceholder')}
             />
 
-            <FilterToggles 
-              options={[
-                { id: FILTER_IDS.ALL, label: t('all') },
-                { id: FILTER_IDS.LONG, label: t('long') },
-                { id: FILTER_IDS.SHORT, label: t('short') }
-              ]}
+            {searchSuggestions.length > 0 && (
+              <YStack
+                backgroundColor={theme.surface}
+                borderRadius="$4"
+                padding="$2"
+                marginTop="$-4" // Pull it up closer to the search bar
+                borderWidth={1}
+                borderColor={theme.borderColor}
+                elevation="$2"
+                zIndex={200}
+              >
+                {searchSuggestions.map((suggestion) => (
+                  <Button
+                    key={suggestion.id}
+                    chromeless
+                    justifyContent="flex-start"
+                    onPress={() => {
+                      setSearchQuery('');
+                      navigation.navigate('Detail', { mezmur: DataService.getById(suggestion.id) });
+                    }}
+                    paddingVertical="$2"
+                    icon={<Ionicons name="search-outline" size={16} color={theme.textSecondary} />}
+                  >
+                    <Text fontFamily="$ethiopicSerif" color={theme.text} numberOfLines={1}>
+                      {suggestion.title}
+                    </Text>
+                  </Button>
+                ))}
+              </YStack>
+            )}
+
+            {!isDrillDown && !searchQuery && hymnHistory.length > 0 && (
+              <YStack space="$2">
+                <XStack jc="space-between" ai="center" paddingHorizontal="$2">
+                  <Text fontFamily="$ethiopicSerif" fontSize="$3" color={theme.textSecondary} opacity={0.7}>
+                    {t('recentlyViewed') || 'Recently Viewed'}
+                  </Text>
+                </XStack>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 2 }}>
+                  {hymnHistory.map((item) => (
+                    <YStack
+                      key={item.id}
+                      backgroundColor={theme.cardBackground}
+                      padding="$3"
+                      borderRadius="$4"
+                      marginRight="$3"
+                      width={160}
+                      borderWidth={1}
+                      borderColor={theme.borderColor}
+                      onPress={() => navigation.navigate('Detail', { mezmur: item })}
+                      pressStyle={{ opacity: 0.8, scale: 0.98 }}
+                    >
+                      <Circle size={30} backgroundColor={theme.primary + '20'} mb="$2" ai="center" jc="center">
+                        <Ionicons name="time-outline" size={16} color={theme.primary} />
+                      </Circle>
+                      <Text fontFamily="$ethiopicSerif" fontSize="$3" fontWeight="700" color={theme.text} numberOfLines={1}>
+                        {item.title}
+                      </Text>
+                      <Text fontFamily="$ethiopic" fontSize="$1" color={theme.textSecondary} numberOfLines={1} opacity={0.7}>
+                        {t(item.section) || item.section}
+                      </Text>
+                    </YStack>
+                  ))}
+                </ScrollView>
+              </YStack>
+            )}
+
+            {!isDrillDown && !searchQuery && recentSearches.length > 0 && (
+              <YStack space="$2" mt="$2">
+                <Text fontFamily="$ethiopicSerif" fontSize="$3" color={theme.textSecondary} opacity={0.7} marginLeft="$2">
+                  {t('recentSearches') || 'Recent Searches'}
+                </Text>
+                <XStack fw="wrap" space="$2">
+                  {recentSearches.map((search, idx) => (
+                    <Button
+                      key={idx}
+                      size="$2"
+                      borderRadius="$10"
+                      backgroundColor={theme.surface}
+                      borderColor={theme.borderColor}
+                      borderWidth={1}
+                      onPress={() => setSearchQuery(search)}
+                      paddingHorizontal="$3"
+                    >
+                      <Text fontSize="$2" color={theme.textSecondary}>{search}</Text>
+                    </Button>
+                  ))}
+                </XStack>
+              </YStack>
+            )}
+
+            <FilterToggles
+              options={filterOptions}
               activeId={selectedFilterId}
               onSelect={setSelectedFilterId}
               theme={theme}
@@ -448,34 +555,34 @@ const HomeScreen = ({ navigation, route }) => {
 
             {!isDrillDown && (
               <YStack space="$2">
-                 <Text fontFamily="$ethiopicSerif" fontSize="$3" color={theme.textSecondary} opacity={0.7} marginLeft="$2">
-                   {t('sections')}
-                 </Text>
-                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingRight: 20 }}>
-                    {sectionOptions.map((option) => (
-                      <YStack
-                        key={option.id}
-                        onPress={() => setSelectedSectionId(option.id)}
-                        marginRight="$3"
-                        paddingVertical="$2"
-                        paddingHorizontal="$3"
-                        borderBottomWidth={selectedSectionId === option.id ? 3 : 0}
-                        borderColor={theme.accent}
-                        opacity={selectedSectionId === option.id ? 1 : 0.6}
-                        pressStyle={{ opacity: 0.8 }}
+                <Text fontFamily="$ethiopicSerif" fontSize="$3" color={theme.textSecondary} opacity={0.7} marginLeft="$2">
+                  {t('sections')}
+                </Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingRight: 20 }}>
+                  {sectionOptions.map((option) => (
+                    <YStack
+                      key={option.id}
+                      onPress={() => setSelectedSectionId(option.id)}
+                      marginRight="$3"
+                      paddingVertical="$2"
+                      paddingHorizontal="$3"
+                      borderBottomWidth={selectedSectionId === option.id ? 3 : 0}
+                      borderColor={theme.accent}
+                      opacity={selectedSectionId === option.id ? 1 : 0.6}
+                      pressStyle={{ opacity: 0.8 }}
+                    >
+                      <Text
+                        fontFamily="$ethiopicSerif"
+                        fontSize="$4"
+                        color={selectedSectionId === option.id ? theme.primary : theme.text}
+                        fontWeight={selectedSectionId === option.id ? "800" : "500"}
                       >
-                        <Text 
-                          fontFamily="$ethiopicSerif" 
-                          fontSize="$4" 
-                          color={selectedSectionId === option.id ? theme.primary : theme.text} 
-                          fontWeight={selectedSectionId === option.id ? "800" : "500"} 
-                        >
-                          {option.label}
-                        </Text>
-                      </YStack>
-                    ))}
-                 </ScrollView>
-                 <YStack height={1} backgroundColor="$borderColor" opacity={0.5} marginTop="$-2" zIndex={-1} />
+                        {option.label}
+                      </Text>
+                    </YStack>
+                  ))}
+                </ScrollView>
+                <YStack height={1} backgroundColor="$borderColor" opacity={0.5} marginTop="$-2" zIndex={-1} />
               </YStack>
             )}
           </YStack>
@@ -491,7 +598,7 @@ const HomeScreen = ({ navigation, route }) => {
           )
         }
       />
-    </YStack>
+    </YStack >
   );
 };
 

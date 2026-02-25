@@ -9,7 +9,6 @@ const ProfileScreen = require('../screens/ProfileScreen').default || require('..
 const CalendarScreen = require('../screens/CalendarScreen').default || require('../screens/CalendarScreen');
 const SectionListScreen = require('../screens/SectionListScreen').default || require('../screens/SectionListScreen');
 const FavoritesScreen = require('../screens/FavoritesScreen').default || require('../screens/FavoritesScreen');
-const MiniPlayer = require('../components/MiniPlayer').default || require('../components/MiniPlayer');
 const NavigationService = require('../services/NavigationService');
 const { useAppTheme } = require('../context/ThemeContext');
 const { useLanguage } = require('../context/LanguageContext');
@@ -45,29 +44,28 @@ const TabNavigator = ({ navigation }) => {
           lazy: true,              // Only render tabs when focused for better performance
         }}
       >
-        <TopTab.Screen 
-          name="Home" 
-          component={TodayScreen} 
+        <TopTab.Screen
+          name="Home"
+          component={TodayScreen}
           options={{ tabBarLabel: t('home') }}
         />
-        <TopTab.Screen 
-          name="Mezmurs" 
-          component={SectionListScreen} 
+        <TopTab.Screen
+          name="Mezmurs"
+          component={SectionListScreen}
           options={{ tabBarLabel: t('mezmurs') }}
         />
-        <TopTab.Screen 
-          name="Calendar" 
-          component={CalendarScreen} 
+        <TopTab.Screen
+          name="Calendar"
+          component={CalendarScreen}
           options={{ tabBarLabel: t('calendar') }}
         />
 
-        <TopTab.Screen 
-          name="Profile" 
-          component={ProfileScreen} 
+        <TopTab.Screen
+          name="Profile"
+          component={ProfileScreen}
           options={{ tabBarLabel: t('profile') }}
         />
       </TopTab.Navigator>
-      <MiniPlayer onPlayerPress={(mezmur) => NavigationService.navigateToRoot('Detail', { mezmur })} />
     </YStack>
   );
 };

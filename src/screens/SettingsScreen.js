@@ -9,6 +9,7 @@ const { THEMES } = require('../constants/theme');
 const { useAppTheme } = require('../context/ThemeContext');
 const { useLanguage } = require('../context/LanguageContext');
 const { useAuth } = require('../context/AuthContext');
+const ScreenHeader = require('../components/ScreenHeader');
 
 const SettingsScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
@@ -26,12 +27,12 @@ const SettingsScreen = ({ navigation }) => {
 
   const themeOptions = useMemo(() => {
     return [
-      { 
-        id: 'system', 
-        name: t('system'), 
+      {
+        id: 'system',
+        name: t('system'),
         background: '#888', // Placeholder for split view
         text: '#FFFFFF',
-        isSystem: true 
+        isSystem: true
       },
       ...Object.values(THEMES).map(tOpt => ({
         ...tOpt,
@@ -48,8 +49,8 @@ const SettingsScreen = ({ navigation }) => {
   ];
 
   const SettingRow = ({ icon, label, sublabel, onPress, rightIcon = "chevron-forward", disabled = false, isActive = false, isDanger = false }) => (
-    <TouchableOpacity 
-      onPress={disabled ? null : onPress} 
+    <TouchableOpacity
+      onPress={disabled ? null : onPress}
       activeOpacity={disabled ? 1 : 0.7}
       disabled={disabled}
     >
@@ -65,19 +66,19 @@ const SettingsScreen = ({ navigation }) => {
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Ionicons name={icon} size={24} color={isDanger ? theme.error : theme.primary} style={{ marginRight: 16 }} />
           <View style={{ flex: 1 }}>
-            <Text 
-              fontFamily="$ethiopic" 
-              fontSize="$5" 
-              color={isDanger ? theme.error : theme.text} 
+            <Text
+              fontFamily="$ethiopic"
+              fontSize="$5"
+              color={isDanger ? theme.error : theme.text}
               fontWeight="600"
               marginBottom={sublabel ? 4 : 0}
             >
               {label}
             </Text>
             {sublabel && (
-              <Text 
-                fontFamily="$body" 
-                fontSize="$2" 
+              <Text
+                fontFamily="$body"
+                fontSize="$2"
                 color={theme.textSecondary}
                 opacity={0.8}
               >
@@ -94,21 +95,18 @@ const SettingsScreen = ({ navigation }) => {
   return (
     <YStack f={1} backgroundColor={theme.background} paddingTop={insets.top}>
       {/* Header */}
-      <XStack paddingHorizontal="$5" paddingVertical="$3" alignItems="center" justifyContent="center">
-        <TouchableOpacity onPress={() => navigation.goBack()} style={{ position: 'absolute', left: 16 }}>
-          <Ionicons name="chevron-back" size={24} color={theme.primary} />
-        </TouchableOpacity>
-        <Text fontFamily="$ethiopicSerif" fontSize="$7" fontWeight="800" color={theme.primary}>
-          {t('settings')}
-        </Text>
-      </XStack>
+      <ScreenHeader
+        title={t('settings')}
+        onBack={() => navigation.goBack()}
+        theme={theme}
+      />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
         <YStack padding="$6" space="$4">
-          
+
           {/* Appearance Section */}
-          <SettingRow 
-            icon="color-palette-outline" 
+          <SettingRow
+            icon="color-palette-outline"
             label={t('appearance')}
             sublabel={themeMode === 'system' ? t('system') : t(theme.id)}
             onPress={() => setShowThemes(!showThemes)}
@@ -146,10 +144,10 @@ const SettingsScreen = ({ navigation }) => {
 
                       {/* Label with dark backdrop for guaranteed visibility */}
                       <YStack px="$2.5" py="$1" backgroundColor="rgba(0,0,0,0.6)" borderRadius={20} alignSelf="center" zIndex={10}>
-                        <Text 
-                          color="#FFFFFF" 
-                          fontFamily="$ethiopic" 
-                          fontSize={11} 
+                        <Text
+                          color="#FFFFFF"
+                          fontFamily="$ethiopic"
+                          fontSize={11}
                           fontWeight="800"
                           textAlign="center"
                         >
@@ -173,8 +171,8 @@ const SettingsScreen = ({ navigation }) => {
           )}
 
           {/* Language Section Dropdown */}
-          <SettingRow 
-            icon="language-outline" 
+          <SettingRow
+            icon="language-outline"
             label={t('language')}
             sublabel={languages.find(l => l.id === language)?.label}
             onPress={() => setShowLanguages(!showLanguages)}
@@ -184,8 +182,8 @@ const SettingsScreen = ({ navigation }) => {
           {showLanguages && (
             <YStack backgroundColor={theme.surface} padding="$3" borderRadius="$4" borderWidth={1} borderColor={theme.borderColor} marginBottom="$3" space="$2" elevation="$1">
               {languages.map((lang) => (
-                <TouchableOpacity 
-                  key={lang.id} 
+                <TouchableOpacity
+                  key={lang.id}
                   onPress={() => {
                     changeLanguage(lang.id);
                     setShowLanguages(false);
@@ -203,6 +201,11 @@ const SettingsScreen = ({ navigation }) => {
           )}
 
           <SettingRow icon="notifications-outline" label={t('notifications')} disabled={true} />
+          <SettingRow
+            icon="chatbubbles-outline"
+            label={t('feedback')}
+            onPress={() => navigation.navigate('Feedback')}
+          />
           <SettingRow icon="help-circle-outline" label={t('helpSupport')} disabled={true} />
 
           <YStack alignItems="center" marginTop="$8" opacity={0.3}>

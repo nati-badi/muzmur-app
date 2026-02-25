@@ -13,10 +13,11 @@ const { LanguageProvider } = require('./src/context/LanguageContext');
 const { FavoritesProvider } = require('./src/context/FavoritesContext');
 const { AuthProvider, useAuth } = require('./src/context/AuthContext');
 const { AudioProvider } = require('./src/context/GlobalAudioState.js');
+const { PlaylistProvider } = require('./src/context/PlaylistContext');
 const SplashScreen = require('expo-splash-screen');
 
 // Prevent splash screen from auto-hiding
-SplashScreen.preventAutoHideAsync().catch(() => {});
+SplashScreen.preventAutoHideAsync().catch(() => { });
 
 const { useAppTheme } = require('./src/context/ThemeContext');
 
@@ -28,21 +29,30 @@ const DynamicStatusBar = () => {
   return <StatusBar style={statusBarStyle} />;
 };
 
+const SyncService = require('./src/services/SyncService');
+const OfflineStatusHeader = require('./src/components/OfflineStatusHeader');
+
 // Wrapper to pass userId to FavoritesProvider
 const AppContent = ({ onLayoutRootView }) => {
   const { user, isAnonymous } = useAuth();
-  
+
+  useEffect(() => {
+    SyncService.start();
+    return () => SyncService.stop();
+  }, []);
+
   return (
     <ThemeProvider>
       <LanguageProvider>
         <AudioProvider>
           <FavoritesProvider userId={user?.uid} isAnonymous={isAnonymous}>
-            <PortalProvider>
+            <PlaylistProvider userId={user?.uid} isAnonymous={isAnonymous}>
               <SafeAreaProvider onLayout={onLayoutRootView}>
                 <DynamicStatusBar />
+                <OfflineStatusHeader />
                 <AppNavigator />
               </SafeAreaProvider>
-            </PortalProvider>
+            </PlaylistProvider>
           </FavoritesProvider>
         </AudioProvider>
       </LanguageProvider>
@@ -73,9 +83,11 @@ function App() {
 
   return (
     <TamaguiProvider config={config} defaultTheme="light">
-      <AuthProvider>
-        <AppContent onLayoutRootView={onLayoutRootView} />
-      </AuthProvider>
+      <PortalProvider>
+        <AuthProvider>
+          <AppContent onLayoutRootView={onLayoutRootView} />
+        </AuthProvider>
+      </PortalProvider>
     </TamaguiProvider>
   );
 }

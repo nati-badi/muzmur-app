@@ -1,6 +1,6 @@
 const React = require('react');
 const { createContext, useContext, useState, useEffect } = React;
-const { 
+const {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
@@ -22,9 +22,25 @@ const AuthProvider = ({ children }) => {
   const [isDataReady, setIsDataReady] = useState(false);
   const [error, setError] = useState(null);
 
+  const STORAGE_KEYS = {
+    USER_PROFILE: 'cached_user_profile'
+  };
+
+  const getProfileKey = (uid) => `${STORAGE_KEYS.USER_PROFILE}_${uid}`;
+
   // Fetch Firestore profile data
   const fetchProfile = async (uid) => {
     try {
+      const AsyncStorage = require('@react-native-async-storage/async-storage').default || require('@react-native-async-storage/async-storage');
+
+      // 1. Try to load from cache first for instant UI
+      const cacheKey = getProfileKey(uid);
+      const cached = await AsyncStorage.getItem(cacheKey);
+      if (cached) {
+        setProfileData(JSON.parse(cached));
+      }
+
+      // 2. Fetch fresh data from Firestore
       const { doc, getDoc } = require('firebase/firestore');
       const { db } = require('../config/firebase.config');
       const docRef = doc(db, 'users', uid);
@@ -32,6 +48,8 @@ const AuthProvider = ({ children }) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
         setProfileData(data);
+        // Update cache
+        await AsyncStorage.setItem(cacheKey, JSON.stringify(data));
       }
     } catch (e) {
       console.error('Error fetching profile:', e);
@@ -40,10 +58,15 @@ const AuthProvider = ({ children }) => {
 
   // Listen to auth state changes
   useEffect(() => {
+    const AsyncStorage = require('@react-native-async-storage/async-storage').default || require('@react-native-async-storage/async-storage');
+
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
         await fetchProfile(currentUser.uid);
+        // Process any queued syncs when logging in
+        const UserProfileService = require('../services/UserProfileService');
+        UserProfileService.processQueue(currentUser.uid).catch(console.error);
       } else {
         setProfileData(null);
       }
@@ -59,7 +82,7 @@ const AuthProvider = ({ children }) => {
 
     // Configure Google Sign-In
     GoogleSignin.configure({
-        webClientId: '696692999848-fh9ajem00u585o8989jainpqn0nmcdo1.apps.googleusercontent.com',
+      webClientId: '696692999848-fh9ajem00u585o8989jainpqn0nmcdo1.apps.googleusercontent.com',
     });
 
     return () => {
@@ -73,12 +96,12 @@ const AuthProvider = ({ children }) => {
     try {
       setError(null);
       const result = await createUserWithEmailAndPassword(auth, email, password);
-      
+
       // Update profile with display name
       if (displayName) {
         await updateProfile(result.user, { displayName });
       }
-      
+
       return { success: true, user: result.user };
     } catch (err) {
       setError(err.message);
@@ -115,7 +138,7 @@ const AuthProvider = ({ children }) => {
     try {
       setError(null);
       await GoogleSignin.hasPlayServices();
-      
+
       // Force account selection by signing out first
       try {
         await GoogleSignin.signOut();
@@ -125,19 +148,19 @@ const AuthProvider = ({ children }) => {
 
       const userInfo = await GoogleSignin.signIn();
       const { idToken } = userInfo.data || userInfo; // Handle different versions of lib
-      
+
       if (!idToken) throw new Error('No ID Token found');
 
       const credential = GoogleAuthProvider.credential(idToken);
       const result = await signInWithCredential(auth, credential);
-      
+
       // Ensure user document exists in Firestore
       if (result.user) {
         const { doc, getDoc, setDoc, serverTimestamp } = require('firebase/firestore');
         const { db } = require('../config/firebase.config');
         const docRef = doc(db, 'users', result.user.uid);
         const docSnap = await getDoc(docRef);
-        
+
         if (!docSnap.exists()) {
           // Create initial profile if it doesn't exist
           await setDoc(docRef, {
@@ -154,8 +177,8 @@ const AuthProvider = ({ children }) => {
       return { success: true, user: result.user };
     } catch (err) {
       if (err.message && err.message.includes('CANCELED')) {
-          // User cancelled, do nothing
-          return { success: false, error: 'Sign in cancelled' };
+        // User cancelled, do nothing
+        return { success: false, error: 'Sign in cancelled' };
       }
       setError(err.message);
       return { success: false, error: err.message };
@@ -179,7 +202,7 @@ const AuthProvider = ({ children }) => {
     try {
       if (!user) return { success: false, error: 'No user' };
       setError(null);
-      
+
       // We no longer call updateProfile(auth.currentUser) with the potentially huge Base64 URL
       // Instead, we just update our local profileData state
       // The Base64 is already saved in Firestore by UserProfileService
@@ -187,7 +210,7 @@ const AuthProvider = ({ children }) => {
         ...prev,
         photoURL: url
       }));
-      
+
       return { success: true };
     } catch (err) {
       setError(err.message);
@@ -209,6 +232,7 @@ const AuthProvider = ({ children }) => {
     updateProfilePicture,
     isAuthenticated: !!user && !user.isAnonymous,
     isAnonymous: user?.isAnonymous || false,
+    isAdmin: profileData?.role === 'admin',
   }), [user, profileData, loading, error, signUp, signIn, signInWithGoogle, signInAsGuest, logOut, updateProfilePicture]);
 
   return (

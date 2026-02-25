@@ -18,7 +18,7 @@ const translations = {
     appTagline: 'Orthodox Hymns',
     calendar: 'Calendar',
     shareMessage: 'Check out the app! Download it now to listen to your favorite hymns.',
-    
+
     // Profile Screen
     user: 'User',
     appearance: 'Appearance',
@@ -27,17 +27,17 @@ const translations = {
     helpSupport: 'Help & Support',
     aboutUs: 'About Us',
     logout: 'Logout',
-    
+
     // Settings labels
     amharic: 'Amharic',
     english: 'English',
     tigrigna: 'Tigrigna',
     afanOromo: 'Afan Oromo',
-    
+
     // Today Screen
     todaysFeatured: "Today's Featured Hymns",
     comingSoon: 'Coming soon! Check back for daily featured hymns.',
-    
+
     // Home Screen
     searchPlaceholder: 'Search by hymn title or lyrics...',
     sections: 'Sections',
@@ -57,10 +57,10 @@ const translations = {
     todaysFeast: "Today's Feast",
     commemoration: "Commemoration of the Day",
     noFavorites: 'No favorite hymns yet.',
-    
+
     // Sidebar
     sidebarTitle: 'Menu',
-    
+
     // Common
     back: 'Back',
     translation: 'Translation',
@@ -125,7 +125,7 @@ const translations = {
     password: 'Password',
     name: 'Name',
     termsAndPrivacy: 'By continuing, you agree to our Terms & Privacy Policy',
-    
+
     // Calendar Weekdays
     monday: 'Mon',
     tuesday: 'Tue',
@@ -134,7 +134,7 @@ const translations = {
     friday: 'Fri',
     saturday: 'Sat',
     sunday: 'Sun',
-    
+
     // Feast/Calendar
     todaysFeast: "Today's Feast",
     annualFeast: 'Annual Feast',
@@ -142,11 +142,11 @@ const translations = {
     noFeastToday: 'No registered feast today',
     feastSecret: 'The Secret of the Day',
     todayLabel: 'Today',
-    
+
     // Auth
     continueAsGuest: 'Continue as Guest',
     continueWithGoogle: 'Continue with Google',
-    
+
     // Ethiopian Months
     month1: 'Meskerem',
     month2: 'Tikimt',
@@ -172,10 +172,10 @@ const translations = {
     searchSuggestionsLabel: 'Search Suggestions',
     mezmurSectionsTitle: 'Mezmur Sections',
     confirmLogout: 'Are you sure you want to logout?',
-    
+
     // Auth Labels
     guest: 'Guest',
-    
+
     // Section Names (Data-driven)
     "የእመቤታችን የምስጋና መዝሙራት": "Hymns of St. Mary",
     "የቅዱስ ሚካኤል መዝሙራት": "Hymns of St. Michael",
@@ -188,7 +188,8 @@ const translations = {
     "የአቡነ ገብረ መንፈስ ቅዱስ መዝሙራት": "Hymns of Abune G. Menfes",
     "ስለ ቤተ ክርስቲያን": "About the Church",
     "የቅድስት አርሴማ": "Hymns of St. Arsema",
-    
+    "Afan Oromo Mezmurs": "Afan Oromo Mezmurs",
+
     // Section Short Labels
     'የእመቤታችን': 'St. Mary',
     'የቅዱስ ሚካኤል': 'St. Michael',
@@ -201,12 +202,13 @@ const translations = {
     'የአቡነ ገብረ መንፈስ ቅዱስ': 'Abune Gabre M.',
     'ስለ ቤተ ክርስቲያን': 'Church',
     'የቅድስት አርሴማ': 'St. Arsema',
+    'Afan Oromo Mezmurs': 'Afan Oromo',
 
     // Categories
     'አጭር': 'Short',
     'ረጅም': 'Long',
     yearSuffix: 'E.C.',
-    
+
     // Theme Names
     classic: 'Classic',
     forest: 'Forest',
@@ -215,9 +217,43 @@ const translations = {
     rose: 'Rose',
     midnight: 'Midnight',
     system: 'System (Auto)',
-    
+
+    // Playlists
+    myPlaylists: 'My Playlists',
+    createPlaylist: 'Create Playlist',
+    playlistName: 'Playlist Name',
+    enterPlaylistName: 'Enter playlist name',
+    addHymn: 'Add Hymn',
+    removeFromPlaylist: 'Remove from Playlist',
+    deletePlaylist: 'Delete Playlist',
+    noPlaylists: 'No playlists yet. Create one to get started!',
+    renamePlaylist: 'Rename Playlist',
+    playlistCreated: 'Playlist created',
+    playlistDeleted: 'Playlist deleted',
+    addToPlaylist: 'Add to Playlist',
+    selectPlaylist: 'Select Playlist',
+    items: 'items',
+    playAll: 'Play All',
+    confirmDeletePlaylist: 'Are you sure you want to delete this playlist?',
+    save: 'Save',
+
     // Footer
     madeWithLove: 'Made with ❤️ for the Church',
+    adminDashboard: 'Admin Dashboard',
+    manageMezmurs: 'Manage Mezmurs',
+    addMezmur: 'Add Mezmur',
+    editMezmur: 'Edit Mezmur',
+    manageUsers: 'Manage Users',
+    adminFeedback: 'Feedback (Admin)',
+    submitFeedback: 'Submit Feedback',
+    feedbackSubject: 'Subject',
+    feedbackMessage: 'Message',
+    sendFeedback: 'Send Feedback',
+    role: 'Role',
+    makeAdmin: 'Make Admin',
+    removeAdmin: 'Remove Admin',
+    banUser: 'Ban User',
+    unbanUser: 'Unban User',
   },
   am: {
     // Screen Titles
@@ -232,7 +268,7 @@ const translations = {
     appTagline: 'ኦርቶዶክስ መዝሙራት',
     calendar: 'የቀን መቁጠሪያ',
     shareMessage: 'መተግበሪያውን ይመልከቱ! የሚወዱትን መዝሙር ለማዳመጥ አሁኑኑ ያውርዱት።',
-    
+
     // Profile Screen
     user: 'ተጠቃሚ',
     appearance: 'ገጽታ',
@@ -241,17 +277,17 @@ const translations = {
     helpSupport: 'እርዳታና ድጋፍ',
     aboutUs: 'ስለ እኛ',
     logout: 'ውጣ',
-    
+
     // Settings labels
     amharic: 'አማርኛ',
     english: 'English',
     tigrigna: 'ትግርኛ',
     afanOromo: 'አፋን ኦሮሞ',
-    
+
     // Today Screen
     todaysFeatured: 'የዕለቱ መዝሙራት',
     comingSoon: 'ለዛሬ የተመረጡ መዝሙራት እዚህ ይገኛሉ። በቅርቡ ይጠበቁ!',
-    
+
     // Home Screen
     searchPlaceholder: 'በመዝሙር ርዕስ ወይም ግጥም ይፈልጉ...',
     sections: 'ክፍላት',
@@ -271,10 +307,10 @@ const translations = {
     todaysFeast: 'የዕለቱ መታሰቢያ',
     commemoration: 'የዕለቱ መታሰቢያ',
     noFavorites: 'ምንም የተመረጡ መዝሙራት የሉም።',
-    
+
     // Sidebar
     sidebarTitle: 'ማውጫ',
-    
+
     // Common
     back: 'ተመለስ',
     translation: 'ትርጉም',
@@ -339,7 +375,7 @@ const translations = {
     password: 'የይለፍ ቃል',
     name: 'ስም',
     termsAndPrivacy: 'በመቀጠልህ በውላችን እና በግላዊነት ፖሊሲያችን ተስማምተሃል።',
-    
+
     // Calendar Weekdays
     monday: 'ሰኞ',
     tuesday: 'ማክሰ',
@@ -348,7 +384,7 @@ const translations = {
     friday: 'ዓርብ',
     saturday: 'ቅዳሜ',
     sunday: 'እሁድ',
-    
+
     // Feast/Calendar
     todaysFeast: 'የዕለቱ መታሰቢያ',
     annualFeast: 'ዓመታዊ በዓል',
@@ -360,7 +396,7 @@ const translations = {
     // Auth
     continueAsGuest: 'እንደ እንግዳ ቀጥል',
     continueWithGoogle: 'በጎግል ቀጥል',
-    
+
     // Ethiopian Months
     month1: 'መስከረም',
     month2: 'ጥቅምት',
@@ -402,6 +438,7 @@ const translations = {
     "የአቡነ ገብረ መንፈስ ቅዱስ መዝሙራት": "የአቡነ ገብረ መንፈስ ቅዱስ መዝሙራት",
     "ስለ ቤተ ክርስቲያን": "ስለ ቤተ ክርስቲያን",
     "የቅድስት አርሴማ": "የቅድስት አርሴማ",
+    "Afan Oromo Mezmurs": "የአፋን ኦሮሞ መዝሙራት",
 
     // Section Short Labels
     'የእመቤታችን': 'የእመቤታችን',
@@ -414,6 +451,7 @@ const translations = {
     'የቃና ዘገሊላ': 'የቃና ዘገሊላ',
     'የአቡነ ገብረ መንፈስ ቅዱስ': 'የአቡነ ገብረ መንፈስ ቅዱስ',
     'የቅድስት አርሴማ': 'የቅድስት አርሴማ',
+    'Afan Oromo Mezmurs': 'አፋን ኦሮሞ',
 
     // Categories
     'አጭር': 'አጭር',
@@ -429,8 +467,42 @@ const translations = {
     midnight: 'ጥቁር',
     system: 'ሲስተም (ራስ-ሰር)',
 
+    // Playlists
+    myPlaylists: 'የእኔ ዝርዝሮች',
+    createPlaylist: 'ዝርዝር ፍጠር',
+    playlistName: 'የዝርዝር ስም',
+    enterPlaylistName: 'የዝርዝር ስም ያስገቡ',
+    addHymn: 'መዝሙር ጨምር',
+    removeFromPlaylist: 'ከዝርዝር አስወግድ',
+    deletePlaylist: 'ዝርዝር አጥፋ',
+    noPlaylists: 'ምንም ዝርዝር የለም። መጀመሪያ ዝርዝር ይፍጠሩ!',
+    renamePlaylist: 'ስም ቀይር',
+    playlistCreated: 'ዝርዝሩ ተፈጥሯል',
+    playlistDeleted: 'ዝርዝሩ ተሰርዟል',
+    addToPlaylist: 'ወደ ዝርዝር ጨምር',
+    selectPlaylist: 'ዝርዝር ይምረጡ',
+    items: 'መዝሙራት',
+    playAll: 'ሁሉንም አጫውት',
+    confirmDeletePlaylist: 'እርግጠኛ ነዎት ይህንን ዝርዝር ማጥፋት ይፈልጋሉ?',
+    save: 'አስቀምጥ',
+
     // Footer
     madeWithLove: 'ለቤተክርስቲያን በፍቅር የተሰራ',
+    adminDashboard: 'የአስተዳዳሪ ዳሽቦርድ',
+    manageMezmurs: 'መዝሙራትን ያስተዳድሩ',
+    addMezmur: 'መዝሙር ይጨምሩ',
+    editMezmur: 'መዝሙር ያስተካክሉ',
+    manageUsers: 'ተጠቃሚዎችን ያስተዳድሩ',
+    adminFeedback: 'አስተያየቶች (አስተዳዳሪ)',
+    submitFeedback: 'አስተያየት ይስጡ',
+    feedbackSubject: 'ርዕስ',
+    feedbackMessage: 'መልእክት',
+    sendFeedback: 'አስተያየት ላክ',
+    role: 'ሚና',
+    makeAdmin: 'አስተዳዳሪ አድርግ',
+    removeAdmin: 'ከአስተዳዳሪነት አስወግድ',
+    banUser: 'አግድ',
+    unbanUser: 'እገዳ አንሳ',
   },
   ti: {
     profile: 'መገለጺ',
@@ -470,7 +542,7 @@ const translations = {
     menu: 'ዝርዝር',
     system: 'ሲስተም',
     midnight: 'ጥቁር',
-    
+
     // Ethiopian Months (Amharic used as default for Ti/Om if unknown, but providing Ti)
     month1: 'መስከረም',
     month2: 'ጥቅምቲ',
@@ -490,7 +562,7 @@ const translations = {
     showLess: 'ቀንስ',
     welcomeBackPrompt: 'እንቋዕ ደሓን መጻእኩም',
     goodMorningPrompt: 'ሰላም ንዓኻ ይኹን',
-    
+
     // Calendar Weekdays
     monday: 'ሰኑይ',
     tuesday: 'ሰሉስ',
@@ -499,7 +571,7 @@ const translations = {
     friday: 'ዓርቢ',
     saturday: 'ቀዳም',
     sunday: 'ሰንበት',
-    
+
     // Feast/Calendar
     todaysFeast: 'ናይ ሎሚ መዘከርታ',
     annualFeast: 'ዓመታዊ በዓል',
@@ -527,7 +599,7 @@ const translations = {
     name: 'ስም',
     termsAndPrivacy: 'ብምቕጻልካ ኣብ ውዕልናን ፖሊሲ ግላውነትናን ተሰማሚዕካ ኣለኻ።',
     playlists: 'ዝርዝር መዝሙራት',
-    
+
     // Overflow Menu
     shareApp: 'መተግበሪ ኣካፍል',
     feedback: 'ርእይቶ',
@@ -553,6 +625,7 @@ const translations = {
     "የአቡነ ገብረ መንፈስ ቅዱስ መዝሙራት": "ናይ አቡነ ገብረ መንፈስ ቅዱስ",
     "ስለ ቤተ ክርስቲያን": "ብዛዕባ ቤተ ክርስቲያን",
     "የቅድስት አርሴማ": "ናይ ቅድስት አርሴማ",
+    "Afan Oromo Mezmurs": "ናይ አፋን ኦሮሞ መዝሙራት",
 
     // Section Short Labels
     'የእመቤታችን': 'እመቤትና',
@@ -566,11 +639,12 @@ const translations = {
     'የአቡነ ገብረ መንፈስ ቅዱስ': 'ገብረ መንፈስ',
     'ስለ ቤተ ክርስቲያን': 'ቤተ ክርስቲያን',
     'የቅድስት አርሴማ': 'አርሴማ',
+    'Afan Oromo Mezmurs': 'ኦሮምኛ',
 
     // Categories
     'አጭር': 'ሓጺር',
     'ረጅም': 'ነዊሕ',
- 
+
     // Feast Names (Common keys for data-level translation)
     "መድኃኔዓለም": "መድኃኔዓለም",
     "ልደታ ማርያም": "ልደታ ማርያም",
@@ -627,7 +701,7 @@ const translations = {
     "ኪዳነ ምሕረት (የካቲት 16)": "ኪዳነ ምሕረት (ለካቲት 16)",
     "ቅዱስ ገብርኤል (ቁልቢ)": "ቅዱስ ገብርኤል (ቁልቢ)",
     "ደብረ ታቦር (ቡሄ)": "ደብረ ታቦር (ቡሄ)",
- 
+
     // Feast Description keys
     "ቅዱስ ሚካኤል ሕዝበ እስራኤልን ከግብፅ ባርነት የመራበትና ባሕረ ኤርትራን የከፈለበት ዕለት ነው።": "ቅዱስ ሚካኤል ንህዝቢ እስራኤል ካብ ባርነት ግብጺ ዝመርሓሉን ባህረ ኤርትራ ዝኸፈለሉን ዕለት እዩ።",
     "እመቤታችን ንፅህናዋ ተጠብቆ እንዲኖር በሦስት ዓመቷ ወደ ቤተ መቅደስ የገባችበት ዕለት ነው።": "እመቤታችን ንፅህናኣ ተሓልዩ ክትነብር ኣብ ሰለስተ ዓመታ ናብ ቤተ መቅደስ ዝአተወትሉ ዕለት እዩ።",
@@ -641,7 +715,7 @@ const translations = {
     "ታላቁ ሰማዕት ቅዱስ ጊዮርጊስ በሰማዕትነት ያለፈበት ዓመታዊ በዓል ነው።": "እቲ ዓብዪ ሰማዕት ቅዱስ ጊዮርጊስ ብሰማዕትነት ዝሓለፈሉ ዓመታዊ በዓል እዩ።",
 
     yearSuffix: 'ዓ.ም',
-    
+
     // UI Labels
     searchMezmurs: 'መዝሙራት ድለ...',
     searchSections: 'ክፍልታት ድለ...',
@@ -650,7 +724,7 @@ const translations = {
     confirmLogout: 'ርግጸኛ ዲኻ ክትወጽእ?',
     playlists: 'ዝርዝር መዝሙራት',
     recent: 'ቀረባ ግዜ',
-    
+
     // Theme Names
     classic: 'ክላሲክ',
     forest: 'ቀጠልያ',
@@ -660,8 +734,42 @@ const translations = {
     midnight: 'ጥቁር',
     system: 'ሲስተም (ባዕላዊ)',
 
+    // Playlists
+    myPlaylists: 'ናተይ ዝርዝራት',
+    createPlaylist: 'ዝርዝር ፍጠር',
+    playlistName: 'ስም ዝርዝር',
+    enterPlaylistName: 'ስም ዝርዝር የእትው',
+    addHymn: 'መዝሙር ወስኽ',
+    removeFromPlaylist: 'ካብ ዝርዝር አውጽእ',
+    deletePlaylist: 'ዝርዝር አጥፋ',
+    noPlaylists: 'ምንም ዝርዝር የለን። መጀመሪያ ዝርዝር ፍጠር!',
+    renamePlaylist: 'ስም ቀይር',
+    playlistCreated: 'ዝርዝር ተፈጢሩ',
+    playlistDeleted: 'ዝርዝር ተሰሪዙ',
+    addToPlaylist: 'ናብ ዝርዝር ወስኽ',
+    selectPlaylist: 'ዝርዝር ምረጽ',
+    items: 'መዝሙራት',
+    playAll: 'ኩሉ አጻውት',
+    confirmDeletePlaylist: 'ርግጸኛ ዲኻ እዚ ዝርዝር ክትስርዞ ትደሊ?',
+    save: 'አቀምጥ',
+
     // Footer
     madeWithLove: 'ንቤተክርስቲያን ብፍቕሪ ዝተዳለወ',
+    adminDashboard: 'ምምሕዳር ዳሽቦርድ',
+    manageMezmurs: 'መዝሙራት አምሕድር',
+    addMezmur: 'መዝሙር ወስኽ',
+    editMezmur: 'መዝሙር አዐርይ',
+    manageUsers: 'ተጠቃሚታት አምሕድር',
+    adminFeedback: 'ርእይቶታት (ምምሕዳር)',
+    submitFeedback: 'ርእይቶ ሃብ',
+    feedbackSubject: 'አርእስቲ',
+    feedbackMessage: 'መልእኽቲ',
+    sendFeedback: 'ርእይቶ ስደድ',
+    role: 'ተራ',
+    makeAdmin: 'አማሓዳሪ ግበር',
+    removeAdmin: 'ካብ አማሓዳሪነት አውጽእ',
+    banUser: 'አግድ',
+    unbanUser: 'እገዳ አልዕል',
   },
   om: {
     profile: 'Ibsa',
@@ -701,7 +809,7 @@ const translations = {
     menu: 'Mana',
     system: 'Sirna',
     midnight: 'Dukkana',
-    
+
     // Ethiopian Months (OM)
     month1: 'Fulbaana',
     month2: 'Onkololeessa',
@@ -735,7 +843,7 @@ const translations = {
     friday: 'Jimmata',
     saturday: 'Sanbata',
     sunday: 'Dilbata',
-    
+
     // Feast/Calendar
     todaysFeast: 'Ayyaana Har’aa',
     annualFeast: 'Ayyaana Waggaa',
@@ -763,7 +871,7 @@ const translations = {
     name: 'Maqaa',
     termsAndPrivacy: 'Itti fufuun kee, Imaammata dhuunfaa fi waadaa keenya irratti walii galuu kee agarsiisa.',
     playlists: 'Tarree Taphaa',
-    
+
     // Overflow Menu
     shareApp: 'Appii Qoodi',
     feedback: 'Yaada',
@@ -789,6 +897,7 @@ const translations = {
     "የአቡነ ገብረ መንፈስ ቅዱስ መዝሙራት": "Faaruu Abuna Gabramenfes Qudus",
     "ስለ ቤተ ክርስቲያን": "Waa’ee Mana Kiristaanaa",
     "የቅድስት አርሴማ": "Faaruu Qulqulleettii Arseemaa",
+    "Afan Oromo Mezmurs": "Faaruu Afaan Oromoo",
 
     // Section Short Labels
     'የእመቤታችን': 'Dubroo Maariyaam',
@@ -798,6 +907,7 @@ const translations = {
     'የመድኃኔዓለም': 'Madhaanee-Aalam',
     'የቅዱስ ጊዮርጊስ': 'Giyoorgis',
     'የአቡነ ተክለ ሃይማኖት': 'Takla Haymaanot',
+    'Afan Oromo Mezmurs': 'Afaan Oromoo',
     'የቃና ዘገሊላ': 'Kaanaazegaliilaa',
     'የአቡነ ገብረ መንፈስ ቅዱስ': 'Gabramenfes',
     'ስለ ቤተ ክርስቲያን': 'Mana Kiristaanaa',
@@ -860,7 +970,7 @@ const translations = {
     "ኪዳነ ምሕረት (የካቲት 16)": "Kidane Mehret (Guraandhala 16)",
     "ቅዱስ ገብርኤል (ቁልቢ)": "Qulqulluu Gabri’eel (Kulubii)",
     "ደብረ ታቦር (ቡሄ)": "Ayyaana Debre Tabor (Buhee)",
-    
+
     // Theme Names
     classic: 'Kilaasikii',
     forest: 'Magariisa',
@@ -870,8 +980,42 @@ const translations = {
     midnight: 'Dukkana',
     system: 'Sirna (Of-danda’aa)',
 
+    // Playlists
+    myPlaylists: 'Tarreewwan Ko',
+    createPlaylist: 'Tarree Uumi',
+    playlistName: 'Maqaa Tarree',
+    enterPlaylistName: 'Maqaa tarree galchi',
+    addHymn: 'Faaruu Dabali',
+    removeFromPlaylist: 'Tarree keessaa baasi',
+    deletePlaylist: 'Tarree Haqi',
+    noPlaylists: 'Tarreen hin jiru. Jalqabuuf tokko uumi!',
+    renamePlaylist: 'Maqaa Jijjiiri',
+    playlistCreated: 'Tarreen uumameera',
+    playlistDeleted: 'Tarreen haqameera',
+    addToPlaylist: 'Gara tarreetti dabali',
+    selectPlaylist: 'Tarree filadhu',
+    items: 'faarulee',
+    playAll: 'Hunda Taphadhu',
+    confirmDeletePlaylist: 'Dhuguma tarree kana haquu barbaadda?',
+    save: 'Save',
+
     // Footer
     madeWithLove: 'Mana Kiristaanaaf jaalalaan kan hojjetame',
+    adminDashboard: 'Admin Dashboard',
+    manageMezmurs: 'Faaruu Bulchiinsa',
+    addMezmur: 'Faaruu Dabali',
+    editMezmur: 'Faaruu Sirreessi',
+    manageUsers: 'Fayyadamtoota Bulchiinsa',
+    adminFeedback: 'Yaada (Admin)',
+    submitFeedback: 'Yaada Kenni',
+    feedbackSubject: 'Mata Duree',
+    feedbackMessage: 'Ergaa',
+    sendFeedback: 'Yaada Ergi',
+    role: 'Gahee',
+    makeAdmin: 'Admin Godhi',
+    removeAdmin: 'Admin irraa Kaasi',
+    banUser: 'Dhorki',
+    unbanUser: 'Dhorkaa Kaasi',
   },
 };
 

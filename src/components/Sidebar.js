@@ -19,12 +19,15 @@ const WATERMARK_OPACITY = 0.06;
 const MENU_ITEMS = [
   { id: 1, labelKey: 'home', icon: 'home-outline', activeIcon: 'home', screen: 'Home', navigator: 'Tabs' },
   { id: 3, labelKey: 'calendar', icon: 'calendar-outline', activeIcon: 'calendar', screen: 'Calendar', navigator: 'Tabs' },
-  { id: 4, labelKey: 'favorites', icon: 'heart-outline', activeIcon: 'heart', screen: 'Favorites', navigator: 'Root' },
+  { id: 4, labelKey: 'favorites', icon: 'heart-outline', activeIcon: 'heart', screen: 'Favorites', navigator: 'Drawer' },
+  { id: 5, labelKey: 'myPlaylists', icon: 'list-outline', activeIcon: 'list', screen: 'PlaylistList', navigator: 'Drawer' },
+  { id: 10, labelKey: 'adminDashboard', icon: 'shield-checkmark-outline', activeIcon: 'shield-checkmark', screen: 'Admin', navigator: 'Drawer', adminOnly: true },
 ];
 
 const SECONDARY_ITEMS = [
   { id: 6, labelKey: 'settings', icon: 'settings-outline', activeIcon: 'settings', screen: 'Settings', navigator: 'Drawer' },
-  { id: 7, labelKey: 'aboutUs', icon: 'information-circle-outline', activeIcon: 'information-circle', screen: 'About', navigator: 'Drawer' },
+  { id: 7, labelKey: 'feedback', icon: 'chatbubbles-outline', activeIcon: 'chatbubbles', screen: 'Feedback', navigator: 'Root' },
+  { id: 8, labelKey: 'aboutUs', icon: 'information-circle-outline', activeIcon: 'information-circle', screen: 'About', navigator: 'Drawer' },
 ];
 
 // Components
@@ -38,7 +41,7 @@ const SidebarHeader = memo(({ t, primary, text, accent }) => (
   <YStack paddingHorizontal="$6" paddingTop="$2" paddingBottom="$4">
     <XStack alignItems="center" space="$3">
       <Circle size={48} backgroundColor={primary} elevation="$3">
-         <Ionicons name="musical-notes" size={24} color={accent} />
+        <Ionicons name="musical-notes" size={24} color={accent} />
       </Circle>
       <YStack>
         <Text fontFamily="$ethiopicSerif" fontSize={24} fontWeight="900" color={text} letterSpacing={-0.5}>
@@ -111,7 +114,7 @@ const MenuItem = memo(({ item, t, navigation, isActive, primaryColor, textColor,
         } else {
           NavigationService.navigateToRoot(item.screen);
         }
-        
+
         requestAnimationFrame(() => navigation.closeDrawer());
       }}
       pressStyle={isDisabled ? {} : { backgroundColor: `${primaryColor}08`, scale: 0.98 }}
@@ -133,7 +136,7 @@ const MenuItem = memo(({ item, t, navigation, isActive, primaryColor, textColor,
 const Sidebar = (props) => {
   const { theme } = useAppTheme();
   const { t } = useLanguage();
-  const { user, profileData, isAuthenticated, isAnonymous } = useAuth();
+  const { user, profileData, isAuthenticated, isAnonymous, isAdmin } = useAuth();
   const rawInsets = useSafeAreaInsets();
   const navigation = props.navigation;
 
@@ -161,6 +164,7 @@ const Sidebar = (props) => {
   }, [isAuthenticated, user?.displayName, profileData?.displayName, isAnonymous, t]);
 
   const renderItem = useCallback(item => {
+    if (item.adminOnly && !isAdmin) return null;
     const isActive = activeRoute === item.screen;
 
     return (

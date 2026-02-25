@@ -9,7 +9,7 @@ class UserProfileService {
   static async saveProfilePictureBase64(userId, base64Data) {
     try {
       const photoURL = `data:image/jpeg;base64,${base64Data}`;
-      
+
       // Update Firestore profile with the Base64 image URL
       await this.saveProfile(userId, { photoURL });
 
@@ -27,7 +27,7 @@ class UserProfileService {
     try {
       const docRef = doc(db, 'users', userId);
       const docSnap = await getDoc(docRef);
-      
+
       if (docSnap.exists()) {
         return { success: true, data: docSnap.data() };
       } else {
@@ -49,7 +49,7 @@ class UserProfileService {
         ...profileData,
         lastSync: serverTimestamp()
       }, { merge: true });
-      
+
       return { success: true };
     } catch (error) {
       console.error('Error saving profile:', error);
@@ -67,7 +67,7 @@ class UserProfileService {
         favorites,
         lastSync: serverTimestamp()
       });
-      
+
       return { success: true };
     } catch (error) {
       // If document doesn't exist, create it
@@ -89,7 +89,7 @@ class UserProfileService {
         theme: themeId,
         lastSync: serverTimestamp()
       });
-      
+
       return { success: true };
     } catch (error) {
       console.error('Error syncing theme:', error);
@@ -107,10 +107,32 @@ class UserProfileService {
         language,
         lastSync: serverTimestamp()
       });
-      
+
       return { success: true };
     } catch (error) {
       console.error('Error syncing language:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Sync playlists to cloud
+   */
+  static async syncPlaylists(userId, playlists) {
+    try {
+      const docRef = doc(db, 'users', userId);
+      await updateDoc(docRef, {
+        playlists,
+        lastSync: serverTimestamp()
+      });
+
+      return { success: true };
+    } catch (error) {
+      // If document doesn't exist, create it
+      if (error.code === 'not-found') {
+        return await this.saveProfile(userId, { playlists });
+      }
+      console.error('Error syncing playlists:', error);
       return { success: false, error: error.message };
     }
   }
@@ -146,6 +168,7 @@ class UserProfileService {
       let processed = 0;
 
       for (const operation of syncQueue) {
+        console.log(`Processing queued operation: ${operation.type}`);
         switch (operation.type) {
           case 'favorites':
             await this.syncFavorites(userId, operation.data);
@@ -156,9 +179,13 @@ class UserProfileService {
           case 'language':
             await this.syncLanguage(userId, operation.data);
             break;
+          case 'playlists':
+            await this.syncPlaylists(userId, operation.data);
+            break;
         }
         processed++;
       }
+      console.log(`Successfully processed ${processed} operations.`);
 
       // Clear queue after successful sync
       await AsyncStorage.removeItem('syncQueue');

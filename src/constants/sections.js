@@ -1,5 +1,3 @@
-const mezmursData = require('../data/mezmurs.json');
-
 // Section definitions for Mezmurs
 const SECTIONS = {
   BAPTISM: 'የከተራና የጥምቀት መዝሙራት',
@@ -18,12 +16,14 @@ const SECTIONS = {
   ABA_GARIMA: 'ስለ አባ ገሪማ',
   ARSEMA: 'ስለ ቅድስት አርሴማ መዝሙራት',
   PHILIP: 'ስለ ቅዱስ ፊልጶስ መዝሙራት',
+  AFAN_OROMO: 'Afan Oromo Mezmurs',
+  NEW_YEAR: 'የዐውደ ዓመት መዝሙራት',
 };
 
 // Map ID ranges to sections
 const getSectionById = (id) => {
   const numId = parseInt(id);
-  
+
   if (numId >= 1 && numId <= 91) return SECTIONS.BAPTISM;
   if (numId >= 92 && numId <= 98) return SECTIONS.CANA;
   if (numId >= 99 && numId <= 147) return SECTIONS.THANKSGIVING;
@@ -40,19 +40,12 @@ const getSectionById = (id) => {
   if (numId === 238) return SECTIONS.ABA_GARIMA;
   if (numId === 239) return SECTIONS.ARSEMA;
   if (numId >= 240 && numId <= 242) return SECTIONS.PHILIP;
-  
-  return SECTIONS.BAPTISM; // Default
-};
+  if (numId >= 243 && numId <= 256) return SECTIONS.NEW_YEAR;
 
-// Get all section names as array
-const getAllSections = () => {
-  return Array.from(new Set(
-    mezmursData.map(m => m.section).filter(Boolean)
-  ));
+  return SECTIONS.BAPTISM; // Default
 };
 
 module.exports = {
   SECTIONS,
   getSectionById,
-  getAllSections,
 };

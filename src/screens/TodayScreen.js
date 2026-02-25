@@ -8,7 +8,6 @@ const { useAppTheme } = require('../context/ThemeContext');
 const { useLanguage } = require('../context/LanguageContext');
 const { toEthiopian, toGeez, ETHIOPIC_MONTHS, ETHIOPIC_MONTHS_EN } = require('../utils/dateUtils');
 const { getFeastForDate } = require('../utils/holidayData');
-const MEZMURS = require('../data/mezmurs.json');
 const { useAudio } = require('../context/GlobalAudioState.js');
 const { useFavorites } = require('../context/FavoritesContext');
 const { useAuth } = require('../context/AuthContext');
@@ -21,7 +20,7 @@ const TodayScreen = ({ navigation }) => {
   const { recentlyPlayed } = useAudio();
   const { favoritesCount } = useFavorites();
   const { user, profileData, loading: authLoading } = useAuth();
-  
+
   const [dataReady, setDataReady] = useState(DataService.isReady);
 
   useEffect(() => {
@@ -39,8 +38,8 @@ const TodayScreen = ({ navigation }) => {
   // 1. Get Today's Ethiopian Date
   const today = new Date();
   const ethDayObj = useMemo(() => toEthiopian(
-    today.getFullYear(), 
-    today.getMonth() + 1, 
+    today.getFullYear(),
+    today.getMonth() + 1,
     today.getDate()
   ), []);
 
@@ -53,26 +52,60 @@ const TodayScreen = ({ navigation }) => {
 
   // 3. Recommendation Engine: Match Feast Keywords to Hymn Sections
   const recommendedHymns = useMemo(() => {
-    const feastText = (feastSummary.major?.en || "") + " " + (feastSummary.monthly?.en || "");
-    const feastTextAm = (feastSummary.major?.am || "") + " " + (feastSummary.monthly?.am || "");
-    
-    // 2. Keyword Mapping to Sections
+    const feastText = [
+      (feastSummary.major?.en || ""),
+      (feastSummary.monthly?.en || ""),
+    ].join(" ").toLowerCase();
+    const feastTextAm = [
+      (feastSummary.major?.am || ""),
+      (feastSummary.monthly?.am || ""),
+    ].join(" ");
+
+    const hasEn = (...words) => words.some(w => feastText.includes(w.toLowerCase()));
+    const hasAm = (...words) => words.some(w => feastTextAm.includes(w));
+
+    // Comprehensive feast keyword → section mapping
+    // All section names must exactly match keys in mezmurs.json
     let sectionMatch = "";
-    if (feastText.includes("Mariam") || feastTextAm.includes("ማርያም")) sectionMatch = "የእመቤታችን የምስጋና መዝሙራት";
-    else if (feastText.includes("Mikael") || feastTextAm.includes("ሚካኤል")) sectionMatch = "የቅዱስ ሚካኤል መዝሙራት";
-    else if (feastText.includes("Gabriel") || feastTextAm.includes("ገብርኤል")) sectionMatch = "የቅዱስ ገብርኤል መዝሙራት";
-    else if (feastText.includes("Tekle Haymanot") || feastTextAm.includes("ተክለ ሃይማኖት")) sectionMatch = "የአቡነ ተክለ ሃይማኖት መዝሙራት";
-    else if (feastText.includes("Giorgis") || feastTextAm.includes("ጊዮርጊስ")) sectionMatch = "የቅዱስ ጊዮርጊስ መዝሙራት";
-    else if (feastText.includes("Medhane Alem") || feastTextAm.includes("መድኃኔዓለም")) sectionMatch = "የመድኃኔዓለም የምስጋና መዝሙራት";
-    else if (feastText.includes("Timket") || feastTextAm.includes("ጥምቀት")) sectionMatch = "የከተራና የጥምቀት መዝሙራት";
-    else if (feastText.includes("Kana ZeGalila") || feastTextAm.includes("ቃና ዘገሊላ")) sectionMatch = "የቃና ዘገሊላ መዝሙራት";
-    
-    // 3. High-Performance Retrieval via DataService
+    if (
+      // All Marian feasts → Mary hymns section
+      hasEn("kidane mehret", "covenant of mercy", "filseta", "assumption of mary",
+        "tsion mariam", "zion", "gishen mariam", "qusquam", "asteriyo",
+        "lideta", "ba'ata", "virgin mary", "mariam", "mary") ||
+      hasAm("ኪዳነ ምሕረት", "ፍልሰታ", "ፍልሰተ", "ጽዮን ማርያም", "ግሸን ማርያም",
+        "ቁስቋም", "አስተርዮ ማርያም", "ልደታ ለማርያም", "ደብረ ከርቤ", "ማርያም")
+    ) {
+      sectionMatch = "የእመቤታችን የምስጋና መዝሙራት";
+    } else if (hasEn("mikael", "michael") || hasAm("ሚካኤል")) {
+      sectionMatch = "የቅዱስ ሚካኤል መዝሙራት";
+    } else if (hasEn("gabriel") || hasAm("ገብርኤል")) {
+      sectionMatch = "የቅዱስ ገብርኤል መዝሙራት";
+    } else if (hasEn("tekle haymanot") || hasAm("ተክለ ሃይማኖት")) {
+      sectionMatch = "የአቡነ ተክለ ሃይማኖት መዝሙራት";
+    } else if (hasEn("giorgis", "george") || hasAm("ጊዮርጊስ")) {
+      sectionMatch = "የቅዱስ ጊዮርጊስ መዝሙራት";
+    } else if (hasEn("gebre menfas") || hasAm("ገብረ መንፈስ ቅዱስ")) {
+      sectionMatch = "የአቡነ ገብረ መንፈስ ቅዱስ መዝሙራት";
+    } else if (hasEn("medhane alem", "savior of the world") || hasAm("መድኃኔዓለም")) {
+      sectionMatch = "የመድኃኔዓለም የምስጋና መዝሙራት";
+    } else if (hasEn("timket", "epiphany", "baptism", "ketera") || hasAm("ጥምቀት", "ከተራ")) {
+      sectionMatch = "የከተራና የጥምቀት መዝሙራት";
+    } else if (hasEn("kana", "cana") || hasAm("ቃና ዘገሊላ")) {
+      sectionMatch = "የቃና ዘገሊላ መዝሙራት";
+    } else if (hasEn("meskel", "true cross", "finding of the cross") || hasAm("መስቀል")) {
+      sectionMatch = "የመስቀል መዝሙራት";
+    } else if (hasEn("debre tabor", "transfiguration") || hasAm("ደብረ ታቦር", "ቡሄ")) {
+      sectionMatch = "የደብረ ታቦር መዝሙራት";
+    } else if (hasEn("new year", "enkutatash") || hasAm("ዐውደ ዓመት", "እንቁጣጣሽ")) {
+      sectionMatch = "የዐውደ ዓመት መዝሙራት";
+    } else if (hasEn("estifanos", "stephen") || hasAm("እስጢፋኖስ")) {
+      sectionMatch = "ስለ ቀዳሜ ሰማዕት እስጢፋኖስ መዝሙራት";
+    }
+
     const pool = DataService.getFeaturedForFeast(sectionMatch);
-    
-    // Stable shuffle for variety without O(N) filtering
     return [...pool].sort(() => 0.5 - Math.random()).slice(0, 5);
   }, [month, day, t]);
+
 
   // Premium Skeleton Components
   const SkeletonHeader = () => (
@@ -133,18 +166,18 @@ const TodayScreen = ({ navigation }) => {
             </YStack>
             <SkeletonFeaturedRow />
             <YStack space="$4">
-               <YStack height={22} width={180} backgroundColor={theme.borderColor} borderRadius="$2" opacity={0.2} />
-               {[1, 2, 3].map(i => (
-                 <YStack key={i} height={85} backgroundColor={theme.cardBackground} borderRadius="$4" paddingHorizontal="$4" justifyContent="center">
-                   <XStack ai="center" space="$4">
-                      <YStack height={45} width={45} borderRadius={10} backgroundColor={theme.borderColor} opacity={0.1} />
-                      <YStack f={1} space="$2">
-                        <YStack height={14} width="60%" backgroundColor={theme.borderColor} borderRadius="$1" opacity={0.2} />
-                        <YStack height={10} width="40%" backgroundColor={theme.borderColor} borderRadius="$1" opacity={0.1} />
-                      </YStack>
-                   </XStack>
-                 </YStack>
-               ))}
+              <YStack height={22} width={180} backgroundColor={theme.borderColor} borderRadius="$2" opacity={0.2} />
+              {[1, 2, 3].map(i => (
+                <YStack key={i} height={85} backgroundColor={theme.cardBackground} borderRadius="$4" paddingHorizontal="$4" justifyContent="center">
+                  <XStack ai="center" space="$4">
+                    <YStack height={45} width={45} borderRadius={10} backgroundColor={theme.borderColor} opacity={0.1} />
+                    <YStack f={1} space="$2">
+                      <YStack height={14} width="60%" backgroundColor={theme.borderColor} borderRadius="$1" opacity={0.2} />
+                      <YStack height={10} width="40%" backgroundColor={theme.borderColor} borderRadius="$1" opacity={0.1} />
+                    </YStack>
+                  </XStack>
+                </YStack>
+              ))}
             </YStack>
           </YStack>
         </ScrollView>
@@ -155,44 +188,44 @@ const TodayScreen = ({ navigation }) => {
   return (
     <YStack f={1} backgroundColor={theme.background} paddingTop={insets.top}>
       {/* 1. Styled Header */}
-      <XStack 
-        paddingHorizontal="$5" 
+      <XStack
+        paddingHorizontal="$5"
         paddingVertical="$3"
         alignItems="center"
         justifyContent="center"
       >
-        <Button 
+        <Button
           position="absolute"
           left="$4"
-          circular 
-          size="$3" 
+          circular
+          size="$3"
           backgroundColor="transparent"
           icon={<Ionicons name="menu-outline" size={28} color={theme.primary} />}
           onPress={() => navigation.toggleDrawer()}
           pressStyle={{ opacity: 0.6 }}
         />
         <YStack alignItems="center">
-           <Text fontFamily="$ethiopicSerif" fontSize={22} fontWeight="800" color={theme.primary}>
-             {t('appTitle')}
-           </Text>
-           <Text fontFamily="$body" fontSize={11} color={theme.text} opacity={0.5} textTransform="uppercase" letterSpacing={1}>
-             {t('goodMorningPrompt')}, {userDisplayName}
-           </Text>
+          <Text fontFamily="$ethiopicSerif" fontSize={22} fontWeight="800" color={theme.primary}>
+            {t('appTitle')}
+          </Text>
+          <Text fontFamily="$body" fontSize={11} color={theme.text} opacity={0.5} textTransform="uppercase" letterSpacing={1}>
+            {t('goodMorningPrompt')}, {userDisplayName}
+          </Text>
         </YStack>
-        <Button 
+        <Button
           position="absolute"
           right="$4"
-          circular 
-          size="$3" 
+          circular
+          size="$3"
           backgroundColor="transparent"
           onPress={() => navigation.navigate('Profile')}
           pressStyle={{ opacity: 0.6 }}
           padding="$0"
         >
           {profileData?.photoURL ? (
-            <RNImage 
-              source={{ uri: profileData.photoURL }} 
-              style={{ width: 34, height: 34, borderRadius: 17 }} 
+            <RNImage
+              source={{ uri: profileData.photoURL }}
+              style={{ width: 34, height: 34, borderRadius: 17 }}
             />
           ) : (
             <Ionicons name="person-circle-outline" size={32} color={theme.primary} />
@@ -202,93 +235,93 @@ const TodayScreen = ({ navigation }) => {
 
       <ScrollView f={1} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 140 }}>
         <YStack padding="$5" space="$5">
-          
+
           {/* Quick Actions / Link Tiles - Enhanced Premium */}
           <XStack space="$3" paddingBottom="$3">
-             <Card 
-               f={1} 
-               height={130} 
-               borderRadius="$5" 
-               backgroundColor={theme.primary} 
-               onPress={() => navigation.navigate('Favorites')}
-               pressStyle={{ scale: 0.97, opacity: 0.95 }}
-               elevation="$4"
-               shadowColor="$shadowColor"
-               shadowOffset={{ width: 0, height: 6 }}
-               shadowOpacity={0.25}
-               shadowRadius={12}
-               overflow="hidden"
-             >
-                <YStack f={1} p="$4" jc="space-between">
-                   <Circle size={44} backgroundColor="rgba(255,255,255,0.2)" ai="center" jc="center">
-                      <Ionicons name="heart" size={22} color="white" />
-                   </Circle>
-                   <YStack>
-                     <Text fontFamily="$ethiopicSerif" color="white" fontWeight="900" fontSize="$5">{t('favorites')}</Text>
-                     <Text color="white" opacity={0.9} fontSize="$2" fontWeight="600">{favoritesCount} {t('mezmurs')}</Text>
-                   </YStack>
+            <Card
+              f={1}
+              height={130}
+              borderRadius="$5"
+              backgroundColor={theme.primary}
+              onPress={() => navigation.navigate('Favorites')}
+              pressStyle={{ scale: 0.97, opacity: 0.95 }}
+              elevation="$4"
+              shadowColor="$shadowColor"
+              shadowOffset={{ width: 0, height: 6 }}
+              shadowOpacity={0.25}
+              shadowRadius={12}
+              overflow="hidden"
+            >
+              <YStack f={1} p="$4" jc="space-between">
+                <Circle size={44} backgroundColor="rgba(255,255,255,0.2)" ai="center" jc="center">
+                  <Ionicons name="heart" size={22} color="white" />
+                </Circle>
+                <YStack>
+                  <Text fontFamily="$ethiopicSerif" color="white" fontWeight="900" fontSize="$5">{t('favorites')}</Text>
+                  <Text color="white" opacity={0.9} fontSize="$2" fontWeight="600">{favoritesCount} {t('mezmurs')}</Text>
                 </YStack>
-                {/* Subtle gradient overlay */}
-                <YStack position="absolute" top={0} right={-20} opacity={0.1}>
-                   <Ionicons name="heart" size={100} color="white" />
+              </YStack>
+              {/* Subtle gradient overlay */}
+              <YStack position="absolute" top={0} right={-20} opacity={0.1}>
+                <Ionicons name="heart" size={100} color="white" />
+              </YStack>
+            </Card>
+            <Card
+              f={1}
+              height={130}
+              borderRadius="$5"
+              backgroundColor={theme.accent}
+              onPress={() => navigation.navigate('Mezmurs')}
+              pressStyle={{ scale: 0.97, opacity: 0.95 }}
+              elevation="$4"
+              shadowColor="$shadowColor"
+              shadowOffset={{ width: 0, height: 6 }}
+              shadowOpacity={0.25}
+              shadowRadius={12}
+              overflow="hidden"
+            >
+              <Image
+                source={require('../../assets/sections/church.jpg')}
+                style={{ position: 'absolute', width: '100%', height: '100%' }}
+                resizeMode="cover"
+              />
+              <YStack f={1} p="$4" jc="flex-end" backgroundColor="rgba(0,0,0,0.45)">
+                <YStack>
+                  <Text fontFamily="$ethiopicSerif" color="white" fontWeight="900" fontSize="$5">{t('explore')}</Text>
+                  <Text color="white" opacity={0.9} fontSize="$2" fontWeight="600">{t('categories')}</Text>
                 </YStack>
-             </Card>
-             <Card 
-               f={1} 
-               height={130} 
-               borderRadius="$5" 
-               backgroundColor={theme.accent} 
-               onPress={() => navigation.navigate('Mezmurs')}
-               pressStyle={{ scale: 0.97, opacity: 0.95 }}
-               elevation="$4"
-               shadowColor="$shadowColor"
-               shadowOffset={{ width: 0, height: 6 }}
-               shadowOpacity={0.25}
-               shadowRadius={12}
-               overflow="hidden"
-             >
-                <Image 
-                  source={require('../../assets/sections/church.jpg')} 
-                  style={{ position: 'absolute', width: '100%', height: '100%' }} 
-                  resizeMode="cover"
-                />
-                <YStack f={1} p="$4" jc="flex-end" backgroundColor="rgba(0,0,0,0.45)">
-                    <YStack>
-                       <Text fontFamily="$ethiopicSerif" color="white" fontWeight="900" fontSize="$5">{t('explore')}</Text>
-                       <Text color="white" opacity={0.9} fontSize="$2" fontWeight="600">{t('categories')}</Text>
-                    </YStack>
-                </YStack>
-             </Card>
+              </YStack>
+            </Card>
           </XStack>
 
           {/* Recently Played Carousel - Enhanced */}
           {recentlyPlayed.length > 0 && (
             <YStack space="$3" marginTop="$2">
               <XStack justifyContent="space-between" alignItems="center" paddingHorizontal="$1">
-                 <Text fontFamily="$ethiopicSerif" fontSize={20} fontWeight="900" color={theme.text}>
-                   {t('recentlyPlayed')}
-                 </Text>
+                <Text fontFamily="$ethiopicSerif" fontSize={20} fontWeight="900" color={theme.text}>
+                  {t('recentlyPlayed')}
+                </Text>
                 <Button chromeless p="$2" onPress={() => navigation.navigate('Mezmurs')} borderRadius="$8">
-                   <XStack ai="center" space="$1">
-                      <Text fontSize="$3" color={theme.primary} fontWeight="700">{t('seeAll')}</Text>
-                      <Ionicons name="chevron-forward" size={16} color={theme.primary} />
-                   </XStack>
+                  <XStack ai="center" space="$1">
+                    <Text fontSize="$3" color={theme.primary} fontWeight="700">{t('seeAll')}</Text>
+                    <Ionicons name="chevron-forward" size={16} color={theme.primary} />
+                  </XStack>
                 </Button>
               </XStack>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingRight: 20, paddingLeft: 4, paddingVertical: 8 }}>
                 {recentlyPlayed.map((item) => (
-                  <YStack 
-                    key={item.id} 
-                    width={150} 
-                    marginRight="$4" 
+                  <YStack
+                    key={item.id}
+                    width={150}
+                    marginRight="$4"
                     onPress={() => navigation.navigate('Detail', { mezmur: item })}
                     pressStyle={{ scale: 0.96 }}
                   >
                     <Card
-                      width={150} 
-                      height={150} 
-                      backgroundColor={theme.cardBackground} 
-                      borderRadius="$5" 
+                      width={150}
+                      height={150}
+                      backgroundColor={theme.cardBackground}
+                      borderRadius="$5"
                       borderWidth={0.6}
                       borderColor={theme.borderColor}
                       ai="center"
@@ -304,7 +337,7 @@ const TodayScreen = ({ navigation }) => {
                     >
                       <Ionicons name="musical-note" size={65} color={theme.primary} opacity={0.12} />
                       <Circle position="absolute" bottom={12} right={12} size={36} backgroundColor={theme.primary} elevation="$2">
-                         <Ionicons name="play" size={18} color="white" style={{marginLeft: 2}} />
+                        <Ionicons name="play" size={18} color="white" style={{ marginLeft: 2 }} />
                       </Circle>
                     </Card>
                     <Text fontFamily="$ethiopic" fontSize={15} fontWeight="800" color={theme.text} numberOfLines={2} lineHeight={20}>
@@ -314,13 +347,13 @@ const TodayScreen = ({ navigation }) => {
                       {t(item.section)}
                     </Text>
                   </YStack>
-                ) )}
+                ))}
               </ScrollView>
             </YStack>
           )}
-          
+
           {/* Combined Today's Date & Feast Card - Minimal Premium */}
-          <Card 
+          <Card
             padding="$5"
             marginVertical="$4"
             borderRadius="$5"
@@ -353,39 +386,39 @@ const TodayScreen = ({ navigation }) => {
 
             {/* Feast Section */}
             <YStack space="$2.5">
-              <Text 
-                fontFamily="$ethiopicSerif" 
-                fontSize={12} 
-                fontWeight="800" 
-                color={theme.primary} 
-                opacity={0.7} 
-                textTransform="uppercase" 
+              <Text
+                fontFamily="$ethiopicSerif"
+                fontSize={12}
+                fontWeight="800"
+                color={theme.primary}
+                opacity={0.7}
+                textTransform="uppercase"
                 letterSpacing={1.2}
               >
                 {t('todaysFeast')}
               </Text>
-              
+
               {/* Enhanced Feast Rendering - Final Polish */}
               <YStack space="$3">
                 {/* 1. Major Annual Feast */}
                 {feastSummary.major ? (
-                  <Text 
-                    fontFamily="$ethiopic" 
-                    fontSize={26} 
-                    fontWeight="900" 
+                  <Text
+                    fontFamily="$ethiopic"
+                    fontSize={26}
+                    fontWeight="900"
                     color={theme.text}
                     lineHeight={36}
                   >
                     {feastSummary.major[language] || feastSummary.major['am'] || feastSummary.major['en'] || ''}
                   </Text>
                 ) : null}
-                
+
                 {/* 2. Monthly Commemoration */}
                 {feastSummary.monthly ? (
-                  <Text 
-                    fontFamily="$ethiopic" 
-                    fontSize={feastSummary.major ? 20 : 25} 
-                    color={feastSummary.major ? theme.primary : theme.text} 
+                  <Text
+                    fontFamily="$ethiopic"
+                    fontSize={feastSummary.major ? 20 : 25}
+                    color={feastSummary.major ? theme.primary : theme.text}
                     fontWeight="900"
                     lineHeight={feastSummary.major ? 28 : 36}
                   >
@@ -413,7 +446,7 @@ const TodayScreen = ({ navigation }) => {
 
             <YStack space="$3">
               {recommendedHymns.map((hymn) => (
-                <Button 
+                <Button
                   key={hymn.id}
                   padding="$0"
                   height={85}
@@ -427,7 +460,7 @@ const TodayScreen = ({ navigation }) => {
                   <XStack f={1} alignItems="center" paddingHorizontal="$4" space="$4">
                     {/* Visual Marker */}
                     <YStack height={45} width={45} borderRadius={10} backgroundColor={theme.primary + '15'} alignItems="center" justifyContent="center">
-                       <Ionicons name="musical-note" size={24} color={theme.primary} />
+                      <Ionicons name="musical-note" size={24} color={theme.primary} />
                     </YStack>
 
                     <YStack f={1} space="$1">
@@ -447,10 +480,10 @@ const TodayScreen = ({ navigation }) => {
           </YStack>
 
           <Separator marginVertical="$4" opacity={0.1} />
-          
-           <Text textAlign="center" fontFamily="$body" fontSize={12} color={theme.textSecondary} opacity={0.6}>
-             {t('version')} 1.0.0
-           </Text>
+
+          <Text textAlign="center" fontFamily="$body" fontSize={12} color={theme.textSecondary} opacity={0.6}>
+            {t('version')} 1.0.0
+          </Text>
         </YStack>
       </ScrollView>
     </YStack>

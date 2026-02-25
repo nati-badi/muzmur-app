@@ -21,7 +21,7 @@ let auth;
 if (getApps().length === 0) {
   // First time initialization
   app = initializeApp(firebaseConfig);
-  
+
   // Robust Auth Initialization for React Native
   let persistence;
   try {
@@ -41,6 +41,7 @@ if (getApps().length === 0) {
 }
 
 const db = getFirestore(app);
+
 const { getStorage } = require('firebase/storage');
 const storage = getStorage(app);
 

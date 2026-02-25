@@ -4,7 +4,7 @@ const { YStack, XStack, Text, Button } = require('tamagui');
 const { Ionicons } = require('@expo/vector-icons');
 const { useLanguage } = require('../context/LanguageContext');
 
-const MezmurListCard = memo(({ item, isFavorite, onToggleFavorite, onPress, getStatusColor, theme }) => {
+const MezmurListCard = memo(({ item, isFavorite, onToggleFavorite, onPress, getStatusColor, theme, rightAction }) => {
   const { t } = useLanguage();
   const getCategory = (lyrics = '') => {
     if (!lyrics) return 'አጭር';
@@ -16,12 +16,12 @@ const MezmurListCard = memo(({ item, isFavorite, onToggleFavorite, onPress, getS
   const statusColor = getStatusColor(calculatedCategory);
 
   // Truncate lyrics for preview (first 2 lines)
-  const lyricsPreview = item.lyrics 
-    ? item.lyrics.split('\n').slice(0, 2).join('\n') 
+  const lyricsPreview = item.lyrics
+    ? item.lyrics.split('\n').slice(0, 2).join('\n')
     : '';
 
   return (
-    <YStack 
+    <YStack
       backgroundColor={theme.cardBackground}
       borderRadius="$3"
       marginBottom="$3"
@@ -32,13 +32,13 @@ const MezmurListCard = memo(({ item, isFavorite, onToggleFavorite, onPress, getS
       position="relative"
     >
       {/* Left Accent Stripe */}
-      <YStack 
-        position="absolute" 
-        left={0} 
-        top={0} 
-        bottom={0} 
-        width={6} 
-        backgroundColor={statusColor} 
+      <YStack
+        position="absolute"
+        left={0}
+        top={0}
+        bottom={0}
+        width={6}
+        backgroundColor={statusColor}
       />
 
       {/* Watermark Icon */}
@@ -48,98 +48,96 @@ const MezmurListCard = memo(({ item, isFavorite, onToggleFavorite, onPress, getS
 
       <XStack padding="$4" paddingLeft="$5" justifyContent="space-between" alignItems="flex-start">
         <YStack flex={1} space="$2">
-           {/* Top Metadata Row */}
-            <XStack alignItems="center" space="$2" marginBottom="$1">
-              <Text 
-                fontFamily="$body" 
-                fontSize="$1" 
-                color={theme.textSecondary} 
-                opacity={0.5}
-                letterSpacing={1}
+          {/* Top Metadata Row */}
+          <XStack alignItems="center" space="$2" marginBottom="$1">
+            <Text
+              fontFamily="$body"
+              fontSize="$1"
+              color={theme.textSecondary}
+              opacity={0.5}
+              letterSpacing={1}
+            >
+              MEZMUR #{item.id}
+            </Text>
+            {/* Refined Badge: Just Text, No "Circle/Pill" */}
+            <YStack
+              opacity={0.7}
+            >
+              <Text
+                fontFamily="$body"
+                fontSize="$1"
+                color={statusColor}
+                fontWeight="700"
+                letterSpacing={0.5}
+                textTransform="uppercase"
               >
-                MEZMUR #{item.id}
+                {t(calculatedCategory)}
               </Text>
-              {/* Refined Badge: Just Text, No "Circle/Pill" */}
-              <YStack 
-                opacity={0.7}
-              >
-                 <Text 
-                  fontFamily="$body" 
-                  fontSize="$1" 
-                  color={statusColor}
-                  fontWeight="700"
-                  letterSpacing={0.5}
-                  textTransform="uppercase"
-                >
-                  {t(calculatedCategory)}
-                </Text>
-              </YStack>
-           </XStack>
-          
-          {/* Title */}
-          <Text 
-             fontFamily="$ethiopic" 
-             fontSize="$6" 
-             fontWeight="800" 
-             color={theme.text} 
-             numberOfLines={1}
-             marginBottom="$1"
-           >
-             {item.title}
-           </Text>
+            </YStack>
+          </XStack>
 
-           {/* Lyric Preview (Serif for Songbook feel) */}
-           <Text 
-             fontFamily="$ethiopicSerif" 
-             fontSize="$4" 
-             color={theme.textSecondary} 
-             numberOfLines={2} 
-             lineHeight={24}
-             opacity={0.7}
-             fontStyle="italic"
-           >
-             "{lyricsPreview}..."
-           </Text>
-           
-           {/* Localized Section Subtitle */}
-           <Text 
-             fontFamily="$ethiopic" 
-             fontSize={12} 
-             color={theme.textSecondary} 
-             opacity={0.8}
-             marginTop="$1"
-           >
-             {t(item.section)}
-           </Text>
+          {/* Title */}
+          <Text
+            fontFamily="$ethiopic"
+            fontSize="$6"
+            fontWeight="800"
+            color={theme.text}
+            numberOfLines={1}
+            marginBottom="$1"
+          >
+            {item.title}
+          </Text>
+
+          {/* Lyric Preview (Serif for Songbook feel) */}
+          <Text
+            fontFamily="$ethiopicSerif"
+            fontSize="$4"
+            color={theme.textSecondary}
+            numberOfLines={2}
+            lineHeight={24}
+            opacity={0.7}
+            fontStyle="italic"
+          >
+            {`"${lyricsPreview}..."`}
+          </Text>
+
+          {/* Localized Section Subtitle */}
+          <Text
+            fontFamily="$ethiopic"
+            fontSize={12}
+            color={theme.textSecondary}
+            opacity={0.8}
+            marginTop="$1"
+          >
+            {t(item.section)}
+          </Text>
         </YStack>
 
-        {/* Floating Heart */}
-        <Button 
-          circular
-          size="$3"
-          backgroundColor={theme.cardBackground}
-          elevation="$1"
-          borderColor={theme.borderColor}
-          borderWidth={0.5}
-          icon={<Ionicons 
-            name={isFavorite ? "heart" : "heart-outline"} 
-            size={18} 
-            color={isFavorite ? theme.error : theme.textSecondary} 
-          />}
-          onPress={(e) => {
-            e.stopPropagation();
-            onToggleFavorite(item.id);
-          }}
-          pressStyle={{ scale: 0.9 }}
-        />
+        {/* Right Action (Delete) or Favorite Heart */}
+        {rightAction ? (
+          rightAction
+        ) : (
+          <Button
+            circular
+            size="$3"
+            backgroundColor={theme.cardBackground}
+            elevation="$1"
+            borderColor={theme.borderColor}
+            borderWidth={0.5}
+            icon={<Ionicons
+              name={isFavorite ? "heart" : "heart-outline"}
+              size={18}
+              color={isFavorite ? theme.error : theme.textSecondary}
+            />}
+            onPress={(e) => {
+              e.stopPropagation();
+              onToggleFavorite(item.id);
+            }}
+            pressStyle={{ scale: 0.9 }}
+          />
+        )}
       </XStack>
     </YStack>
-  );
-}, (prevProps, nextProps) => {
-  return (
-    prevProps.item.id === nextProps.item.id &&
-    prevProps.isFavorite === nextProps.isFavorite &&
-    prevProps.theme === nextProps.theme
   );
 });
 

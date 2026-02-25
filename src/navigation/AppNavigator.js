@@ -4,6 +4,7 @@ const { createStackNavigator } = require('@react-navigation/stack');
 const { createDrawerNavigator } = require('@react-navigation/drawer');
 const { NavigationContainer } = require('@react-navigation/native');
 const { ActivityIndicator, View } = require('react-native');
+const { useSafeAreaInsets } = require('react-native-safe-area-context');
 const HomeScreen = require('../screens/HomeScreen').default || require('../screens/HomeScreen');
 const DetailScreen = require('../screens/DetailScreen').default || require('../screens/DetailScreen');
 const FavoritesScreen = require('../screens/FavoritesScreen').default || require('../screens/FavoritesScreen');
@@ -26,14 +27,27 @@ const DrawerNavigator = require('./DrawerNavigator').default || require('./Drawe
 
 const Stack = createStackNavigator();
 
-const { navigationRef } = require('../services/NavigationService');
+const NavigationService = require('../services/NavigationService');
+const { navigationRef } = NavigationService;
+const MiniPlayer = require('../components/MiniPlayer').default || require('../components/MiniPlayer');
 
 const AppNavigator = () => {
   const { user, loading } = useAuth();
+  const { theme } = useAppTheme();
   const hasRunMigration = React.useRef(null);
   const { setFavoritesFromCloud } = useFavorites();
   const [hasSeenWelcome, setHasSeenWelcome] = React.useState(null);
-  
+  const [currentRoute, setCurrentRoute] = React.useState('Drawer');
+  const insets = useSafeAreaInsets();
+
+  // Define screens that have a bottom tab bar
+  const tabScreens = ['Home', 'Mezmurs', 'Calendar', 'Profile'];
+  const hasBottomTabs = tabScreens.includes(currentRoute);
+
+  // Calculate bottom offset for MiniPlayer
+  // If tabs are present, we need to be above the CustomBottomPill (65 height + 15 bottom margin + extra space)
+  const bottomOffset = hasBottomTabs ? (Math.max(insets.bottom, 15) + 80) : (insets.bottom + 15);
+
   // Check if user has seen welcome screen
   useEffect(() => {
     const checkWelcomeStatus = async () => {
@@ -49,15 +63,15 @@ const AppNavigator = () => {
       if (user && !user.isAnonymous && hasRunMigration.current !== user.uid) {
         hasRunMigration.current = user.uid; // Set immediately to prevent race
         console.log('User logged in, starting migration for:', user.uid);
-        
+
         // Perform migration
         const migrationResult = await MigrationService.performFullMigration(user.uid);
-        
+
         if (migrationResult.success) {
           console.log('Migration successful');
           // Pull latest cloud data if it exists
           const cloudData = await MigrationService.pullCloudData(user.uid);
-          
+
           if (cloudData.success && cloudData.synced) {
             console.log('Cloud data pulled successfully');
             // Reload favorites from user-specific storage
@@ -78,7 +92,6 @@ const AppNavigator = () => {
   const isInitializing = loading || hasSeenWelcome === null;
 
   if (isInitializing) {
-    const { theme } = useAppTheme();
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.background }}>
         <ActivityIndicator size="large" color={theme.primary} />
@@ -86,33 +99,52 @@ const AppNavigator = () => {
     );
   }
 
+  // Define screens where MiniPlayer should NOT be shown
+  const hiddenOnScreens = ['Detail', 'HymnPlayer', 'Welcome', 'Auth'];
+  const showMiniPlayer = !hiddenOnScreens.includes(currentRoute);
+
   return (
-    <NavigationContainer ref={navigationRef}>
-      <Stack.Navigator 
-        initialRouteName={!hasSeenWelcome ? "Welcome" : (user ? "Drawer" : "Auth")}
-        screenOptions={{
-          headerShown: false,
+    <View style={{ flex: 1, backgroundColor: theme.background }}>
+      <NavigationContainer
+        ref={navigationRef}
+        onStateChange={() => {
+          const route = navigationRef.current?.getCurrentRoute();
+          if (route) setCurrentRoute(route.name);
         }}
       >
-        {/* Auth Flow */}
-        <Stack.Screen 
-          name="Welcome" 
-          component={WelcomeScreen}
-          options={{ gestureEnabled: false }}
+        <Stack.Navigator
+          initialRouteName={!hasSeenWelcome ? "Welcome" : (user ? "Drawer" : "Auth")}
+          screenOptions={{
+            headerShown: false,
+          }}
+        >
+          {/* Auth Flow */}
+          <Stack.Screen
+            name="Welcome"
+            component={WelcomeScreen}
+            options={{ gestureEnabled: false }}
+          />
+          <Stack.Screen
+            name="Auth"
+            component={AuthScreen}
+            options={{ gestureEnabled: false }}
+          />
+
+          {/* Main App Flow */}
+          <Stack.Screen name="Drawer" component={DrawerNavigator} />
+          <Stack.Screen name="MezmurList" component={HomeScreen} />
+          <Stack.Screen name="Detail" component={DetailScreen} />
+          <Stack.Screen name="Favorites" component={FavoritesScreen} />
+          <Stack.Screen name="HymnPlayer" component={HymnPlayerScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
+      {showMiniPlayer && (
+        <MiniPlayer
+          onPlayerPress={(mezmur) => NavigationService.navigateToRoot('Detail', { mezmur })}
+          bottomOffset={bottomOffset}
         />
-        <Stack.Screen 
-          name="Auth" 
-          component={AuthScreen}
-          options={{ gestureEnabled: false }}
-        />
-        
-        {/* Main App Flow */}
-        <Stack.Screen name="Drawer" component={DrawerNavigator} />
-        <Stack.Screen name="Detail" component={DetailScreen} />
-        <Stack.Screen name="Favorites" component={FavoritesScreen} />
-        <Stack.Screen name="HymnPlayer" component={HymnPlayerScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
+      )}
+    </View>
   );
 };
 

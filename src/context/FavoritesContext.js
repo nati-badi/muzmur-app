@@ -2,6 +2,7 @@ const React = require('react');
 const { createContext, useState, useContext, useEffect, useCallback } = React;
 const AsyncStorage = require('@react-native-async-storage/async-storage').default || require('@react-native-async-storage/async-storage');
 const UserProfileService = require('../services/UserProfileService');
+const SyncService = require('../services/SyncService');
 
 const FavoritesContext = createContext();
 
@@ -47,7 +48,16 @@ const FavoritesProvider = ({ children, userId, isAnonymous }) => {
 
     try {
       setSyncPending(true);
-      await UserProfileService.syncFavorites(userId, favoritesList);
+      const { isConnected } = SyncService.getSyncStatus();
+
+      if (isConnected) {
+        await UserProfileService.syncFavorites(userId, favoritesList);
+      } else {
+        await UserProfileService.queueSync({
+          type: 'favorites',
+          data: favoritesList
+        });
+      }
       setSyncPending(false);
     } catch (error) {
       console.error('Failed to sync favorites to cloud:', error);
@@ -65,7 +75,7 @@ const FavoritesProvider = ({ children, userId, isAnonymous }) => {
     setFavorites((prev) => {
       const isFav = prev.includes(idStr);
       const next = isFav ? prev.filter((fid) => fid !== idStr) : [...prev, idStr];
-      
+
       // Persist to local storage immediately (offline-first) with user-specific key
       const storageKey = getStorageKey();
       AsyncStorage.setItem(storageKey, JSON.stringify(next)).catch(e => {
@@ -74,7 +84,7 @@ const FavoritesProvider = ({ children, userId, isAnonymous }) => {
 
       // Sync to cloud in background (non-blocking)
       syncToCloud(next);
-      
+
       return next;
     });
   }, [syncToCloud, getStorageKey]);
@@ -87,7 +97,7 @@ const FavoritesProvider = ({ children, userId, isAnonymous }) => {
   const setFavoritesFromCloud = useCallback((cloudFavorites) => {
     const sanitized = Array.isArray(cloudFavorites) ? cloudFavorites.map(String) : [];
     setFavorites(sanitized);
-    
+
     // Update local storage with user-specific key
     const storageKey = getStorageKey();
     AsyncStorage.setItem(storageKey, JSON.stringify(sanitized)).catch(e => {

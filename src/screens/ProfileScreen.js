@@ -11,8 +11,7 @@ const { useAppTheme } = require('../context/ThemeContext');
 const { useLanguage } = require('../context/LanguageContext');
 const { useFavorites } = require('../context/FavoritesContext');
 const { useAuth } = require('../context/AuthContext');
-const mezmursData = require('../data/mezmurs.json');
-const Button = require('tamagui').Button;
+const ScreenHeader = require('../components/ScreenHeader');
 
 const ProfileScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
@@ -83,7 +82,7 @@ const ProfileScreen = ({ navigation }) => {
     try {
       // 1. Save to Firestore as Base64
       const result = await UserProfileService.saveProfilePictureBase64(user.uid, base64);
-      
+
       if (result.success) {
         // 2. Update Auth Profile
         await updateProfilePicture(result.downloadURL);
@@ -100,98 +99,84 @@ const ProfileScreen = ({ navigation }) => {
 
   return (
     <YStack f={1} backgroundColor={theme.background} paddingTop={insets.top}>
-      {/* Minimal Header */}
-      <XStack 
-        paddingHorizontal="$5" 
-        paddingVertical="$3"
-        alignItems="center"
-        justifyContent="center" 
+      <ScreenHeader
+        title={t('profile')}
+        onMenu={() => navigation.toggleDrawer()}
+        theme={theme}
+        rightElement={
+          <TouchableOpacity
+            onPress={() => setIsMenuOpen(!isMenuOpen)}
+            style={{ padding: 4 }}
+          >
+            <Ionicons name="ellipsis-vertical" size={24} color={theme.primary} />
+          </TouchableOpacity>
+        }
+      />
+
+      {/* Overflow Menu */}
+      <Modal
+        visible={isMenuOpen}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setIsMenuOpen(false)}
       >
-        <Button 
-          position="absolute"
-          left="$4"
-          circular 
-          size="$3" 
-          backgroundColor="transparent"
-          icon={<Ionicons name="menu-outline" size={28} color={theme.primary} />}
-          onPress={() => navigation.toggleDrawer()}
-          pressStyle={{ opacity: 0.6 }}
-        />
-        <Text fontFamily="$ethiopicSerif" fontSize="$7" fontWeight="800" color={theme.primary}>
-          {t('profile')}
-        </Text>
-        <TouchableOpacity 
-          onPress={() => setIsMenuOpen(!isMenuOpen)}
-          style={{ position: 'absolute', right: 16 }}
-        >
-          <Ionicons name="ellipsis-vertical" size={24} color={theme.primary} />
-        </TouchableOpacity>
-
-        {/* Overflow Menu */}
-        <Modal
-          visible={isMenuOpen}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setIsMenuOpen(false)}
-        >
-          <TouchableWithoutFeedback onPress={() => setIsMenuOpen(false)}>
-            <View style={{ flex: 1, backgroundColor: 'transparent' }}>
-               <YStack
-                position="absolute"
-                top={insets.top + 10} 
-                right={16}
-                width={200}
-                backgroundColor={theme.surface}
-                borderRadius="$4"
-                padding="$2"
-                elevation="$5"
-                zIndex={100}
-                borderWidth={1}
-                borderColor={theme.borderColor}
-                shadowColor="#000"
-                shadowOffset={{ width: 0, height: 4 }}
-                shadowOpacity={0.2}
-                shadowRadius={8}
+        <TouchableWithoutFeedback onPress={() => setIsMenuOpen(false)}>
+          <View style={{ flex: 1, backgroundColor: 'transparent' }}>
+            <YStack
+              position="absolute"
+              top={insets.top + 10}
+              right={16}
+              width={200}
+              backgroundColor={theme.surface}
+              borderRadius="$4"
+              padding="$2"
+              elevation="$5"
+              zIndex={100}
+              borderWidth={1}
+              borderColor={theme.borderColor}
+              shadowColor="#000"
+              shadowOffset={{ width: 0, height: 4 }}
+              shadowOpacity={0.2}
+              shadowRadius={8}
+            >
+              <TouchableOpacity
+                onPress={() => { setIsMenuOpen(false); handleShare(); }}
+                style={{ padding: 12, flexDirection: 'row', alignItems: 'center' }}
               >
-                <TouchableOpacity 
-                   onPress={() => { setIsMenuOpen(false); handleShare(); }}
-                   style={{ padding: 12, flexDirection: 'row', alignItems: 'center' }}
-                >
-                  <Ionicons name="share-social-outline" size={20} color={theme.primary} style={{ marginRight: 12 }} />
-                  <Text fontFamily="$body" color={theme.text} fontSize="$3">{t('shareApp')}</Text>
-                </TouchableOpacity>
+                <Ionicons name="share-social-outline" size={20} color={theme.primary} style={{ marginRight: 12 }} />
+                <Text fontFamily="$body" color={theme.text} fontSize="$3">{t('shareApp')}</Text>
+              </TouchableOpacity>
 
-                <TouchableOpacity 
-                   onPress={() => { setIsMenuOpen(false); handleFeedback(); }}
-                   style={{ padding: 12, flexDirection: 'row', alignItems: 'center' }}
-                >
-                  <Ionicons name="chatbubble-ellipses-outline" size={20} color={theme.primary} style={{ marginRight: 12 }} />
-                  <Text fontFamily="$body" color={theme.text} fontSize="$3">{t('feedback')}</Text>
-                </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => { setIsMenuOpen(false); handleFeedback(); }}
+                style={{ padding: 12, flexDirection: 'row', alignItems: 'center' }}
+              >
+                <Ionicons name="chatbubble-ellipses-outline" size={20} color={theme.primary} style={{ marginRight: 12 }} />
+                <Text fontFamily="$body" color={theme.text} fontSize="$3">{t('feedback')}</Text>
+              </TouchableOpacity>
 
-                <Separator borderColor={theme.borderColor} opacity={0.5} marginVertical={4} />
+              <Separator borderColor={theme.borderColor} opacity={0.5} marginVertical={4} />
 
-                <TouchableOpacity 
-                   onPress={() => { setIsMenuOpen(false); handleCheckUpdate(); }}
-                   style={{ padding: 12, flexDirection: 'row', alignItems: 'center' }}
-                >
-                  <Ionicons name="cloud-download-outline" size={20} color={theme.primary} style={{ marginRight: 12 }} />
-                  <Text fontFamily="$body" color={theme.text} fontSize="$3">{t('checkUpdates')}</Text>
-                </TouchableOpacity>
-              </YStack>
-            </View>
-          </TouchableWithoutFeedback>
-        </Modal>
-      </XStack>
+              <TouchableOpacity
+                onPress={() => { setIsMenuOpen(false); handleCheckUpdate(); }}
+                style={{ padding: 12, flexDirection: 'row', alignItems: 'center' }}
+              >
+                <Ionicons name="cloud-download-outline" size={20} color={theme.primary} style={{ marginRight: 12 }} />
+                <Text fontFamily="$body" color={theme.text} fontSize="$3">{t('checkUpdates')}</Text>
+              </TouchableOpacity>
+            </YStack>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 140 }}>
         {/* Profile Card */}
         <YStack padding="$5" alignItems="center">
           <YStack position="relative">
             <TouchableOpacity onPress={pickImage} disabled={uploading} activeOpacity={0.8}>
-              <Circle 
-                size={120} 
-                backgroundColor={theme.surface} 
+              <Circle
+                size={120}
+                backgroundColor={theme.surface}
                 elevation="$4"
                 borderWidth={4}
                 borderColor={theme.background}
@@ -207,14 +192,14 @@ const ProfileScreen = ({ navigation }) => {
                   <Ionicons name="person" size={60} color={theme.borderColor} />
                 )}
               </Circle>
-              
+
               {/* Edit Icon Overlay */}
               {isAuthenticated && (
-                <Circle 
-                  size={36} 
-                  backgroundColor={theme.primary} 
-                  position="absolute" 
-                  bottom={4} 
+                <Circle
+                  size={36}
+                  backgroundColor={theme.primary}
+                  position="absolute"
+                  bottom={4}
                   right={4}
                   elevation="$2"
                   borderWidth={3}
@@ -272,7 +257,7 @@ const ProfileScreen = ({ navigation }) => {
 
         {/* Action List */}
         <YStack paddingHorizontal="$5" space="$3">
-          <TouchableOpacity 
+          <TouchableOpacity
             activeOpacity={0.7}
             onPress={() => navigation.navigate('Favorites')}
           >
@@ -295,7 +280,7 @@ const ProfileScreen = ({ navigation }) => {
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             activeOpacity={0.7}
             onPress={() => navigation.navigate('Settings')}
           >
@@ -318,7 +303,7 @@ const ProfileScreen = ({ navigation }) => {
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             activeOpacity={1}
             disabled={true}
             style={{ opacity: 0.35 }}
@@ -342,7 +327,7 @@ const ProfileScreen = ({ navigation }) => {
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             activeOpacity={0.7}
             onPress={isAuthenticated ? handleSignOut : () => navigation.replace('Auth')}
           >
@@ -357,10 +342,10 @@ const ProfileScreen = ({ navigation }) => {
               justifyContent: 'center',
             }}>
               <Ionicons name={isAuthenticated ? "log-out" : "log-in"} size={20} color={theme.error} style={{ marginRight: 12 }} />
-              <Text 
-                fontFamily="$ethiopic" 
-                fontSize="$4" 
-                fontWeight="600" 
+              <Text
+                fontFamily="$ethiopic"
+                fontSize="$4"
+                fontWeight="600"
                 color={theme.error}
               >
                 {isAuthenticated ? t('logout') : t('signIn')}
@@ -369,7 +354,7 @@ const ProfileScreen = ({ navigation }) => {
           </TouchableOpacity>
         </YStack>
       </ScrollView>
-    </YStack>
+    </YStack >
   );
 };
 
