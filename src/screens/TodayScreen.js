@@ -36,16 +36,14 @@ const TodayScreen = ({ navigation }) => {
   const userDisplayName = user?.displayName || user?.email?.split('@')[0] || t('guest') || 'Guest';
 
   // 1. Get Today's Ethiopian Date
-  const today = new Date();
-  const ethDayObj = useMemo(() => toEthiopian(
-    today.getFullYear(),
-    today.getMonth() + 1,
-    today.getDate()
-  ), []);
+  const ethDayObj = useMemo(() => {
+    const d = new Date();
+    return toEthiopian(d.getFullYear(), d.getMonth() + 1, d.getDate());
+  }, []); // Only once on mount
 
   const { day, month, year } = ethDayObj;
-  const monthName = t(`month${month}`);
-  const geezDay = toGeez(day);
+  const monthName = useMemo(() => t(`month${month}`), [month, t]);
+  const geezDay = useMemo(() => toGeez(day), [day]);
 
   // 2. Resolve Today's Feast
   const feastSummary = useMemo(() => getFeastForDate(month, day), [month, day]);
@@ -222,14 +220,16 @@ const TodayScreen = ({ navigation }) => {
           pressStyle={{ opacity: 0.6 }}
           padding="$0"
         >
-          {profileData?.photoURL ? (
-            <RNImage
-              source={{ uri: profileData.photoURL }}
-              style={{ width: 34, height: 34, borderRadius: 17 }}
-            />
-          ) : (
-            <Ionicons name="person-circle-outline" size={32} color={theme.primary} />
-          )}
+          <YStack width={34} height={34} borderRadius={17} backgroundColor={theme.borderColor + '20'} alignItems="center" justifyContent="center" overflow="hidden">
+            {profileData?.photoURL ? (
+              <RNImage
+                source={{ uri: profileData.photoURL }}
+                style={{ width: 34, height: 34 }}
+              />
+            ) : (
+              <Ionicons name="person-circle-outline" size={32} color={theme.primary} />
+            )}
+          </YStack>
         </Button>
       </XStack>
 
@@ -280,11 +280,13 @@ const TodayScreen = ({ navigation }) => {
               shadowRadius={12}
               overflow="hidden"
             >
-              <Image
-                source={require('../../assets/sections/church.jpg')}
-                style={{ position: 'absolute', width: '100%', height: '100%' }}
-                resizeMode="cover"
-              />
+              <YStack position="absolute" top={0} left={0} right={0} bottom={0} backgroundColor={theme.borderColor + '15'}>
+                <RNImage
+                  source={require('../../assets/sections/church.jpg')}
+                  style={{ width: '100%', height: '100%' }}
+                  resizeMode="cover"
+                />
+              </YStack>
               <YStack f={1} p="$4" jc="flex-end" backgroundColor="rgba(0,0,0,0.45)">
                 <YStack>
                   <Text fontFamily="$ethiopicSerif" color="white" fontWeight="900" fontSize="$5">{t('explore')}</Text>

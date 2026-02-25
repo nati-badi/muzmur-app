@@ -12,16 +12,41 @@ const { SECTIONS } = require('../constants/sections');
 const { normalizeAmharic } = require('../utils/textUtils');
 const NavigationService = require('../services/NavigationService');
 
+const SECTIONS_DATA = (t) => [
+  { id: SECTIONS.MARY, label: t('የእመቤታችን'), image: require('../../assets/sections/maryam.jpg') },
+  { id: SECTIONS.MICHAEL, label: t('የቅዱስ ሚካኤል'), image: require('../../assets/sections/michael.jpg') },
+  { id: SECTIONS.GABRIEL, label: t('የቅዱስ ገብርኤል'), image: require('../../assets/sections/gebriel.jpg') },
+  { id: SECTIONS.BAPTISM, label: t('የጥምቀት'), image: require('../../assets/sections/timket_1.jpg') },
+  { id: SECTIONS.THANKSGIVING, label: t('የመድኃኔዓለም'), image: require('../../assets/sections/medhanialem.jpg') },
+  { id: SECTIONS.GEORGE, label: t('የቅዱስ ጊዮርጊስ'), image: require('../../assets/sections/george.jpg') },
+  { id: SECTIONS.TEKLE_HAYMANOT, label: t('የአቡነ ተክለ ሃይማኖት'), image: require('../../assets/sections/tekle_haymanot.jpg') },
+  { id: SECTIONS.CANA, label: t('የቃና ዘገሊላ'), image: require('../../assets/sections/cana.jpg') },
+  { id: SECTIONS.GEBRE_MENFES_KIDUS, label: t('የአቡነ ገብረ መንፈስ ቅዱስ'), image: require('../../assets/sections/gebre_menfes.jpg') },
+  { id: SECTIONS.CHURCH, label: t('ስለ ቤተ ክርስቲያን'), image: require('../../assets/sections/church.jpg') },
+  { id: SECTIONS.ARSEMA, label: t('የቅድስት አርሴማ'), image: require('../../assets/sections/arsema.jpg') },
+  { id: SECTIONS.AFAN_OROMO, label: t('Afan Oromo Mezmurs'), image: require('../../assets/sections/afan_oromo.png') },
+  { id: SECTIONS.NEW_YEAR, label: t('የዐውደ ዓመት'), image: require('../../assets/sections/lidet.jpg') },
+];
+
 const SectionListScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const { theme } = useAppTheme();
   const { t } = useLanguage();
   const { width } = useWindowDimensions();
   const [searchQuery, setSearchQuery] = React.useState('');
+  const [debouncedQuery, setDebouncedQuery] = React.useState('');
   const [searchSuggestions, setSearchSuggestions] = React.useState([]);
   const [showSuggestions, setShowSuggestions] = React.useState(false);
   const [searchBarLayout, setSearchBarLayout] = React.useState(null);
   const [isLoading, setIsLoading] = React.useState(!DataService.isReady);
+
+  // Debounce search query
+  React.useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
 
   // Sync with general app hydration
   React.useEffect(() => {
@@ -32,24 +57,10 @@ const SectionListScreen = ({ navigation }) => {
     }
   }, []);
 
-  // Effect to disable parent swipe when search is active
+  // Update suggestions when debounced query changes
   React.useEffect(() => {
-    navigation.setOptions({
-      swipeEnabled: !showSuggestions
-    });
-
-    return () => {
-      navigation.setOptions({
-        swipeEnabled: true
-      });
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showSuggestions]);
-
-  const handleSearchChange = (text) => {
-    setSearchQuery(text);
-    if (text.trim().length > 1) {
-      const normalizedQuery = normalizeAmharic(text.toLowerCase());
+    if (debouncedQuery.trim().length > 1) {
+      const normalizedQuery = normalizeAmharic(debouncedQuery.toLowerCase());
       const suggestions = DataService.getAll()
         .filter(m => normalizeAmharic(m.title.toLowerCase()).includes(normalizedQuery))
         .slice(0, 10);
@@ -59,7 +70,9 @@ const SectionListScreen = ({ navigation }) => {
       setSearchSuggestions([]);
       setShowSuggestions(false);
     }
-  };
+  }, [debouncedQuery]);
+
+  // Effect to disable parent swipe when search is active
 
   const SkeletonItem = () => (
     <Card
@@ -91,21 +104,7 @@ const SectionListScreen = ({ navigation }) => {
     navigation.navigate('Detail', { mezmur: hymn });
   };
 
-  const sections = [
-    { id: SECTIONS.MARY, label: t('የእመቤታችን'), image: require('../../assets/sections/maryam.jpg') },
-    { id: SECTIONS.MICHAEL, label: t('የቅዱስ ሚካኤል'), image: require('../../assets/sections/michael.jpg') },
-    { id: SECTIONS.GABRIEL, label: t('የቅዱስ ገብርኤል'), image: require('../../assets/sections/gebriel.jpg') },
-    { id: SECTIONS.BAPTISM, label: t('የጥምቀት'), image: require('../../assets/sections/timket_1.jpg') },
-    { id: SECTIONS.THANKSGIVING, label: t('የመድኃኔዓለም'), image: require('../../assets/sections/medhanialem.jpg') },
-    { id: SECTIONS.GEORGE, label: t('የቅዱስ ጊዮርጊስ'), image: require('../../assets/sections/george.jpg') },
-    { id: SECTIONS.TEKLE_HAYMANOT, label: t('የአቡነ ተክለ ሃይማኖት'), image: require('../../assets/sections/tekle_haymanot.jpg') },
-    { id: SECTIONS.CANA, label: t('የቃና ዘገሊላ'), image: require('../../assets/sections/cana.jpg') },
-    { id: SECTIONS.GEBRE_MENFES_KIDUS, label: t('የአቡነ ገብረ መንፈስ ቅዱስ'), image: require('../../assets/sections/gebre_menfes.jpg') },
-    { id: SECTIONS.CHURCH, label: t('ስለ ቤተ ክርስቲያን'), image: require('../../assets/sections/church.jpg') },
-    { id: SECTIONS.ARSEMA, label: t('የቅድስት አርሴማ'), image: require('../../assets/sections/arsema.jpg') },
-    { id: SECTIONS.AFAN_OROMO, label: t('Afan Oromo Mezmurs'), image: require('../../assets/sections/afan_oromo.png') },
-    { id: SECTIONS.NEW_YEAR, label: t('የዐውደ ዓመት'), image: require('../../assets/sections/lidet.jpg') },
-  ];
+  const sections = React.useMemo(() => SECTIONS_DATA(t), [t]);
 
   const cardWidth = (width - 60) / 2;
 
@@ -167,7 +166,7 @@ const SectionListScreen = ({ navigation }) => {
       >
         <SearchBar
           value={searchQuery}
-          onChangeText={handleSearchChange}
+          onChangeText={setSearchQuery}
           onSubmitEditing={handleSearch}
           onFocus={() => {
             if (searchQuery.length > 1) setShowSuggestions(true);

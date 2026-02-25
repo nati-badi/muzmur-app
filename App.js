@@ -32,9 +32,10 @@ const DynamicStatusBar = () => {
 const SyncService = require('./src/services/SyncService');
 const OfflineStatusHeader = require('./src/components/OfflineStatusHeader');
 
-// Wrapper to pass userId to FavoritesProvider
+// Wrapper to pass theme and other providers to AppNavigator
 const AppContent = ({ onLayoutRootView }) => {
   const { user, isAnonymous } = useAuth();
+  const { theme, isLoaded: themeLoaded } = useAppTheme();
 
   useEffect(() => {
     SyncService.start();
@@ -42,21 +43,23 @@ const AppContent = ({ onLayoutRootView }) => {
   }, []);
 
   return (
-    <ThemeProvider>
-      <LanguageProvider>
-        <AudioProvider>
-          <FavoritesProvider userId={user?.uid} isAnonymous={isAnonymous}>
-            <PlaylistProvider userId={user?.uid} isAnonymous={isAnonymous}>
-              <SafeAreaProvider onLayout={onLayoutRootView}>
-                <DynamicStatusBar />
-                <OfflineStatusHeader />
-                <AppNavigator />
-              </SafeAreaProvider>
-            </PlaylistProvider>
-          </FavoritesProvider>
-        </AudioProvider>
-      </LanguageProvider>
-    </ThemeProvider>
+    <TamaguiProvider config={config} theme={theme.id === 'midnight' ? 'dark' : 'light'}>
+      <PortalProvider>
+        <LanguageProvider>
+          <AudioProvider>
+            <FavoritesProvider userId={user?.uid} isAnonymous={isAnonymous}>
+              <PlaylistProvider userId={user?.uid} isAnonymous={isAnonymous}>
+                <SafeAreaProvider onLayout={onLayoutRootView}>
+                  <DynamicStatusBar />
+                  <OfflineStatusHeader />
+                  <AppNavigator />
+                </SafeAreaProvider>
+              </PlaylistProvider>
+            </FavoritesProvider>
+          </AudioProvider>
+        </LanguageProvider>
+      </PortalProvider>
+    </TamaguiProvider>
   );
 };
 
@@ -71,7 +74,11 @@ function App() {
     NotoSerifEthiopic_700Bold,
   });
 
+  // Use a ref to track if theme is ready
+  const themeReadyRef = React.useRef(false);
+
   const onLayoutRootView = useCallback(async () => {
+    // We only hide splash when fonts are ready AND the component layout fires
     if (fontsLoaded || fontError) {
       await SplashScreen.hideAsync();
     }
@@ -82,13 +89,11 @@ function App() {
   }
 
   return (
-    <TamaguiProvider config={config} defaultTheme="light">
-      <PortalProvider>
-        <AuthProvider>
-          <AppContent onLayoutRootView={onLayoutRootView} />
-        </AuthProvider>
-      </PortalProvider>
-    </TamaguiProvider>
+    <AuthProvider>
+      <ThemeProvider>
+        <AppContent onLayoutRootView={onLayoutRootView} />
+      </ThemeProvider>
+    </AuthProvider>
   );
 }
 

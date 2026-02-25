@@ -6,19 +6,20 @@ const { useLanguage } = require('../context/LanguageContext');
 
 const MezmurListCard = memo(({ item, isFavorite, onToggleFavorite, onPress, getStatusColor, theme, rightAction }) => {
   const { t } = useLanguage();
-  const getCategory = (lyrics = '') => {
-    if (!lyrics) return 'አጭር';
+
+  const calculatedCategory = React.useMemo(() => {
+    if (item.category) return item.category;
+    const lyrics = item.lyrics || '';
     const lineCount = lyrics.split('\n').length;
     return lineCount > 8 ? 'ረጅም' : 'አጭር';
-  };
+  }, [item.category, item.lyrics]);
 
-  const calculatedCategory = item.category || getCategory(item.lyrics);
-  const statusColor = getStatusColor(calculatedCategory);
+  const statusColor = React.useMemo(() => getStatusColor(calculatedCategory), [getStatusColor, calculatedCategory]);
 
-  // Truncate lyrics for preview (first 2 lines)
-  const lyricsPreview = item.lyrics
-    ? item.lyrics.split('\n').slice(0, 2).join('\n')
-    : '';
+  const lyricsPreview = React.useMemo(() => {
+    if (!item.lyrics) return '';
+    return item.lyrics.split('\n').slice(0, 2).join('\n');
+  }, [item.lyrics]);
 
   return (
     <YStack

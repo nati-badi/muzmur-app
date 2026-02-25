@@ -1,5 +1,5 @@
 const React = require('react');
-const { useState, useEffect, useCallback } = React;
+const { useState, useEffect, useCallback, memo } = React;
 const { StyleSheet, ActivityIndicator } = require('react-native');
 const { YStack, XStack, Text, Button, Circle } = require('tamagui');
 const Slider = require('@react-native-community/slider').default || require('@react-native-community/slider');
@@ -24,8 +24,6 @@ const HymnPlayerScreen = ({ navigation }) => {
     isLooping, isShuffle,
     togglePlayback, toggleLoop, toggleShuffle, handleSkip, handleSeek
   } = useAudio();
-
-  const { position, duration } = useAudioProgress();
 
   const formatTime = (millis) => {
     if (!millis || isNaN(millis)) return '0:00';
@@ -120,141 +118,175 @@ const HymnPlayerScreen = ({ navigation }) => {
         </Text>
       </YStack>
 
-      {/* Controls Container */}
+      {/* Progress & Controls Section (Isolated) */}
+      <FullPlayerControls
+        position={undefined} // Will be handled inside
+        duration={undefined} // Will be handled inside
+        isPlaying={isPlaying}
+        isLoading={isLoading}
+        error={error}
+        clearError={clearError}
+        isLooping={isLooping}
+        isShuffle={isShuffle}
+        togglePlayback={togglePlayback}
+        toggleLoop={toggleLoop}
+        toggleShuffle={toggleShuffle}
+        handleSkip={handleSkip}
+        handleSeek={handleSeek}
+        isFavorite={isFavorite}
+        toggleFavorite={toggleFavorite}
+        mezmur={mezmur}
+        theme={theme}
+        t={t}
+        insets={insets}
+      />
+    </YStack>
+    </YStack >
+  );
+};
+
+const FullPlayerControls = memo(({
+  mezmur, isPlaying, isLoading, error, clearError,
+  isLooping, isShuffle,
+  togglePlayback, toggleLoop, toggleShuffle, handleSkip, handleSeek,
+  isFavorite, toggleFavorite,
+  theme, t, insets
+}) => {
+  const { position, duration } = useAudioProgress();
+
+  return (
+    <YStack
+      backgroundColor={theme.cardBackground}
+      padding="$4"
+      paddingBottom={insets.bottom + 20}
+      borderTopLeftRadius={40}
+      borderTopRightRadius={40}
+      elevation="$5"
+    >
+      {/* Style Handle */}
       <YStack
-        backgroundColor={theme.cardBackground}
-        padding="$4"
-        paddingBottom={insets.bottom + 20}
-        borderTopLeftRadius={40}
-        borderTopRightRadius={40}
-        elevation="$5"
-      >
-        {/* Style Handle */}
+        width={40}
+        height={4}
+        backgroundColor={theme.playerAccent}
+        borderRadius={2}
+        alignSelf="center"
+        marginVertical="$3"
+        opacity={0.4}
+      />
+
+      {/* Error Message */}
+      {error && (
         <YStack
-          width={40}
-          height={4}
-          backgroundColor={theme.playerAccent}
-          borderRadius={2}
-          alignSelf="center"
-          marginVertical="$3"
-          opacity={0.4}
+          backgroundColor={theme.error + '20'}
+          padding="$3"
+          borderRadius="$3"
+          marginBottom="$4"
+          borderWidth={1}
+          borderColor={theme.error + '40'}
+          alignItems="center"
+        >
+          <XStack alignItems="center" space="$2" marginBottom="$1">
+            <Ionicons name="alert-circle" size={20} color={theme.error} />
+            <Text color={theme.error} fontWeight="700">{t('error')}</Text>
+          </XStack>
+          <Text color={theme.error} fontSize="$2" textAlign="center" marginBottom="$2">
+            {error}
+          </Text>
+          <Button
+            size="$2"
+            backgroundColor={theme.error}
+            onPress={clearError}
+            pressStyle={{ opacity: 0.8 }}
+          >
+            <Text color="white" fontSize="$2">{t('dismiss')}</Text>
+          </Button>
+        </YStack>
+      )}
+      {/* Progress Slider */}
+      <YStack paddingHorizontal="$2" marginBottom="$4">
+        <SmoothSlider
+          position={position}
+          duration={duration}
+          onSeek={handleSeek}
+          theme={theme}
+          isCurrentPlaying={true}
+        />
+      </YStack>
+
+      {/* Control Buttons row */}
+      <XStack alignItems="center" justifyContent="space-between" paddingHorizontal="$2">
+        <Button
+          circular
+          size="$4"
+          backgroundColor={isShuffle ? "rgba(0,0,0,0.05)" : "transparent"}
+          icon={<Ionicons name="shuffle" size={26} color={isShuffle ? theme.accent : theme.primary} opacity={isShuffle ? 1 : 0.85} />}
+          onPress={toggleShuffle}
+          pressStyle={{ opacity: 0.6 }}
         />
 
-        {/* Error Message */}
-        {error && (
-          <YStack
-            backgroundColor={theme.error + '20'}
-            padding="$3"
-            borderRadius="$3"
-            marginBottom="$4"
-            borderWidth={1}
-            borderColor={theme.error + '40'}
-            alignItems="center"
-          >
-            <XStack alignItems="center" space="$2" marginBottom="$1">
-              <Ionicons name="alert-circle" size={20} color={theme.error} />
-              <Text color={theme.error} fontWeight="700">{t('error')}</Text>
-            </XStack>
-            <Text color={theme.error} fontSize="$2" textAlign="center" marginBottom="$2">
-              {error}
-            </Text>
-            <Button
-              size="$2"
-              backgroundColor={theme.error}
-              onPress={clearError}
-              pressStyle={{ opacity: 0.8 }}
-            >
-              <Text color="white" fontSize="$2">{t('dismiss')}</Text>
-            </Button>
-          </YStack>
-        )}
-        {/* Progress Slider */}
-        <YStack paddingHorizontal="$2" marginBottom="$4">
-          <SmoothSlider
-            position={position}
-            duration={duration}
-            onSeek={handleSeek}
-            theme={theme}
-            isCurrentPlaying={true}
-          />
-        </YStack>
-
-        {/* Control Buttons row */}
-        <XStack alignItems="center" justifyContent="space-between" paddingHorizontal="$2">
-          <Button
-            get={1}
-            circular
-            size="$4"
-            backgroundColor={isShuffle ? "rgba(0,0,0,0.05)" : "transparent"}
-            icon={<Ionicons name="shuffle" size={26} color={isShuffle ? theme.accent : theme.primary} opacity={isShuffle ? 1 : 0.85} />}
-            onPress={toggleShuffle}
-            pressStyle={{ opacity: 0.6 }}
-          />
-
-          <XStack space="$5" alignItems="center">
-            <Button
-              circular
-              size="$5"
-              backgroundColor="transparent"
-              icon={<Ionicons name="play-back" size={34} color={theme.primary} />}
-              onPress={() => handleSkip(-5)} // Exactly 5 seconds as requested
-              pressStyle={{ opacity: 0.6 }}
-            />
-
-            <Button
-              circular
-              size="$8"
-              backgroundColor={theme.primary}
-              icon={isLoading ? <ActivityIndicator color={theme.background} /> : <Ionicons name={isPlaying ? "pause" : "play"} size={42} color={theme.background} />}
-              onPress={togglePlayback}
-              disabled={isLoading}
-              pressStyle={{ scale: 0.9 }}
-              elevation="$4"
-            />
-
-            <Button
-              circular
-              size="$5"
-              backgroundColor="transparent"
-              icon={<Ionicons name="play-forward" size={34} color={theme.primary} />}
-              onPress={() => handleSkip(5)} // Exactly 5 seconds as requested
-              pressStyle={{ opacity: 0.6 }}
-            />
-          </XStack>
-
-          <Button
-            circular
-            size="$4"
-            backgroundColor={isLooping ? "rgba(0,0,0,0.05)" : "transparent"}
-            icon={<Ionicons
-              name={isLooping ? "repeat" : "repeat-outline"}
-              size={26}
-              color={isLooping ? theme.accent : theme.primary}
-              opacity={isLooping ? 1 : 0.85}
-            />}
-            onPress={toggleLoop}
-            pressStyle={{ opacity: 0.6 }}
-          />
-        </XStack>
-
-        {/* Favorite Section */}
-        <XStack justifyContent="center" marginTop="$6">
+        <XStack space="$5" alignItems="center">
           <Button
             circular
             size="$5"
             backgroundColor="transparent"
-            icon={<Ionicons
-              name={isFavorite(mezmur.id) ? "heart" : "heart-outline"}
-              size={30}
-              color={isFavorite(mezmur.id) ? theme.error : theme.primary}
-            />}
-            onPress={() => toggleFavorite(mezmur.id)}
-            pressStyle={{ scale: 1.2 }}
+            icon={<Ionicons name="play-back" size={34} color={theme.primary} />}
+            onPress={() => handleSkip(-5)}
+            pressStyle={{ opacity: 0.6 }}
+          />
+
+          <Button
+            circular
+            size="$8"
+            backgroundColor={theme.primary}
+            icon={isLoading ? <ActivityIndicator color={theme.background} /> : <Ionicons name={isPlaying ? "pause" : "play"} size={42} color={theme.background} />}
+            onPress={togglePlayback}
+            disabled={isLoading}
+            pressStyle={{ scale: 0.9 }}
+            elevation="$4"
+          />
+
+          <Button
+            circular
+            size="$5"
+            backgroundColor="transparent"
+            icon={<Ionicons name="play-forward" size={34} color={theme.primary} />}
+            onPress={() => handleSkip(5)}
+            pressStyle={{ opacity: 0.6 }}
           />
         </XStack>
-      </YStack>
+
+        <Button
+          circular
+          size="$4"
+          backgroundColor={isLooping ? "rgba(0,0,0,0.05)" : "transparent"}
+          icon={<Ionicons
+            name={isLooping ? "repeat" : "repeat-outline"}
+            size={26}
+            color={isLooping ? theme.accent : theme.primary}
+            opacity={isLooping ? 1 : 0.85}
+          />}
+          onPress={toggleLoop}
+          pressStyle={{ opacity: 0.6 }}
+        />
+      </XStack>
+
+      {/* Favorite Section */}
+      <XStack justifyContent="center" marginTop="$6">
+        <Button
+          circular
+          size="$5"
+          backgroundColor="transparent"
+          icon={<Ionicons
+            name={isFavorite(mezmur.id) ? "heart" : "heart-outline"}
+            size={30}
+            color={isFavorite(mezmur.id) ? theme.error : theme.primary}
+          />}
+          onPress={() => toggleFavorite(mezmur.id)}
+          pressStyle={{ scale: 1.2 }}
+        />
+      </XStack>
     </YStack>
   );
-};
+});
 
 module.exports = HymnPlayerScreen;

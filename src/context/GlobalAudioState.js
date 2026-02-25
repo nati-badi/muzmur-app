@@ -13,16 +13,17 @@ const AudioProvider = ({ children }) => {
   const [currentMezmur, setCurrentMezmur] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [position, setPosition] = useState(0);
-  const [duration, setDuration] = useState(0);
   const [isLooping, setIsLooping] = useState(false);
   const [isShuffle, setIsShuffle] = useState(false);
-  const [isSeeking, setIsSeeking] = useState(false);
   const [recentlyPlayed, setRecentlyPlayed] = useState([]);
   const [queue, setQueue] = useState([]);
   const [queueIndex, setQueueIndex] = useState(-1);
-
   const [error, setError] = useState(null);
+
+  // Position/Duration moved to ProgressProvider to isolate updates
+  const [position, setPosition] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [isSeeking, setIsSeeking] = useState(false);
 
   // Use a Ref for the status handler to provide a perfectly stable reference to the engine
   const statusHandlerRef = useRef(null);
@@ -248,10 +249,13 @@ const AudioProvider = ({ children }) => {
     setIsSeeking
   }), [position, duration, isSeeking]);
 
+  // Wrap children in Memo to prevent root-level re-renders when position updates
+  const memoizedChildren = useMemo(() => children, [children]);
+
   return (
     <AudioContext.Provider value={controlValue}>
       <AudioProgressContext.Provider value={progressValue}>
-        {children}
+        {memoizedChildren}
       </AudioProgressContext.Provider>
     </AudioContext.Provider>
   );

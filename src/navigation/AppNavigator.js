@@ -30,23 +30,15 @@ const Stack = createStackNavigator();
 const NavigationService = require('../services/NavigationService');
 const { navigationRef } = NavigationService;
 const MiniPlayer = require('../components/MiniPlayer').default || require('../components/MiniPlayer');
+const MiniPlayerManager = require('../components/MiniPlayerManager').default || require('../components/MiniPlayerManager');
 
 const AppNavigator = () => {
   const { user, loading } = useAuth();
-  const { theme } = useAppTheme();
-  const hasRunMigration = React.useRef(null);
+  const { theme, isLoaded: themeLoaded } = useAppTheme();
+  const insets = useSafeAreaInsets();
   const { setFavoritesFromCloud } = useFavorites();
   const [hasSeenWelcome, setHasSeenWelcome] = React.useState(null);
-  const [currentRoute, setCurrentRoute] = React.useState('Drawer');
-  const insets = useSafeAreaInsets();
-
-  // Define screens that have a bottom tab bar
-  const tabScreens = ['Home', 'Mezmurs', 'Calendar', 'Profile'];
-  const hasBottomTabs = tabScreens.includes(currentRoute);
-
-  // Calculate bottom offset for MiniPlayer
-  // If tabs are present, we need to be above the CustomBottomPill (65 height + 15 bottom margin + extra space)
-  const bottomOffset = hasBottomTabs ? (Math.max(insets.bottom, 15) + 80) : (insets.bottom + 15);
+  const hasRunMigration = React.useRef(null);
 
   // Check if user has seen welcome screen
   useEffect(() => {
@@ -89,7 +81,7 @@ const AppNavigator = () => {
   }, [user, setFavoritesFromCloud]);
 
   // Show loading spinner while auth is initializing or welcome status unknown
-  const isInitializing = loading || hasSeenWelcome === null;
+  const isInitializing = loading || hasSeenWelcome === null || !themeLoaded;
 
   if (isInitializing) {
     return (
@@ -99,19 +91,9 @@ const AppNavigator = () => {
     );
   }
 
-  // Define screens where MiniPlayer should NOT be shown
-  const hiddenOnScreens = ['Detail', 'HymnPlayer', 'Welcome', 'Auth'];
-  const showMiniPlayer = !hiddenOnScreens.includes(currentRoute);
-
   return (
     <View style={{ flex: 1, backgroundColor: theme.background }}>
-      <NavigationContainer
-        ref={navigationRef}
-        onStateChange={() => {
-          const route = navigationRef.current?.getCurrentRoute();
-          if (route) setCurrentRoute(route.name);
-        }}
-      >
+      <NavigationContainer ref={navigationRef}>
         <Stack.Navigator
           initialRouteName={!hasSeenWelcome ? "Welcome" : (user ? "Drawer" : "Auth")}
           screenOptions={{
@@ -138,12 +120,16 @@ const AppNavigator = () => {
           <Stack.Screen name="HymnPlayer" component={HymnPlayerScreen} />
         </Stack.Navigator>
       </NavigationContainer>
-      {showMiniPlayer && (
-        <MiniPlayer
-          onPlayerPress={(mezmur) => NavigationService.navigateToRoot('Detail', { mezmur })}
-          bottomOffset={bottomOffset}
-        />
-      )}
+
+      <MiniPlayerManager>
+        {({ isVisible, hasBottomTabs }) => (
+          <MiniPlayer
+            onPlayerPress={(mezmur) => NavigationService.navigateToRoot('Detail', { mezmur })}
+            isVisible={isVisible}
+            hasTabs={hasBottomTabs}
+          />
+        )}
+      </MiniPlayerManager>
     </View>
   );
 };

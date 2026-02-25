@@ -119,10 +119,14 @@ const HomeScreen = ({ navigation, route }) => {
   useFocusEffect(
     useCallback(() => {
       const loadCache = async () => {
-        const searches = await CacheService.getRecentSearches();
-        const history = await CacheService.getHymnHistory();
-        setRecentSearches(searches);
-        setHymnHistory(history);
+        const [searches, history] = await Promise.all([
+          CacheService.getRecentSearches(),
+          CacheService.getHymnHistory()
+        ]);
+
+        // Only update if data actually changed to avoid layout shifts
+        setRecentSearches(prev => JSON.stringify(prev) === JSON.stringify(searches) ? prev : searches);
+        setHymnHistory(prev => JSON.stringify(prev) === JSON.stringify(history) ? prev : history);
       };
       loadCache();
     }, [])
@@ -309,7 +313,7 @@ const HomeScreen = ({ navigation, route }) => {
       isFavorite={isFavorite(item.id)}
       onToggleFavorite={toggleFavorite}
       onPress={handlePress}
-      getStatusColor={() => getStatusColor(item.lengthType)}
+      getStatusColor={getStatusColor}
       theme={theme}
     />
   ), [isFavorite, toggleFavorite, handlePress, getStatusColor, theme]);
@@ -455,16 +459,23 @@ const HomeScreen = ({ navigation, route }) => {
               placeholder={t('searchPlaceholder')}
             />
 
-            {searchSuggestions.length > 0 && (
+            {searchQuery.length >= 2 && searchSuggestions.length > 0 && (
               <YStack
+                position="absolute"
+                top={65} // Right below SearchBar
+                left={0}
+                right={0}
                 backgroundColor={theme.surface}
                 borderRadius="$4"
                 padding="$2"
-                marginTop="$-4" // Pull it up closer to the search bar
                 borderWidth={1}
                 borderColor={theme.borderColor}
-                elevation="$2"
-                zIndex={200}
+                elevation="$5"
+                zIndex={500}
+                shadowColor="#000"
+                shadowOffset={{ width: 0, height: 4 }}
+                shadowOpacity={0.2}
+                shadowRadius={8}
               >
                 {searchSuggestions.map((suggestion) => (
                   <Button

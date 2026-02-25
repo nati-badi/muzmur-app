@@ -10,7 +10,22 @@ const { useSafeAreaInsets } = require('react-native-safe-area-context');
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-const MiniPlayer = ({ onPlayerPress, bottomOffset = 0 }) => {
+const MiniProgressBar = memo(({ theme }) => {
+  const { position, duration } = useAudioProgress();
+  const progress = duration > 0 ? (position / duration) * 100 : 0;
+
+  return (
+    <YStack height={3} backgroundColor="rgba(255,255,255,0.1)">
+      <YStack
+        height="100%"
+        width={`${progress}%`}
+        backgroundColor={theme.playerAccent}
+      />
+    </YStack>
+  );
+});
+
+const MiniPlayer = ({ onPlayerPress, isVisible = true, hasTabs = false }) => {
   const { theme } = useAppTheme();
   const { t } = useLanguage();
   const insets = useSafeAreaInsets();
@@ -18,54 +33,81 @@ const MiniPlayer = ({ onPlayerPress, bottomOffset = 0 }) => {
     currentMezmur, isPlaying, isLoading,
     togglePlayback, stopPlayback
   } = useAudio();
-  const { position, duration } = useAudioProgress();
 
   const translateX = React.useRef(new Animated.Value(0)).current;
-  const opacity = React.useRef(new Animated.Value(1)).current;
+  const translateY = React.useRef(new Animated.Value(isVisible ? (hasTabs ? -80 : 0) : 100)).current;
+  const opacity = React.useRef(new Animated.Value(isVisible ? 1 : 0)).current;
+  const scale = React.useRef(new Animated.Value(isVisible ? 1 : 0.98)).current;
 
   const panResponder = React.useRef(
     PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: (_, gestureState) => {
-        return Math.abs(gestureState.dx) > 10;
+        // Only take over if horizontal movement is significant
+        return Math.abs(gestureState.dx) > 10 && Math.abs(gestureState.dx) > Math.abs(gestureState.dy);
+      },
+      onPanResponderGrant: () => {
+        // Subtle "lift" effect when grabbed
+        Animated.spring(scale, {
+          toValue: 0.98,
+          useNativeDriver: true,
+          tension: 100,
+          friction: 10
+        }).start();
       },
       onPanResponderMove: (_, gestureState) => {
         if (gestureState.dx > 0) {
           translateX.setValue(gestureState.dx);
-          // Optional: fade out as we swipe
-          const newOpacity = 1 - (gestureState.dx / (SCREEN_WIDTH * 0.8));
+          // Faster fade out
+          const newOpacity = 1 - (gestureState.dx / (SCREEN_WIDTH * 0.7));
           opacity.setValue(Math.max(0, newOpacity));
         }
       },
       onPanResponderRelease: (_, gestureState) => {
-        if (gestureState.dx > SCREEN_WIDTH * 0.4) {
-          // Dismiss
+        const { dx, vx } = gestureState;
+
+        // Dismiss if swiped far enough OR if swiped quickly (flick)
+        if (dx > SCREEN_WIDTH * 0.4 || vx > 0.5) {
+          // Dismiss with a nice spring-loaded throw
           Animated.parallel([
-            Animated.timing(translateX, {
+            Animated.spring(translateX, {
               toValue: SCREEN_WIDTH,
-              duration: 200,
+              velocity: vx,
               useNativeDriver: true,
+              bounciness: 0
             }),
             Animated.timing(opacity, {
               toValue: 0,
-              duration: 200,
+              duration: 150,
+              useNativeDriver: true,
+            }),
+            Animated.spring(scale, {
+              toValue: 0.9,
               useNativeDriver: true,
             })
           ]).start(() => {
             stopPlayback();
-            translateX.setValue(0);
-            opacity.setValue(1);
           });
         } else {
-          // Snap back
+          // Snap back with organic spring
           Animated.parallel([
             Animated.spring(translateX, {
               toValue: 0,
               useNativeDriver: true,
-              friction: 5
+              tension: 80,
+              friction: 8
             }),
             Animated.spring(opacity, {
               toValue: 1,
-              useNativeDriver: true
+              useNativeDriver: true,
+              tension: 80,
+              friction: 8
+            }),
+            Animated.spring(scale, {
+              toValue: 1,
+              useNativeDriver: true,
+              tension: 100,
+              friction: 10
             })
           ]).start();
         }
@@ -73,19 +115,59 @@ const MiniPlayer = ({ onPlayerPress, bottomOffset = 0 }) => {
     })
   ).current;
 
-  if (!currentMezmur) return null;
+  // Handle visibility and offset transitions natively
+  React.useEffect(() => {
+    // Determine the base Y-offset depending on whether we have tabs or not
+    // We keep bottom: 15 constant and use translateY to "lift" it above tabs
+    const targetY = isVisible ? (hasTabs ? -80 : 0) : 100;
 
-  const progress = duration > 0 ? (position / duration) * 100 : 0;
+    Animated.parallel([
+      Animated.spring(translateY, {
+        toValue: targetY,
+        useNativeDriver: true,
+        tension: 60,
+        friction: 10
+      }),
+      Animated.timing(opacity, {
+        toValue: isVisible ? 1 : 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scale, {
+        toValue: isVisible ? 1 : 0.98,
+        useNativeDriver: true,
+        tension: 60,
+        friction: 10
+      })
+    ]).start();
+  }, [isVisible, hasTabs]);
+
+  // Reset animation values when the song changes
+  React.useEffect(() => {
+    if (currentMezmur?.id && isVisible) {
+      translateX.setValue(0);
+      // translateY is handled by the visibility effect
+      opacity.setValue(1);
+      scale.setValue(1);
+    }
+  }, [currentMezmur?.id]);
+
+  if (!currentMezmur) return null;
 
   return (
     <Animated.View
+      pointerEvents={isVisible ? 'auto' : 'none'}
       style={{
         position: 'absolute',
-        bottom: bottomOffset > 0 ? bottomOffset : insets.bottom + 15,
+        bottom: insets.bottom + 15, // Fixed base position
         left: 15,
         right: 15,
         zIndex: 2000,
-        transform: [{ translateX }],
+        transform: [
+          { translateX },
+          { translateY },
+          { scale }
+        ],
         opacity,
       }}
       {...panResponder.panHandlers}
@@ -153,13 +235,7 @@ const MiniPlayer = ({ onPlayerPress, bottomOffset = 0 }) => {
         </TouchableOpacity>
 
         {/* Mini Progress Bar */}
-        <YStack height={3} backgroundColor="rgba(255,255,255,0.1)">
-          <YStack
-            height="100%"
-            width={`${progress}%`}
-            backgroundColor={theme.playerAccent}
-          />
-        </YStack>
+        <MiniProgressBar theme={theme} />
       </YStack>
     </Animated.View>
   );
