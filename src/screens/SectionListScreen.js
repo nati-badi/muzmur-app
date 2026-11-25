@@ -1,6 +1,6 @@
 const React = require('react');
 const { ScrollView, useWindowDimensions, Keyboard, TouchableWithoutFeedback } = require('react-native');
-const { YStack, XStack, Text, Card, Circle, Button, Input, Image } = require('tamagui');
+const { YStack, XStack, Text, Card, Circle, Button, Image } = require('tamagui');
 const { Ionicons } = require('../utils/icons');
 const ScreenHeader = require('../components/ScreenHeader');
 const { useSafeAreaInsets } = require('react-native-safe-area-context');

@@ -3,6 +3,7 @@ const { createContext, useState, useContext, useEffect, useCallback, useRef, use
 const AsyncStorage = require('@react-native-async-storage/async-storage').default || require('@react-native-async-storage/async-storage');
 const audioService = require('../services/audioService');
 const DataService = require('../services/DataService');
+const LocalAudioService = require('../services/LocalAudioService');
 
 const AudioContext = createContext();
 const AudioProgressContext = createContext();
@@ -37,11 +38,42 @@ const AudioProvider = ({ children }) => {
 
   const queueRef = useRef(queue);
   const queueIndexRef = useRef(queueIndex);
+  const playNextRef = useRef(async () => {});
 
   useEffect(() => {
     queueRef.current = queue;
     queueIndexRef.current = queueIndex;
   }, [queue, queueIndex]);
+
+  const loadRecentlyPlayed = useCallback(async () => {
+    try {
+      const stored = await AsyncStorage.getItem(RECENTLY_PLAYED_KEY);
+      if (stored) {
+        setRecentlyPlayed(JSON.parse(stored));
+      }
+    } catch (e) {
+      console.error('Failed to load recently played', e);
+    }
+  }, []);
+
+  const addToRecentlyPlayed = useCallback(async (mezmur) => {
+    try {
+      let persisted = null;
+      setRecentlyPlayed((prev) => {
+        const newList = [
+          mezmur,
+          ...prev.filter((m) => m.id !== mezmur.id),
+        ].slice(0, 10);
+        persisted = newList;
+        return newList;
+      });
+      if (persisted) {
+        await AsyncStorage.setItem(RECENTLY_PLAYED_KEY, JSON.stringify(persisted));
+      }
+    } catch (e) {
+      console.error('Failed to save recently played', e);
+    }
+  }, []);
 
   useEffect(() => {
     audioService.init();
@@ -60,7 +92,7 @@ const AudioProvider = ({ children }) => {
           if (loopRef.current) {
             // Already handled by audioService if set
           } else if (queueRef.current.length > 0 && queueIndexRef.current < queueRef.current.length - 1) {
-            playNext();
+            await playNextRef.current();
           } else {
             setIsPlaying(false);
             await audioService.pause();
@@ -76,32 +108,7 @@ const AudioProvider = ({ children }) => {
     return () => {
       audioService.stop();
     };
-  }, []);
-
-  const loadRecentlyPlayed = async () => {
-    try {
-      const stored = await AsyncStorage.getItem(RECENTLY_PLAYED_KEY);
-      if (stored) {
-        setRecentlyPlayed(JSON.parse(stored));
-      }
-    } catch (e) {
-      console.error('Failed to load recently played', e);
-    }
-  };
-
-  const addToRecentlyPlayed = async (mezmur) => {
-    try {
-      const newList = [
-        mezmur,
-        ...recentlyPlayed.filter(m => m.id !== mezmur.id)
-      ].slice(0, 10);
-
-      setRecentlyPlayed(newList);
-      await AsyncStorage.setItem(RECENTLY_PLAYED_KEY, JSON.stringify(newList));
-    } catch (e) {
-      console.error('Failed to save recently played', e);
-    }
-  };
+  }, [loadRecentlyPlayed]);
 
   // This is the stable callback passed to audio engine
   const onStatusUpdate = useCallback((status) => {
@@ -145,10 +152,12 @@ const AudioProvider = ({ children }) => {
       setIsLoading(true);
       setError(null); // Clear previous errors
 
-      const urls = [
-        `https://cdn.jsdelivr.net/gh/nati-badi/muzmur-assets@main/${mezmur.id}.m4a`,
-        `https://cdn.jsdelivr.net/gh/nati-badi/muzmur-assets@main/${mezmur.id}.mp3`
-      ];
+      const urls = await LocalAudioService.resolvePlaybackUris(mezmur);
+      if (!urls.length) {
+        setIsLoading(false);
+        setError('LOCAL_AUDIO_MISSING');
+        return;
+      }
 
       await audioService.playHymn(mezmur, urls, onStatusUpdate);
 
@@ -163,16 +172,13 @@ const AudioProvider = ({ children }) => {
       console.error("Error playing audio", error);
       setIsLoading(false);
 
-      // User-friendly error mapping
-      let message = 'Unable to play audio.';
-      if (error.message && error.message.includes('404')) {
-        message = 'Audio file not found on server.';
-      } else if (error.message && error.message.includes('Network')) {
-        message = 'Network error. Please check your connection.';
+      if (error.message === 'LOCAL_AUDIO_MISSING') {
+        setError('LOCAL_AUDIO_MISSING');
+      } else {
+        setError('AUDIO_PLAYBACK_FAILED');
       }
-      setError(message);
     }
-  }, [isLooping, onStatusUpdate]);
+  }, [isLooping, onStatusUpdate, addToRecentlyPlayed]);
 
   const playPlaylist = useCallback(async (playlist, startIndex = 0) => {
     if (!playlist.items || playlist.items.length === 0) return;
@@ -196,6 +202,10 @@ const AudioProvider = ({ children }) => {
       await playMezmur(queue[nextIndex]);
     }
   }, [queue, queueIndex, playMezmur]);
+
+  useEffect(() => {
+    playNextRef.current = playNext;
+  }, [playNext]);
 
   const playPrevious = useCallback(async () => {
     if (queue.length > 0 && queueIndex > 0) {

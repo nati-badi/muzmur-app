@@ -1,15 +1,16 @@
 const React = require('react');
-const { useMemo, useCallback } = React;
-const { FlatList, StyleSheet } = require('react-native');
-const { YStack, XStack, Text, Button, Circle } = require('tamagui');
+const { useMemo, useCallback, useState } = React;
+const { useFocusEffect } = require('@react-navigation/native');
+const { FlatList } = require('react-native');
+const { YStack, Text } = require('tamagui');
 const { useSafeAreaInsets } = require('react-native-safe-area-context');
 const { useAppTheme } = require('../context/ThemeContext');
 const { useLanguage } = require('../context/LanguageContext');
 const { useFavorites } = require('../context/FavoritesContext');
 const { Ionicons } = require('../utils/icons');
 const DataService = require('../services/DataService');
-const { TouchableOpacity } = require('react-native');
 const MezmurListCard = require('../components/MezmurListCard');
+const LocalAudioService = require('../services/LocalAudioService');
 
 const ScreenHeader = require('../components/ScreenHeader');
 
@@ -18,6 +19,15 @@ const FavoritesScreen = ({ navigation }) => {
   const { theme } = useAppTheme();
   const { t } = useLanguage();
   const { favorites, toggleFavorite, isFavorite } = useFavorites();
+  const [audioIndexVersion, setAudioIndexVersion] = useState(0);
+
+  useFocusEffect(
+    useCallback(() => {
+      LocalAudioService.refreshAudioAvailability().then(() => {
+        setAudioIndexVersion((v) => v + 1);
+      });
+    }, [])
+  );
 
   const favoriteMezmurs = useMemo(() => {
     return favorites
@@ -42,6 +52,7 @@ const FavoritesScreen = ({ navigation }) => {
       onPress={(item) => navigation.navigate('Detail', { mezmur: item })}
       getStatusColor={getStatusColor}
       theme={theme}
+      hasAudio={LocalAudioService.isAudioAvailable(item.id)}
     />
   ), [isFavorite, toggleFavorite, navigation, getStatusColor, theme]);
 
@@ -75,6 +86,7 @@ const FavoritesScreen = ({ navigation }) => {
       ) : (
         <FlatList
           data={favoriteMezmurs}
+          extraData={audioIndexVersion}
           keyExtractor={item => String(item.id)}
           renderItem={renderItem}
           getItemLayout={getItemLayout}
@@ -89,7 +101,5 @@ const FavoritesScreen = ({ navigation }) => {
     </YStack>
   );
 };
-
-const styles = StyleSheet.create({});
 
 module.exports = FavoritesScreen;

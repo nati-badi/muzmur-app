@@ -21,6 +21,17 @@ const translations = {
     offlineFeatureFavorites: 'Favorites saved on your phone',
     offlineFeatureNoAccount: 'No account or internet required',
     continue: 'Continue',
+    offlineAudio: 'Offline audio',
+    offlineAudioCount: '{count} files on this device',
+    offlineAudioHint: 'Import files named like 12.m4a (hymn id). Or add files to assets/audio before building the APK.',
+    audioImportDone: 'Audio imported',
+    audioImportDoneMessage: '{count} file(s) saved for offline playback.',
+    audioImportFailed: 'Could not import audio. Use filenames like 12.m4a.',
+    audioNotOnDevice: 'No audio file for this hymn on your device. Import it in Settings → Offline audio, or rebuild the app with files in assets/audio.',
+    audioPlaybackFailed: 'Could not play this audio file.',
+    audioAvailable: 'Audio available',
+    lyricsOnly: 'Lyrics only',
+    audioCoverageSummary: '{available} of {total} hymns have audio on this device',
     calendar: 'Calendar',
     shareMessage: 'Check out the app! Download it now to listen to your favorite hymns.',
 
@@ -122,7 +133,6 @@ const translations = {
     midnight: 'Midnight',
     signIn: 'Sign In',
     register: 'Register',
-    guestUser: 'Guest User',
     welcomeBack: 'Welcome Back',
     createAccount: 'Create Account',
     yourNamePlaceholder: 'Your Name',
@@ -141,7 +151,6 @@ const translations = {
     sunday: 'Sun',
 
     // Feast/Calendar
-    todaysFeast: "Today's Feast",
     annualFeast: 'Annual Feast',
     monthlyFeast: 'Monthly Commemoration',
     noFeastToday: 'No registered feast today',
@@ -205,9 +214,6 @@ const translations = {
     'የአቡነ ተክለ ሃይማኖት': 'Abune Tekle H.',
     'የቃና ዘገሊላ': 'Cana Galilee',
     'የአቡነ ገብረ መንፈስ ቅዱስ': 'Abune Gabre M.',
-    'ስለ ቤተ ክርስቲያን': 'Church',
-    'የቅድስት አርሴማ': 'St. Arsema',
-    'Afan Oromo Mezmurs': 'Afan Oromo',
 
     // Categories
     'አጭር': 'Short',
@@ -220,8 +226,6 @@ const translations = {
     serene: 'Serene',
     royal: 'Royal',
     rose: 'Rose',
-    midnight: 'Midnight',
-    system: 'System (Auto)',
 
     // Playlists
     myPlaylists: 'My Playlists',
@@ -333,6 +337,17 @@ const translations = {
     offlineFeatureFavorites: 'ተወዳጆች በስልክዎ ይታሰራሉ',
     offlineFeatureNoAccount: 'መለያ ወይም ኢንተርኔት አያስፈልግም',
     continue: 'ቀጥል',
+    offlineAudio: 'ኦፍላይን ኦዲዮ',
+    offlineAudioCount: 'በዚህ ስልክ ላይ {count} ፋይሎች',
+    offlineAudioHint: '12.m4a ካሉ ፋይሎችን አስገባ (የመዝሙር መለያ)። ወይም APK ከመገንባት በፊት assets/audio ውስጥ አኑር።',
+    audioImportDone: 'ኦዲዮ ተገብቷል',
+    audioImportDoneMessage: '{count} ፋይል(ዎች) ለኦፍላይን ማጫወት ተቀምጠዋል።',
+    audioImportFailed: 'ኦዲዮ ማስመጣት አልተሳካም። 12.m4a ያህል ስም ተጠቀም።',
+    audioNotOnDevice: 'ለዚህ መዝሙር ኦዲዮ በስልክዎ ላይ የለም። በቅንብሮች → ኦፍላይን ኦዲዮ ያስገቡ ወይም APK በ assets/audio ክፍሎች ይገንቡ።',
+    audioPlaybackFailed: 'ኦዲዮው ሊጫወት አልቻለም።',
+    audioAvailable: 'ኦዲዮ አለ',
+    lyricsOnly: 'ጽሁፍ ብቻ',
+    audioCoverageSummary: 'ከ {total} መዝሙሮች {available} ኦዲዮ አላቸው',
     calendar: 'የቀን መቁጠሪያ',
     shareMessage: 'መተግበሪያውን ይመልከቱ! የሚወዱትን መዝሙር ለማዳመጥ አሁኑኑ ያውርዱት።',
 
@@ -434,7 +449,6 @@ const translations = {
     midnight: 'ጥቁር',
     signIn: 'ግባ',
     register: 'ተመዝገብ',
-    guestUser: 'እንግዳ ተጠቃሚ',
     welcomeBack: 'እንኳን ደህና መጡ',
     createAccount: 'አካውንት ይፍጠሩ',
     yourNamePlaceholder: 'የእርስዎ ስም',
@@ -453,7 +467,6 @@ const translations = {
     sunday: 'እሁድ',
 
     // Feast/Calendar
-    todaysFeast: 'የዕለቱ መታሰቢያ',
     annualFeast: 'ዓመታዊ በዓል',
     monthlyFeast: 'የዕለቱ መታሰቢያ',
     noFeastToday: 'የተመዘገበ በዓል የለም',
@@ -517,8 +530,6 @@ const translations = {
     'የአቡነ ተክለ ሃይማኖት': 'የአቡነ ተክለ ሃይማኖት',
     'የቃና ዘገሊላ': 'የቃና ዘገሊላ',
     'የአቡነ ገብረ መንፈስ ቅዱስ': 'የአቡነ ገብረ መንፈስ ቅዱስ',
-    'የቅድስት አርሴማ': 'የቅድስት አርሴማ',
-    'Afan Oromo Mezmurs': 'አፋን ኦሮሞ',
 
     // Categories
     'አጭር': 'አጭር',
@@ -531,8 +542,6 @@ const translations = {
     serene: 'ሰማያዊ',
     royal: 'ወይን ጠጅ',
     rose: 'ሮዝ',
-    midnight: 'ጥቁር',
-    system: 'ሲስተም (ራስ-ሰር)',
 
     // Playlists
     myPlaylists: 'የእኔ ዝርዝሮች',
@@ -671,6 +680,17 @@ const translations = {
     menu: 'ዝርዝር',
     system: 'ሲስተም',
     midnight: 'ጥቁር',
+    offlineAudio: 'ኦፍላይን ኦዲዮ',
+    offlineAudioCount: 'ኣብዚ ስልክ {count} ፋይሎች',
+    offlineAudioHint: '12.m4a ኣይነበረ ቅዳሕ ስም ተጠቐም።',
+    audioImportDone: 'ኦዲዮ ተመኺኑ',
+    audioImportDoneMessage: '{count} ፋይል(ታት) ንኦፍላይን ምጽዋት ተቐሚጡ።',
+    audioImportFailed: 'ኦዲዮ ክትመኽት ኣይከኣለን።',
+    audioNotOnDevice: 'ንዚ መዝሙር ኦዲዮ ኣብ ስልክኻ የለን።',
+    audioPlaybackFailed: 'ኦዲዮ ክጻወት ኣይከኣለን።',
+    audioAvailable: 'ኦዲዮ ኣሎ',
+    lyricsOnly: 'ጽሑፍ ጥራይ',
+    audioCoverageSummary: 'ካብ {total} መዝሙራት {available} ኦዲዮ ኣለዎም',
 
     // Ethiopian Months (Amharic used as default for Ti/Om if unknown, but providing Ti)
     month1: 'መስከረም',
@@ -766,10 +786,6 @@ const translations = {
     'የአቡነ ተክለ ሃይማኖት': 'ተክለ ሃይማኖት',
     'የቃና ዘገሊላ': 'ቃና ዘገሊላ',
     'የአቡነ ገብረ መንፈስ ቅዱስ': 'ገብረ መንፈስ',
-    'ስለ ቤተ ክርስቲያን': 'ቤተ ክርስቲያን',
-    'የቅድስት አርሴማ': 'አርሴማ',
-    'Afan Oromo Mezmurs': 'ኦሮምኛ',
-
     // Categories
     'አጭር': 'ሓጺር',
     'ረጅም': 'ነዊሕ',
@@ -827,7 +843,6 @@ const translations = {
     "መስቀል (የደምራ በዓል)": "መስቀል (ናይ ደምራ በዓል)",
     "ቅዱስ ሚካኤል (ህዳር ሚካኤል)": "ቅዱስ ሚካኤል (ሕዳር ሚካኤል)",
     "በዓለ ገና (ልደት)": "በዓለ ገና (ልደት)",
-    "ኪዳነ ምሕረት (የካቲት 16)": "ኪዳነ ምሕረት (ለካቲት 16)",
     "ቅዱስ ገብርኤል (ቁልቢ)": "ቅዱስ ገብርኤል (ቁልቢ)",
     "ደብረ ታቦር (ቡሄ)": "ደብረ ታቦር (ቡሄ)",
 
@@ -837,7 +852,6 @@ const translations = {
     "ቅዱስ ገብርኤል ሠለስቱ ደቂቅን (ሦስቱን ወጣቶች) ከሚነድ እሳት ያዳነበት ዕለት ነው።": "ቅዱስ ገብርኤል ንሰለስቱ ደቂቅ ካብ ዝነድድ ሓዊ ዘድሓነሉ ዕለት እዩ።",
     "እመቤታችን ቅድስት ድንግል ማርያም የተወለደችበት ዕለት ነው።": "እመቤታችን ቅድስት ድንግል ማርያም ዝተወለደትሉ ዕለት እዩ።",
     "ንግሥት እሌኒ በጸሎትና በሱባኤ የእውነተኛውን መስቀል የተቀበረበትን ቦታ ያገኘችበትን ዕለት ለማስታወስ ይከበራል።": "ንግሥቲ እሌኒ ብጸሎትን ብሱባኤን ነቲ ዝተቐበረ ናይ ሓቂ መስቀል ዝረኸበትሉ ዕለት ንምዝካር ይኽበር።",
-    "ጌታችን መድኃኒታችን ኢየሱስ ክርስቶስ ለዓለም ድኅነት በዕፀ መስቀል ላይ የፈጸመው የማዳን ሥራ ይታሰባል::": "ጐይታናን መድሓኒናን ኢየሱስ ክርስቶስ ንድሕነት ዓለም ኣብ ዕፀ መስቀል ዝፈጸሞ ናይ ምድሓን ስራሕ ይዝከር።",
     "ጌታችን መድኃኒታችን ኢየሱስ ክርስቶስ ለዓለም ድኅነት በዕፀ መስቀል ላይ የፈጸመው የማዳን ሥራ ይታሰባል::": "ጐይታናን መድሓኒናን ኢየሱስ ክርስቶስ ንድሕነት ዓለም ኣብ ዕፀ መስቀል ዝፈጸሞ ናይ ምድሓን ስራሕ ይዝከር።",
     "ጌታችን መድኃኒታችን ኢየሱስ ክርስቶስ በቤተልሔም የተወለደበት ታላቅ የደስታ ዕለት ነው።": "ጐይታናን መድሓኒናን ኢየሱስ ክርስቶስ ኣብ ቤትልሔም ዝተወለደሉ ዓብዪ ናይ ሓጐስ ዕለት እዩ።",
     "ጌታችን በዮርዳኖስ ባሕር በዮሐንስ እጅ ለመጠመቁ መታሰቢያ የሚከበር ታላቅ በዓል ነው።": "ጐይታና ኣብ ባሕረ ዮርዳኖስ ብኢድ ዮሃንስ ንዝተጠመቖ መዘከርታ ዝኽበር ዓብዪ በዓል እዩ።",
@@ -851,17 +865,7 @@ const translations = {
     searchSuggestionsLabel: 'ጥቆማታት ድለያ',
     mezmurSectionsTitle: 'ክፍልታት መዝሙር',
     confirmLogout: 'ርግጸኛ ዲኻ ክትወጽእ?',
-    playlists: 'ዝርዝር መዝሙራት',
     recent: 'ቀረባ ግዜ',
-
-    // Theme Names
-    classic: 'ክላሲክ',
-    forest: 'ቀጠልያ',
-    serene: 'ሰማያዊ',
-    royal: 'ወይን ጠጅ',
-    rose: 'ሮዝ',
-    midnight: 'ጥቁር',
-    system: 'ሲስተም (ባዕላዊ)',
 
     // Playlists
     myPlaylists: 'ናተይ ዝርዝራት',
@@ -1000,6 +1004,17 @@ const translations = {
     menu: 'Mana',
     system: 'Sirna',
     midnight: 'Dukkana',
+    offlineAudio: 'Sagalee interneetii malee',
+    offlineAudioCount: 'Faayilii {count} bilbila kana irratti',
+    offlineAudioHint: 'Maqaa faayilii akka 12.m4a fayyadami.',
+    audioImportDone: 'Sagaleen galmaa’ame',
+    audioImportDoneMessage: 'Faayilii {count} taphachuuf qabame.',
+    audioImportFailed: 'Sagalee galchuu hin dandeenye.',
+    audioNotOnDevice: 'Faaruu kanaaf sagalee bilbila irratti hin jiru.',
+    audioPlaybackFailed: 'Sagalee taphachuu hin dandeenye.',
+    audioAvailable: 'Sagalee jira',
+    lyricsOnly: 'Qabxii qofa',
+    audioCoverageSummary: 'Faaruu {total} keessaa {available} sagalee qaba',
 
     // Ethiopian Months (OM)
     month1: 'Fulbaana',
@@ -1098,11 +1113,8 @@ const translations = {
     'የመድኃኔዓለም': 'Madhaanee-Aalam',
     'የቅዱስ ጊዮርጊስ': 'Giyoorgis',
     'የአቡነ ተክለ ሃይማኖት': 'Takla Haymaanot',
-    'Afan Oromo Mezmurs': 'Afaan Oromoo',
     'የቃና ዘገሊላ': 'Kaanaazegaliilaa',
     'የአቡነ ገብረ መንፈስ ቅዱስ': 'Gabramenfes',
-    'ስለ ቤተ ክርስቲያን': 'Mana Kiristaanaa',
-    'የቅድስት አርሴማ': 'Arseemaa',
 
     // Categories
     'አጭር': 'Gabaabaa',
@@ -1139,7 +1151,6 @@ const translations = {
     "ጽዮን ማርያም": "Tsion Mariyam",
 
     // UI Labels
-    playlists: 'Tarree Taphaa',
     recent: 'Dhiyootti',
     yearSuffix: 'E.C.',
 
@@ -1154,22 +1165,12 @@ const translations = {
     "ጌታችን በዮርዳኖስ ባሕር በዮሐንስ እጅ ለመጠመቁ መታሰቢያ የሚከበር ታላቅ በዓል ነው።": "Ayyaana guddaa cuuphaa Gooftaa keenyaa laga Yordaanositti Harka Yohaannisiin raawwatame.",
     "ታላቁ ሰማዕት ቅዱስ ጊዮርጊስ በሰማዕትነት ያለፈበት ዓመታዊ በዓል ነው።": "Ayyaana waggaa wareegamtoota gurguddoo Qulqulluu Giyoorgis yaadachuuf kabajamu.",
     "በዓለ ገና (ልደት)": "Dhaloota Kiristoos (Genaa)",
-    "ጥምቀት": "Cuuphaa",
     "እንቁጣጣሽ (አዲስ ዓመት)፣ ዮሐንስ መጥምቅ": "Ayyaana Enqutaataash (Waggaa Haaraa)",
     "መስቀል (የደምራ በዓል)": "Ayyaana Masqalaa",
     "ቅዱስ ሚካኤል (ህዳር ሚካኤል)": "Ayyaana Qulqulluu Miikaa’el (Hidaar)",
     "ኪዳነ ምሕረት (የካቲት 16)": "Kidane Mehret (Guraandhala 16)",
     "ቅዱስ ገብርኤል (ቁልቢ)": "Qulqulluu Gabri’eel (Kulubii)",
     "ደብረ ታቦር (ቡሄ)": "Ayyaana Debre Tabor (Buhee)",
-
-    // Theme Names
-    classic: 'Kilaasikii',
-    forest: 'Magariisa',
-    serene: 'Cuquliisa',
-    royal: 'Waatoo',
-    rose: 'Roozii',
-    midnight: 'Dukkana',
-    system: 'Sirna (Of-danda’aa)',
 
     // Playlists
     myPlaylists: 'Tarreewwan Ko',

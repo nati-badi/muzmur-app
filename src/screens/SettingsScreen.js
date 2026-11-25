@@ -1,7 +1,8 @@
 const React = require('react');
-const { useState, useMemo } = React;
-const { useColorScheme } = require('react-native');
-const { YStack, Text, XStack, Circle, ScrollView, Button, View } = require('tamagui');
+const { useState, useMemo, useEffect, useCallback } = React;
+const DocumentPicker = require('expo-document-picker');
+const LocalAudioService = require('../services/LocalAudioService');
+const { YStack, Text, XStack, Circle, ScrollView, View } = require('tamagui');
 const { TouchableOpacity } = require('react-native');
 const { useSafeAreaInsets } = require('react-native-safe-area-context');
 const { Ionicons } = require('../utils/icons');
@@ -15,9 +16,53 @@ const SettingsScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const { theme, themeMode, setTheme } = useAppTheme();
   const { language, changeLanguage, t } = useLanguage();
-  const systemColorScheme = useColorScheme();
   const [showThemes, setShowThemes] = useState(false);
   const [showLanguages, setShowLanguages] = useState(false);
+  const [audioCoverage, setAudioCoverage] = useState({ available: 0, total: 0 });
+  const [importingAudio, setImportingAudio] = useState(false);
+
+  const coverage = useMemo(() => LocalAudioService.getCoverageSummary(), []);
+
+  const refreshAudioCount = useCallback(async () => {
+    const ids = await LocalAudioService.refreshAudioAvailability();
+    setAudioCoverage({
+      available: ids.size,
+      total: coverage.totalHymns,
+    });
+  }, [coverage.totalHymns]);
+
+  useEffect(() => {
+    refreshAudioCount();
+  }, [refreshAudioCount]);
+
+  const handleImportAudio = async () => {
+    try {
+      setImportingAudio(true);
+      const result = await DocumentPicker.getDocumentAsync({
+        type: 'audio/*',
+        multiple: true,
+        copyToCacheDirectory: true,
+      });
+      if (result.canceled || !result.assets?.length) {
+        setImportingAudio(false);
+        return;
+      }
+      const importResult = await LocalAudioService.importPickerAssets(result.assets);
+      await refreshAudioCount();
+      setImportingAudio(false);
+      if (importResult.success) {
+        Alert.alert(
+          t('audioImportDone'),
+          t('audioImportDoneMessage').replace('{count}', String(importResult.imported))
+        );
+      } else {
+        Alert.alert(t('error'), t('audioImportFailed'));
+      }
+    } catch (e) {
+      setImportingAudio(false);
+      Alert.alert(t('error'), e.message || t('audioImportFailed'));
+    }
+  };
 
   const handleFeedback = () => {
     Alert.alert(t('feedbackAlertTitle'), t('feedbackAlertMessage'), [{ text: t('ok') }]);
@@ -197,6 +242,19 @@ const SettingsScreen = ({ navigation }) => {
               ))}
             </YStack>
           )}
+
+          <SettingRow
+            icon="musical-notes-outline"
+            label={t('offlineAudio')}
+            sublabel={t('audioCoverageSummary')
+              .replace('{available}', String(audioCoverage.available))
+              .replace('{total}', String(audioCoverage.total))}
+            onPress={handleImportAudio}
+            rightIcon={importingAudio ? 'hourglass-outline' : 'download-outline'}
+          />
+          <Text fontFamily="$body" fontSize="$2" color={theme.textSecondary} opacity={0.85} marginTop={-4} marginBottom="$2" paddingHorizontal="$1">
+            {t('offlineAudioHint')}
+          </Text>
 
           <SettingRow icon="notifications-outline" label={t('notifications')} disabled={true} />
           <SettingRow icon="chatbubbles-outline" label={t('feedback')} onPress={handleFeedback} />

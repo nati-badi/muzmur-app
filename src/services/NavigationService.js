@@ -1,4 +1,3 @@
-const React = require('react');
 const { createNavigationContainerRef, TabActions } = require('@react-navigation/native');
 
 const navigationRef = createNavigationContainerRef();

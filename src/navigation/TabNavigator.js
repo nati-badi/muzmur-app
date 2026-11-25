@@ -1,14 +1,11 @@
 const React = require('react');
 const { createMaterialTopTabNavigator } = require('@react-navigation/material-top-tabs');
-const { Ionicons } = require('../utils/icons');
-const { Text, XStack, YStack } = require('tamagui');
-const { useSafeAreaInsets } = require('react-native-safe-area-context');
+const { YStack } = require('tamagui');
 
 const TodayScreen = require('../screens/TodayScreen').default || require('../screens/TodayScreen');
 const ProfileScreen = require('../screens/ProfileScreen').default || require('../screens/ProfileScreen');
 const CalendarScreen = require('../screens/CalendarScreen').default || require('../screens/CalendarScreen');
 const SectionListScreen = require('../screens/SectionListScreen').default || require('../screens/SectionListScreen');
-const FavoritesScreen = require('../screens/FavoritesScreen').default || require('../screens/FavoritesScreen');
 const NavigationService = require('../services/NavigationService');
 const { useAppTheme } = require('../context/ThemeContext');
 const { useLanguage } = require('../context/LanguageContext');

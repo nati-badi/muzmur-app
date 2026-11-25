@@ -35,6 +35,7 @@ const TabItem = React.memo(({ route, isFocused, onPress, label }) => {
     </YStack>
   );
 });
+TabItem.displayName = 'TabItem';
 
 const CustomBottomPill = ({ state, descriptors, navigation, theme, t }) => {
   const insets = useSafeAreaInsets();

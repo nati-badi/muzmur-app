@@ -26,7 +26,7 @@ class CacheService {
         try {
             const data = await AsyncStorage.getItem(CACHE_KEYS.SEARCH_HISTORY);
             return data ? JSON.parse(data) : [];
-        } catch (e) {
+        } catch (_e) {
             return [];
         }
     }
@@ -47,7 +47,7 @@ class CacheService {
         try {
             const data = await AsyncStorage.getItem(CACHE_KEYS.HYMN_HISTORY);
             return data ? JSON.parse(data) : [];
-        } catch (e) {
+        } catch (_e) {
             return [];
         }
     }

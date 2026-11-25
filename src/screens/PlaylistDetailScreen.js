@@ -1,7 +1,8 @@
 const React = require('react');
-const { useMemo } = React;
-const { FlatList, TouchableOpacity, StyleSheet } = require('react-native');
-const { YStack, XStack, Text, Button, Circle, Separator, View } = require('tamagui');
+const { useMemo, useCallback, useState } = React;
+const { useFocusEffect } = require('@react-navigation/native');
+const { FlatList, TouchableOpacity } = require('react-native');
+const { YStack, XStack, Text, Button, Circle, Separator } = require('tamagui');
 const { Ionicons } = require('../utils/icons');
 const ScreenHeader = require('../components/ScreenHeader');
 const { useSafeAreaInsets } = require('react-native-safe-area-context');
@@ -11,14 +12,24 @@ const { useAppTheme } = require('../context/ThemeContext');
 const { useAudio } = require('../context/GlobalAudioState.js');
 const DataService = require('../services/DataService');
 const MezmurListCard = require('../components/MezmurListCard');
+const LocalAudioService = require('../services/LocalAudioService');
 
 const PlaylistDetailScreen = ({ route, navigation }) => {
   const { playlistId } = route.params;
   const insets = useSafeAreaInsets();
   const { theme } = useAppTheme();
   const { t } = useLanguage();
-  const { playlists, removeFromPlaylist, reorderPlaylist } = usePlaylists();
+  const { playlists, removeFromPlaylist } = usePlaylists();
   const { playPlaylist } = useAudio();
+  const [audioIndexVersion, setAudioIndexVersion] = useState(0);
+
+  useFocusEffect(
+    useCallback(() => {
+      LocalAudioService.refreshAudioAvailability().then(() => {
+        setAudioIndexVersion((v) => v + 1);
+      });
+    }, [])
+  );
 
   const playlist = useMemo(() =>
     playlists.find(p => p.id === playlistId),
@@ -62,6 +73,7 @@ const PlaylistDetailScreen = ({ route, navigation }) => {
 
       <FlatList
         data={hymns}
+        extraData={audioIndexVersion}
         keyExtractor={(item, index) => `${item.id}-${index}`}
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 100 }}
         ListHeaderComponent={() => (
@@ -107,6 +119,7 @@ const PlaylistDetailScreen = ({ route, navigation }) => {
             onPress={() => handleItemPress(item)}
             theme={theme}
             getStatusColor={(type) => type === 'LONG_FILTER' ? theme.error : theme.success}
+            hasAudio={LocalAudioService.isAudioAvailable(item.id)}
             rightAction={
               <TouchableOpacity
                 onPress={() => removeFromPlaylist(playlistId, item.id)}
@@ -130,7 +143,5 @@ const PlaylistDetailScreen = ({ route, navigation }) => {
     </YStack>
   );
 };
-
-const styles = StyleSheet.create({});
 
 module.exports = PlaylistDetailScreen;

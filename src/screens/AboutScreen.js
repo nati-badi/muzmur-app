@@ -1,6 +1,6 @@
 const React = require('react');
 const { YStack, Text, XStack, ScrollView, View, Separator, Button } = require('tamagui');
-const { TouchableOpacity, Linking, Image } = require('react-native');
+const { Linking } = require('react-native');
 const { useSafeAreaInsets } = require('react-native-safe-area-context');
 const { Ionicons } = require('../utils/icons');
 const { useAppTheme } = require('../context/ThemeContext');

@@ -1,9 +1,7 @@
 const React = require('react');
-const { useState, useEffect, useCallback, memo } = React;
-const { StyleSheet, ActivityIndicator } = require('react-native');
+const { memo } = React;
+const { ActivityIndicator } = require('react-native');
 const { YStack, XStack, Text, Button, Circle } = require('tamagui');
-const Slider = require('@react-native-community/slider').default || require('@react-native-community/slider');
-const AsyncStorage = require('@react-native-async-storage/async-storage').default || require('@react-native-async-storage/async-storage');
 const { useSafeAreaInsets } = require('react-native-safe-area-context');
 const { useAppTheme } = require('../context/ThemeContext');
 const { useLanguage } = require('../context/LanguageContext');
@@ -25,13 +23,6 @@ const HymnPlayerScreen = ({ navigation }) => {
     togglePlayback, toggleLoop, toggleShuffle, handleSkip, handleSeek
   } = useAudio();
 
-  const formatTime = (millis) => {
-    if (!millis || isNaN(millis)) return '0:00';
-    const totalSeconds = millis / 1000;
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = Math.floor(totalSeconds % 60);
-    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-  };
 
   if (!currentMezmur) {
     return (
@@ -287,5 +278,6 @@ const FullPlayerControls = memo(({
     </YStack>
   );
 });
+FullPlayerControls.displayName = 'FullPlayerControls';
 
 module.exports = HymnPlayerScreen;

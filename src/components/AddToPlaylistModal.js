@@ -1,7 +1,7 @@
 const React = require('react');
 const { useState } = React;
-const { Modal, TouchableOpacity, View, StyleSheet, FlatList, TextInput } = require('react-native');
-const { YStack, XStack, Text, Button, Circle, Separator } = require('tamagui');
+const { Modal, TouchableOpacity, StyleSheet, FlatList, TextInput } = require('react-native');
+const { YStack, XStack, Text, Button, Circle } = require('tamagui');
 const { Ionicons } = require('../utils/icons');
 const { usePlaylists } = require('../context/PlaylistContext');
 const { useLanguage } = require('../context/LanguageContext');

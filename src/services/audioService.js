@@ -1,6 +1,4 @@
 const { Audio, InterruptionModeIOS, InterruptionModeAndroid } = require('expo-av');
-const FileSystem = require('expo-file-system/legacy');
-
 // --- HYBRID MODULE LOADER ---
 let ExpoAudio = null;
 let USE_MODERN_AUDIO = false;
@@ -14,7 +12,7 @@ try {
       USE_MODERN_AUDIO = true;
       console.log('[AudioService] Using Modern Native Engine (expo-audio) 🚀');
   }
-} catch (e) {
+} catch (_e) {
   console.log('[AudioService] Native module missing. Falling back to Legacy (expo-av) 🛡️');
 }
 
@@ -81,13 +79,25 @@ class AudioService {
 
       this.currentHymnId = hymn.id;
       const urlList = Array.isArray(urls) ? urls : [urls];
-      let sourceUri = urlList[0];
-      
-      const localResult = await this.getLocalUri(hymn.id);
-      if (localResult) sourceUri = localResult.uri;
+      if (!urlList.length) {
+        throw new Error('LOCAL_AUDIO_MISSING');
+      }
 
-      // Create Player
-      this.player = new ExpoAudio.AudioPlayer(sourceUri);
+      let lastError = null;
+      let started = false;
+      for (const sourceUri of urlList) {
+        try {
+          this.player = new ExpoAudio.AudioPlayer(sourceUri);
+          started = true;
+          break;
+        } catch (err) {
+          lastError = err;
+          this.player = null;
+        }
+      }
+      if (!started) {
+        throw lastError || new Error('LOCAL_AUDIO_MISSING');
+      }
       
       // Lock Screen Config
       this.player.staysActiveInBackground = true;
@@ -102,20 +112,6 @@ class AudioService {
       }, 250);
 
       this.player.play();
-
-      this.player.play();
-
-      // --- METADATA (Modern) ---
-      // expo-audio should handle metadata via its own API (updateLockScreenMetadata) if available.
-      // Removed the invalid expo-av hack.
-
-      // Backround Cache
-
-      // Backround Cache
-      if (!localResult) {
-          const ext = sourceUri.includes('.mp3') ? 'mp3' : 'm4a';
-          this._cacheFile(hymn.id, sourceUri, ext);
-      }
 
     } catch (error) {
        console.error('[Modern Player Error]', error);
@@ -168,15 +164,12 @@ class AudioService {
       await this.stop({ resetHymn: false });
       this.currentHymnId = hymn.id;
 
-      let sourceUri = urlList[0];
-      const localResult = await this.getLocalUri(hymn.id);
-      if (localResult) sourceUri = localResult.uri;
+      if (!urlList.length) {
+        throw new Error('LOCAL_AUDIO_MISSING');
+      }
 
-      // Try candidates
       let lastError = null;
-      let success = false;
-      
-      // Optimized loop for legacy
+
       const tryPlay = async (uri) => {
          const { sound } = await Audio.Sound.createAsync(
             { uri },
@@ -195,19 +188,18 @@ class AudioService {
          return true;
       };
 
-      if (localResult) {
-          await tryPlay(localResult.uri);
-      } else {
-          for (const url of urlList) {
-             try {
-                await tryPlay(url);
-                const ext = url.includes('.mp3') ? 'mp3' : 'm4a';
-                this._cacheFile(hymn.id, url, ext);
-                success = true;
-                break;
-             } catch(e) { lastError = e; }
-          }
-          if (!success && lastError) throw lastError;
+      let played = false;
+      for (const url of urlList) {
+        try {
+          await tryPlay(url);
+          played = true;
+          break;
+        } catch (e) {
+          lastError = e;
+        }
+      }
+      if (!played) {
+        throw lastError || new Error('LOCAL_AUDIO_MISSING');
       }
 
     } catch (error) {
@@ -237,14 +229,14 @@ class AudioService {
     
     // Modern Cleanup
     if (this.player) {
-      try { this.player.pause(); this.player = null; } catch (e) {}
+      try { this.player.pause(); this.player = null; } catch (_e) {}
     }
     
     // Metadata Cleanup (Fix: Stop ghost sessions)
     if (this.metadataSound) {
         try { 
             await this.metadataSound.unloadAsync(); 
-        } catch(e) {}
+        } catch (_e) {}
         this.metadataSound = null;
     }
 
@@ -253,7 +245,7 @@ class AudioService {
        try { 
            await this.sound.setOnPlaybackStatusUpdate(null);
            await this.sound.unloadAsync(); 
-       } catch (e) {}
+       } catch (_e) {}
        this.sound = null;
     }
 
@@ -265,24 +257,13 @@ class AudioService {
     if (this.sound) await this.sound.setPositionAsync(millis);
   }
 
-  async _cacheFile(hymnId, remoteUrl, extension) {
-    try {
-      const dir = `${FileSystem.documentDirectory}mezmurs/`;
-      const dirInfo = await FileSystem.getInfoAsync(dir);
-      if (!dirInfo.exists) await FileSystem.makeDirectoryAsync(dir, { intermediates: true });
-      const fileUri = `${dir}${hymnId}.${extension}`;
-      if (!(await FileSystem.getInfoAsync(fileUri)).exists) await FileSystem.downloadAsync(remoteUrl, fileUri);
-    } catch (e) {}
-  }
-
   async getLocalUri(hymnId) {
-    const extensions = ['m4a', 'mp3'];
-    for (const ext of extensions) {
-      try {
-        const uri = `${FileSystem.documentDirectory}mezmurs/${hymnId}.${ext}`;
-        const info = await FileSystem.getInfoAsync(uri);
-        if (info.exists) return { uri, ext };
-      } catch (e) {}
+    const LocalAudioService = require('./LocalAudioService');
+    const uris = await LocalAudioService.resolvePlaybackUris({ id: hymnId });
+    if (uris.length) {
+      const uri = uris[0];
+      const ext = uri.split('.').pop();
+      return { uri, ext };
     }
     return null;
   }

@@ -3,8 +3,9 @@ const { memo } = React;
 const { YStack, XStack, Text, Button } = require('tamagui');
 const { Ionicons } = require('../utils/icons');
 const { useLanguage } = require('../context/LanguageContext');
+const LocalAudioService = require('../services/LocalAudioService');
 
-const MezmurListCard = memo(({ item, isFavorite, onToggleFavorite, onPress, getStatusColor, theme, rightAction }) => {
+const MezmurListCard = memo(({ item, isFavorite, onToggleFavorite, onPress, getStatusColor, theme, rightAction, hasAudio }) => {
   const { t } = useLanguage();
 
   const calculatedCategory = React.useMemo(() => {
@@ -20,6 +21,8 @@ const MezmurListCard = memo(({ item, isFavorite, onToggleFavorite, onPress, getS
     if (!item.lyrics) return '';
     return item.lyrics.split('\n').slice(0, 2).join('\n');
   }, [item.lyrics]);
+
+  const audioAvailable = hasAudio ?? LocalAudioService.isAudioAvailable(item.id);
 
   return (
     <YStack
@@ -75,6 +78,18 @@ const MezmurListCard = memo(({ item, isFavorite, onToggleFavorite, onPress, getS
                 {t(calculatedCategory)}
               </Text>
             </YStack>
+            {audioAvailable && (
+              <XStack
+                alignItems="center"
+                justifyContent="center"
+                opacity={0.9}
+                marginLeft="$1"
+                accessibilityRole="image"
+                accessibilityLabel={t('audioAvailable')}
+              >
+                <Ionicons name="volume-high" size={14} color={theme.success || theme.primary} />
+              </XStack>
+            )}
           </XStack>
 
           {/* Title */}
@@ -141,5 +156,6 @@ const MezmurListCard = memo(({ item, isFavorite, onToggleFavorite, onPress, getS
     </YStack>
   );
 });
+MezmurListCard.displayName = 'MezmurListCard';
 
 module.exports = MezmurListCard;

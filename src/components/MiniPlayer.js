@@ -1,6 +1,6 @@
 const React = require('react');
 const { memo } = React;
-const { YStack, XStack, Text, Button, Circle, Theme } = require('tamagui');
+const { YStack, XStack, Text, Button, Circle } = require('tamagui');
 const { Ionicons } = require('../utils/icons');
 const { useAudio, useAudioProgress } = require('../context/GlobalAudioState.js');
 const { useAppTheme } = require('../context/ThemeContext');
@@ -24,6 +24,7 @@ const MiniProgressBar = memo(({ theme }) => {
     </YStack>
   );
 });
+MiniProgressBar.displayName = 'MiniProgressBar';
 
 const MiniPlayer = ({ onPlayerPress, isVisible = true, hasTabs = false }) => {
   const { theme } = useAppTheme();
@@ -140,7 +141,7 @@ const MiniPlayer = ({ onPlayerPress, isVisible = true, hasTabs = false }) => {
         friction: 10
       })
     ]).start();
-  }, [isVisible, hasTabs]);
+  }, [isVisible, hasTabs, opacity, scale, translateY]);
 
   // Reset animation values when the song changes
   React.useEffect(() => {
@@ -150,7 +151,7 @@ const MiniPlayer = ({ onPlayerPress, isVisible = true, hasTabs = false }) => {
       opacity.setValue(1);
       scale.setValue(1);
     }
-  }, [currentMezmur?.id]);
+  }, [currentMezmur?.id, isVisible, opacity, scale, translateX]);
 
   if (!currentMezmur) return null;
 
@@ -241,4 +242,7 @@ const MiniPlayer = ({ onPlayerPress, isVisible = true, hasTabs = false }) => {
   );
 };
 
-module.exports = memo(MiniPlayer);
+const MemoizedMiniPlayer = memo(MiniPlayer);
+MemoizedMiniPlayer.displayName = 'MiniPlayer';
+
+module.exports = MemoizedMiniPlayer;

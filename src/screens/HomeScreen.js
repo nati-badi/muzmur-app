@@ -1,15 +1,12 @@
 const React = require('react');
 const { useState, useEffect, useCallback, useMemo, memo } = React;
-const { FlatList, Modal, ScrollView, StyleSheet, ActivityIndicator, useWindowDimensions, Share, Alert, TouchableWithoutFeedback, View, Image: RNImage } = require('react-native');
-const { YStack, XStack, Text, Input, Button, Circle, Theme, Separator } = require('tamagui');
+const { FlatList, Modal, ScrollView, ActivityIndicator, useWindowDimensions, Share, Alert, TouchableWithoutFeedback, View, Image: RNImage } = require('react-native');
+const { YStack, XStack, Text, Button, Circle, Separator } = require('tamagui');
 const { useSafeAreaInsets } = require('react-native-safe-area-context');
 const { Ionicons } = require('../utils/icons');
-const AsyncStorage = require('@react-native-async-storage/async-storage').default || require('@react-native-async-storage/async-storage');
 const { useFocusEffect } = require('@react-navigation/native');
 const { useAppTheme } = require('../context/ThemeContext');
 const { useLanguage } = require('../context/LanguageContext');
-const { getAllSections } = require('../constants/sections');
-const { COLORS } = require('../constants/theme');
 const SearchBar = require('../components/SearchBar');
 const { useFavorites } = require('../context/FavoritesContext');
 const { useAuth } = require('../context/AuthContext');
@@ -18,6 +15,7 @@ const { normalizeAmharic } = require('../utils/textUtils');
 const DataService = require('../services/DataService');
 const CacheService = require('../services/CacheService');
 const ScreenHeader = require('../components/ScreenHeader');
+const LocalAudioService = require('../services/LocalAudioService');
 
 // Constants
 const FILTER_IDS = {
@@ -50,6 +48,7 @@ const SkeletonCard = memo(() => {
     </YStack>
   );
 });
+SkeletonCard.displayName = 'SkeletonCard';
 
 // Memoized filter component to prevent list renders from blocking button clicks
 const FilterToggles = memo(({ options, activeId, onSelect, theme }) => {
@@ -86,6 +85,7 @@ const FilterToggles = memo(({ options, activeId, onSelect, theme }) => {
     </XStack>
   );
 });
+FilterToggles.displayName = 'FilterToggles';
 
 const HomeScreen = ({ navigation, route }) => {
   const insets = useSafeAreaInsets();
@@ -114,19 +114,22 @@ const HomeScreen = ({ navigation, route }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [recentSearches, setRecentSearches] = useState([]);
   const [hymnHistory, setHymnHistory] = useState([]);
+  const [audioIndexVersion, setAudioIndexVersion] = useState(0);
 
-  // Load history and searches on focus
+  // Load history, searches, and local audio index on focus
   useFocusEffect(
     useCallback(() => {
       const loadCache = async () => {
         const [searches, history] = await Promise.all([
           CacheService.getRecentSearches(),
-          CacheService.getHymnHistory()
+          CacheService.getHymnHistory(),
         ]);
+        await LocalAudioService.refreshAudioAvailability();
 
         // Only update if data actually changed to avoid layout shifts
         setRecentSearches(prev => JSON.stringify(prev) === JSON.stringify(searches) ? prev : searches);
         setHymnHistory(prev => JSON.stringify(prev) === JSON.stringify(history) ? prev : history);
+        setAudioIndexVersion((v) => v + 1);
       };
       loadCache();
     }, [])
@@ -185,20 +188,22 @@ const HomeScreen = ({ navigation, route }) => {
     { id: FILTER_IDS.SHORT, label: t('short') }
   ], [t]);
 
-  const sectionOptions = useMemo(() => {
-    const sections = DataService.getSections();
-    return [
-      { id: SECTION_ALL_ID, label: t('all') },
-      ...sections.map(s => ({ id: s.id, label: t(s.label) || s.label }))
-    ];
-  }, [t, dataVersion]);
+  const hymnSections = useMemo(() => {
+    void dataVersion;
+    return DataService.getSections();
+  }, [dataVersion]);
+
+  const sectionOptions = useMemo(() => [
+    { id: SECTION_ALL_ID, label: t('all') },
+    ...hymnSections.map((s) => ({ id: s.id, label: t(s.label) || s.label })),
+  ], [t, hymnSections]);
 
   // Update visibleCount if screen height changes
   useEffect(() => {
     if (visibleCount < calculatedInitialCount) {
       setVisibleCount(calculatedInitialCount);
     }
-  }, [calculatedInitialCount]);
+  }, [calculatedInitialCount, visibleCount]);
 
   // Reset pagination when filters change
   useEffect(() => {
@@ -251,21 +256,14 @@ const HomeScreen = ({ navigation, route }) => {
     );
   };
 
-  const handleShowMenu = () => {
-    Alert.alert(
-      t('moreOptions'),
-      t('chooseAction'),
-      [
-        { text: t('shareApp'), onPress: handleShare },
-        { text: t('feedback'), onPress: handleFeedback },
-        { text: t('checkUpdates'), onPress: handleCheckUpdate },
-        { text: t('cancel'), style: 'cancel' }
-      ]
-    );
-  };
+
+  const allMezmurs = useMemo(() => {
+    void dataVersion;
+    return DataService.getAll();
+  }, [dataVersion]);
 
   const filteredMezmurs = useMemo(() => {
-    let result = DataService.getAll();
+    let result = allMezmurs;
 
     // 1. Filter by Section
     if (selectedSectionId !== SECTION_ALL_ID) {
@@ -284,7 +282,7 @@ const HomeScreen = ({ navigation, route }) => {
     }
 
     return result;
-  }, [debouncedQuery, appliedFilterId, selectedSectionId, dataVersion]);
+  }, [debouncedQuery, appliedFilterId, selectedSectionId, allMezmurs]);
 
   // TIER 3: EPHEMERAL CACHE (Suggestions)
   const searchSuggestions = useMemo(() => {
@@ -315,6 +313,7 @@ const HomeScreen = ({ navigation, route }) => {
       onPress={handlePress}
       getStatusColor={getStatusColor}
       theme={theme}
+      hasAudio={LocalAudioService.isAudioAvailable(item.id)}
     />
   ), [isFavorite, toggleFavorite, handlePress, getStatusColor, theme]);
 
@@ -415,6 +414,7 @@ const HomeScreen = ({ navigation, route }) => {
 
       <FlatList
         data={isLoadingData ? [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] : paginatedData}
+        extraData={audioIndexVersion}
         keyExtractor={(item, index) => isLoadingData ? `skeleton-${index}` : String(item.id)}
         renderItem={isLoadingData ? () => <SkeletonCard /> : renderItem}
         getItemLayout={getItemLayout}
@@ -612,7 +612,5 @@ const HomeScreen = ({ navigation, route }) => {
     </YStack >
   );
 };
-
-const styles = StyleSheet.create({});
 
 module.exports = HomeScreen;

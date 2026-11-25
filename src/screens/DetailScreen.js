@@ -1,9 +1,7 @@
 const React = require('react');
-const { useState, useEffect, useCallback, memo, useMemo } = React;
-const { ScrollView, StyleSheet, ActivityIndicator, TouchableOpacity } = require('react-native');
-const { YStack, XStack, Text, Button, Circle, Theme } = require('tamagui');
-const Slider = require('@react-native-community/slider').default || require('@react-native-community/slider');
-const AsyncStorage = require('@react-native-async-storage/async-storage').default || require('@react-native-async-storage/async-storage');
+const { useState, useEffect, memo, useMemo } = React;
+const { ScrollView, ActivityIndicator, TouchableOpacity, Alert } = require('react-native');
+const { YStack, XStack, Text, Button, Circle } = require('tamagui');
 const { useAppTheme } = require('../context/ThemeContext');
 const { useLanguage } = require('../context/LanguageContext');
 const { useFavorites } = require('../context/FavoritesContext');
@@ -11,20 +9,39 @@ const { useAudio, useAudioProgress } = require('../context/GlobalAudioState.js')
 const { Ionicons } = require('../utils/icons');
 const { useSafeAreaInsets } = require('react-native-safe-area-context');
 const SmoothSlider = require('../components/SmoothSlider');
+const LocalAudioService = require('../services/LocalAudioService');
 
 const DetailScreen = ({ route, navigation }) => {
   const insets = useSafeAreaInsets();
   const { theme } = useAppTheme();
   const { t } = useLanguage();
   const { mezmur } = route.params;
+  const [hasAudio, setHasAudio] = useState(null);
   const { isFavorite, toggleFavorite } = useFavorites();
   const {
     currentMezmur, isPlaying, isLoading,
     isLooping, isShuffle,
-    playMezmur, togglePlayback, toggleLoop, toggleShuffle, handleSkip, handleSeek
+    playMezmur, togglePlayback, toggleLoop, toggleShuffle, handleSkip, handleSeek,
+    error, clearError,
   } = useAudio();
 
   const isCurrentPlaying = currentMezmur?.id === mezmur.id;
+
+  useEffect(() => {
+    if (!error) return;
+    const message = error === 'LOCAL_AUDIO_MISSING' ? t('audioNotOnDevice') : t('audioPlaybackFailed');
+    Alert.alert(t('error'), message, [{ text: t('ok'), onPress: clearError }]);
+  }, [error, t, clearError]);
+
+  useEffect(() => {
+    let cancelled = false;
+    LocalAudioService.hasLocalAudio(mezmur).then((ok) => {
+      if (!cancelled) setHasAudio(ok);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [mezmur]);
 
   const handlePlayPause = () => {
     if (isCurrentPlaying) {
@@ -34,13 +51,11 @@ const DetailScreen = ({ route, navigation }) => {
     }
   };
 
-  const getCategoryLabel = (lyrics = '') => {
+  const categoryLabel = useMemo(() => {
+    const lyrics = mezmur.lyrics || '';
     if (!lyrics) return t('short');
-    const lineCount = lyrics.split('\n').length;
-    return lineCount > 8 ? t('long') : t('short');
-  };
-
-  const categoryLabel = useMemo(() => getCategoryLabel(mezmur.lyrics), [mezmur.lyrics, t]);
+    return lyrics.split('\n').length > 8 ? t('long') : t('short');
+  }, [mezmur.lyrics, t]);
   const statusColor = categoryLabel === t('long') ? theme.error : theme.success;
 
   return (
@@ -90,22 +105,37 @@ const DetailScreen = ({ route, navigation }) => {
           {mezmur.title}
         </Text>
 
-        <XStack
-          backgroundColor={theme.cardBackground}
-          paddingHorizontal="$4"
-          paddingVertical="$2"
-          borderRadius={20}
-          alignSelf="center"
-          borderWidth={1}
-          borderColor={theme.borderColor}
-          alignItems="center"
-          space="$2"
-          marginBottom="$6"
-        >
-          <Circle size={8} backgroundColor={statusColor} />
-          <Text fontFamily="$ethiopicSerif" fontSize="$2" fontWeight="bold" color={statusColor} textTransform="uppercase">
-            {categoryLabel}
-          </Text>
+        <XStack space="$2" alignSelf="center" marginBottom="$6">
+          <XStack
+            backgroundColor={theme.cardBackground}
+            paddingHorizontal="$4"
+            paddingVertical="$2"
+            borderRadius={20}
+            borderWidth={1}
+            borderColor={theme.borderColor}
+            alignItems="center"
+            space="$2"
+          >
+            <Circle size={8} backgroundColor={statusColor} />
+            <Text fontFamily="$ethiopicSerif" fontSize="$2" fontWeight="bold" color={statusColor} textTransform="uppercase">
+              {categoryLabel}
+            </Text>
+          </XStack>
+          {hasAudio !== null && (
+            <XStack
+              backgroundColor={hasAudio ? `${theme.success}22` : `${theme.textSecondary}22`}
+              paddingHorizontal="$3"
+              paddingVertical="$2"
+              borderRadius={20}
+              alignItems="center"
+              space="$1"
+            >
+              <Ionicons name={hasAudio ? 'volume-high' : 'document-text'} size={14} color={hasAudio ? theme.success : theme.textSecondary} />
+              <Text fontSize="$1" fontWeight="700" color={hasAudio ? theme.success : theme.textSecondary}>
+                {hasAudio ? t('audioAvailable') : t('lyricsOnly')}
+              </Text>
+            </XStack>
+          )}
         </XStack>
 
         <YStack alignItems="center" marginBottom="$6">
@@ -168,6 +198,7 @@ const DetailScreen = ({ route, navigation }) => {
         isFavorite={isFavorite}
         toggleFavorite={toggleFavorite}
         handlePlayPause={handlePlayPause}
+        hasAudio={hasAudio}
         theme={theme}
         t={t}
         insets={insets}
@@ -181,7 +212,7 @@ const DetailPlayerControls = memo(({
   mezmur, currentMezmur, isPlaying, isLoading,
   isLooping, isShuffle,
   togglePlayback, toggleLoop, toggleShuffle, handleSkip, handleSeek,
-  isFavorite, toggleFavorite, handlePlayPause,
+  isFavorite, toggleFavorite, handlePlayPause, hasAudio,
   theme, t, insets
 }) => {
   const { position, duration } = useAudioProgress();
@@ -280,10 +311,11 @@ const DetailPlayerControls = memo(({
           <Button
             circular
             size="$6"
-            backgroundColor={theme.playerAccent}
+            backgroundColor={hasAudio === false ? theme.textSecondary : theme.playerAccent}
             icon={(isLoading && isCurrentPlaying) ? <ActivityIndicator color={theme.playerBackground} /> : <Ionicons name={(isPlaying && isCurrentPlaying) ? "pause" : "play"} size={32} color={theme.playerBackground} />}
-            onPress={handlePlayPause}
-            disabled={isLoading}
+            onPress={hasAudio === false ? undefined : handlePlayPause}
+            disabled={isLoading || hasAudio === false}
+            opacity={hasAudio === false ? 0.5 : 1}
             pressStyle={{ scale: 0.95 }}
             elevation="$4"
           />
@@ -310,5 +342,6 @@ const DetailPlayerControls = memo(({
     </YStack>
   );
 });
+DetailPlayerControls.displayName = 'DetailPlayerControls';
 
 module.exports = DetailScreen;

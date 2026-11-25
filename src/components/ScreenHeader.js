@@ -1,7 +1,6 @@
 const React = require('react');
-const { XStack, Text, Button, Circle, View } = require('tamagui');
+const { XStack, Text, Button } = require('tamagui');
 const { Ionicons } = require('../utils/icons');
-const { TouchableOpacity } = require('react-native');
 
 /**
  * ScreenHeader - A standardized header for all screens.

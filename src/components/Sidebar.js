@@ -3,7 +3,7 @@ const { useMemo, memo, useCallback } = React;
 const { YStack, XStack, Text, Circle, Button, Separator } = require('tamagui');
 const { Ionicons } = require('../utils/icons');
 const { DrawerContentScrollView } = require('@react-navigation/drawer');
-const { useNavigationState, getFocusedRouteNameFromRoute, TabActions } = require('@react-navigation/native');
+const { useNavigationState, getFocusedRouteNameFromRoute } = require('@react-navigation/native');
 const { useAppTheme } = require('../context/ThemeContext');
 const { useLanguage } = require('../context/LanguageContext');
 const { useAuth } = require('../context/AuthContext');
@@ -34,6 +34,7 @@ const BackgroundWatermark = memo(({ primaryColor }) => (
     <Ionicons name="musical-notes" size={300} color={primaryColor} />
   </YStack>
 ));
+BackgroundWatermark.displayName = 'BackgroundWatermark';
 
 const SidebarHeader = memo(({ t, primary, text, accent }) => (
   <YStack paddingHorizontal="$6" paddingTop="$2" paddingBottom="$4">
@@ -52,6 +53,7 @@ const SidebarHeader = memo(({ t, primary, text, accent }) => (
     </XStack>
   </YStack>
 ));
+SidebarHeader.displayName = 'SidebarHeader';
 
 const SidebarFooter = memo(({ t, userInfo, profileData, user, surface, borderColor, background, accent, text, primary, textSecondary, insets, onNavigate }) => (
   <YStack padding="$4" paddingBottom={insets.bottom + 10} backgroundColor={surface} borderTopWidth={1} borderTopColor={borderColor} minHeight={90} justifyContent="center">
@@ -86,6 +88,7 @@ const SidebarFooter = memo(({ t, userInfo, profileData, user, surface, borderCol
     </Button>
   </YStack>
 ));
+SidebarFooter.displayName = 'SidebarFooter';
 
 const MenuItem = memo(({ item, t, navigation, isActive, primaryColor, textColor, textSecondaryColor }) => {
   const isDisabled = !item.screen;
@@ -129,6 +132,7 @@ const MenuItem = memo(({ item, t, navigation, isActive, primaryColor, textColor,
     </Button>
   );
 });
+MenuItem.displayName = 'MenuItem';
 
 // Sidebar Component
 const Sidebar = (props) => {

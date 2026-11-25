@@ -1,12 +1,12 @@
 const React = require('react');
 const { useState, useMemo, useEffect } = React;
-const { YStack, XStack, Text, Button, ScrollView, Card, Separator, Circle, Image } = require('tamagui');
+const { YStack, XStack, Text, Button, ScrollView, Card, Separator, Circle } = require('tamagui');
 const { Image: RNImage } = require('react-native');
 const { useSafeAreaInsets } = require('react-native-safe-area-context');
 const { Ionicons } = require('../utils/icons');
 const { useAppTheme } = require('../context/ThemeContext');
 const { useLanguage } = require('../context/LanguageContext');
-const { toEthiopian, toGeez, ETHIOPIC_MONTHS, ETHIOPIC_MONTHS_EN } = require('../utils/dateUtils');
+const { toEthiopian, toGeez } = require('../utils/dateUtils');
 const { getFeastForDate } = require('../utils/holidayData');
 const { useAudio } = require('../context/GlobalAudioState.js');
 const { useFavorites } = require('../context/FavoritesContext');
@@ -102,7 +102,7 @@ const TodayScreen = ({ navigation }) => {
 
     const pool = DataService.getFeaturedForFeast(sectionMatch);
     return [...pool].sort(() => 0.5 - Math.random()).slice(0, 5);
-  }, [month, day, t]);
+  }, [feastSummary]);
 
 
   // Premium Skeleton Components

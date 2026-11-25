@@ -1,12 +1,12 @@
 const React = require('react');
-const { useState, useMemo, useEffect } = React;
-const { YStack, Text, XStack, Button, Circle, ScrollView, Card, SizableText } = require('tamagui');
+const { useState, useMemo } = React;
+const { YStack, Text, XStack, Button, ScrollView } = require('tamagui');
 const { TouchableOpacity } = require('react-native');
 const { useSafeAreaInsets } = require('react-native-safe-area-context');
 const { Ionicons } = require('../utils/icons');
 const { useAppTheme } = require('../context/ThemeContext');
 const { useLanguage } = require('../context/LanguageContext');
-const { toEthiopian, getEthiopianMonthStartDay, toGeez, ETHIOPIC_MONTHS } = require('../utils/dateUtils');
+const { toEthiopian, getEthiopianMonthStartDay, toGeez } = require('../utils/dateUtils');
 const { getFeastForDate } = require('../utils/holidayData');
 
 const ScreenHeader = require('../components/ScreenHeader');

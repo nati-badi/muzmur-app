@@ -12,11 +12,16 @@ const PlaylistProvider = ({ children }) => {
   // Storage key is user-specific
   const getStorageKey = useCallback(() => PLAYLISTS_STORAGE_KEY, []);
 
-  useEffect(() => {
-    loadPlaylists();
+  const persistPlaylists = useCallback(async (newList) => {
+    try {
+      const key = getStorageKey();
+      await AsyncStorage.setItem(key, JSON.stringify(newList));
+    } catch (e) {
+      console.error('Failed to persist playlists:', e);
+    }
   }, [getStorageKey]);
 
-  const loadPlaylists = async () => {
+  const loadPlaylists = useCallback(async () => {
     try {
       const key = getStorageKey();
       const stored = await AsyncStorage.getItem(key);
@@ -30,16 +35,11 @@ const PlaylistProvider = ({ children }) => {
       console.error('Failed to load playlists:', e);
       setIsLoaded(true);
     }
-  };
+  }, [getStorageKey]);
 
-  const persistPlaylists = async (newList) => {
-    try {
-      const key = getStorageKey();
-      await AsyncStorage.setItem(key, JSON.stringify(newList));
-    } catch (e) {
-      console.error('Failed to persist playlists:', e);
-    }
-  };
+  useEffect(() => {
+    loadPlaylists();
+  }, [loadPlaylists]);
 
   const createPlaylist = useCallback(async (name) => {
     const newPlaylist = {
@@ -53,7 +53,7 @@ const PlaylistProvider = ({ children }) => {
     setPlaylists(newList);
     await persistPlaylists(newList);
     return newPlaylist;
-  }, [playlists, getStorageKey]);
+  }, [playlists, persistPlaylists]);
 
   const renamePlaylist = useCallback(async (playlistId, newName) => {
     const newList = playlists.map(p =>
@@ -61,13 +61,13 @@ const PlaylistProvider = ({ children }) => {
     );
     setPlaylists(newList);
     await persistPlaylists(newList);
-  }, [playlists, getStorageKey]);
+  }, [playlists, persistPlaylists]);
 
   const deletePlaylist = useCallback(async (playlistId) => {
     const newList = playlists.filter(p => p.id !== playlistId);
     setPlaylists(newList);
     await persistPlaylists(newList);
-  }, [playlists, getStorageKey]);
+  }, [playlists, persistPlaylists]);
 
   const addToPlaylist = useCallback(async (playlistId, hymnId) => {
     const newList = playlists.map(p => {
@@ -84,7 +84,7 @@ const PlaylistProvider = ({ children }) => {
     });
     setPlaylists(newList);
     await persistPlaylists(newList);
-  }, [playlists, getStorageKey]);
+  }, [playlists, persistPlaylists]);
 
   const removeFromPlaylist = useCallback(async (playlistId, hymnId) => {
     const newList = playlists.map(p => {
@@ -99,7 +99,7 @@ const PlaylistProvider = ({ children }) => {
     });
     setPlaylists(newList);
     await persistPlaylists(newList);
-  }, [playlists, getStorageKey]);
+  }, [playlists, persistPlaylists]);
 
   const reorderPlaylist = useCallback(async (playlistId, newItems) => {
     const newList = playlists.map(p =>
@@ -107,7 +107,7 @@ const PlaylistProvider = ({ children }) => {
     );
     setPlaylists(newList);
     await persistPlaylists(newList);
-  }, [playlists, getStorageKey]);
+  }, [playlists, persistPlaylists]);
 
   const setPlaylistsFromCloud = useCallback(async (cloudPlaylists) => {
     setPlaylists(cloudPlaylists);

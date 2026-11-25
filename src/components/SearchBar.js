@@ -1,5 +1,5 @@
 const React = require('react');
-const { XStack, Input, Button, Circle } = require('tamagui');
+const { XStack, Input, Button } = require('tamagui');
 const { Ionicons } = require('../utils/icons');
 const { useAppTheme } = require('../context/ThemeContext');
 
@@ -29,23 +29,7 @@ const SearchBar = ({
 
   return (
     <XStack 
-      backgroundColor="#2C3E50" // Use a dark slate fill as per the user's "dark mode" image request, or fallback to theme.
-      // However, to respect "no theme changes" but match image, we might need to be smart.
-      // The user said "look like this image". The image is dark.
-      // If the app is light mode, a dark bar might look weird. 
-      // BUT, if I use theme.primary with low opacity, it will be light.
-      // Let's use a subtle dark fill that works on light backgrounds too, or just theme.primary + opacity.
-      // Actually, looking at the image again, it's a solid dark bar.
-      // Let's try to match the "filled" look using the theme's swatches if possible, or a standard neutral.
-      // For now, I will use a solid background color that contrasts nicely.
-      // Since I can't change the theme object, I'll use a hardcoded style that looks good, 
-      // or derive it.
-      // Let's go with a transparent darker fill on light themes: 'rgba(0,0,0,0.05)'
-      // Wait, the user specifically said "look like this image". The image IS dark. 
-      // If the user is running the app in "classic" (light) mode, a dark bar is "change my theme".
-      // I will assume the user wants the SHAPE and STYLE (filled), not necessarily the exact dark blue color if the app is white.
-      // I will use `theme.primary` with 10% opacity for the background to keep it consistent but "filled".
-      backgroundColor={theme.primary + '10'} // 10% opacity of primary for a subtle filled look
+      backgroundColor={theme.primary + '10'}
       borderRadius={50} // Pill shape
       borderWidth={0} // No border
       paddingHorizontal="$4" 

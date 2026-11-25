@@ -4,15 +4,11 @@ const { normalizeAmharic } = require('../utils/textUtils');
 const { SECTIONS } = require('../constants/sections');
 const AsyncStorage = require('@react-native-async-storage/async-storage').default || require('@react-native-async-storage/async-storage');
 
-const STORAGE_KEYS = {
-  MEZMUR_OVERRIDES: 'mezmur_cloud_overrides',
-  LAST_SYNC_TIME: 'mezmur_last_sync_timestamp'
-};
+const OFFLINE_DATA_VERSION = 2;
+const OFFLINE_DATA_VERSION_KEY = 'offline_data_version';
 
 /**
  * DataService provides pre-indexed, high-performance access to hymn data.
- * It eliminates the need for expensive O(N) operations during render cycles.
- * Now supports "Delta Sync" to merge cloud-edited hymns with local base data.
  */
 class DataService {
   constructor() {
@@ -20,7 +16,6 @@ class DataService {
     this.hymnsBySection = {};
     this.initializationPromise = this.init();
     this.isReady = false;
-    this.lastSyncTime = null;
     this.listeners = new Set();
   }
 
@@ -33,82 +28,44 @@ class DataService {
   }
 
   notifyListeners() {
-    this.listeners.forEach(callback => callback());
+    this.listeners.forEach(callback => callback);
   }
 
   async init() {
     try {
       console.log('DataService: Starting initialization...');
-      // 1. Process base local data
+
+      const storedVersion = await AsyncStorage.getItem(OFFLINE_DATA_VERSION_KEY);
+      if (storedVersion !== String(OFFLINE_DATA_VERSION)) {
+        await AsyncStorage.multiRemove([
+          'mezmur_cloud_overrides',
+          'mezmur_last_sync_timestamp',
+          'syncQueue',
+        ]);
+        await AsyncStorage.setItem(OFFLINE_DATA_VERSION_KEY, String(OFFLINE_DATA_VERSION));
+        console.log('DataService: Cleared legacy cloud sync data.');
+      }
+
       const processedAmharic = mezmursData.map(item => this.processHymn(item));
       const processedOromo = oroMezmursData.map(item =>
         this.processHymn({ ...item, id: `oro_${item.id}`, section: SECTIONS.AFAN_OROMO })
       );
 
-      let initialHymns = [...processedAmharic, ...processedOromo];
-      console.log(`DataService: Processed ${initialHymns.length} base hymns.`);
-
-      // 2. Load and apply stored overrides
-      const storedOverrides = await AsyncStorage.getItem(STORAGE_KEYS.MEZMUR_OVERRIDES);
-      const storedSyncTime = await AsyncStorage.getItem(STORAGE_KEYS.LAST_SYNC_TIME);
-
-      if (storedSyncTime) {
-        this.lastSyncTime = parseInt(storedSyncTime);
-      }
-
-      if (storedOverrides) {
-        const overrides = JSON.parse(storedOverrides);
-        console.log(`DataService: Applying ${Object.keys(overrides).length} cloud overrides.`);
-        initialHymns = this.mergeOverrides(initialHymns, Object.values(overrides));
-      }
-
-      this.allHymns = initialHymns;
+      this.allHymns = [...processedAmharic, ...processedOromo];
       this.rebuildSectionIndex();
 
       this.isReady = true;
-      console.log('DataService: Initialization complete. App is ready (offline).');
-
+      console.log(`DataService: Ready with ${this.allHymns.length} hymns (offline).`);
       return true;
     } catch (error) {
       console.error('DataService init error:', error);
-      this.isReady = true; // Fallback to local data only
+      this.isReady = true;
       return false;
     }
   }
 
-  /** Offline app: no cloud hymn sync. */
   async syncWithCloud() {
     return { success: true, updates: [] };
-  }
-
-  /**
-   * Manually update a specific hymn in memory and notify listeners.
-   * Useful for instant UI feedback after an admin edit.
-   */
-  updateLocalHymn(updatedData) {
-    const processed = this.processHymn(updatedData);
-
-    const existingIdx = this.allHymns.findIndex(h => h.id.toString() === processed.id.toString());
-    const newHymns = [...this.allHymns];
-
-    if (existingIdx !== -1) {
-      newHymns[existingIdx] = processed;
-    } else {
-      newHymns.push(processed);
-    }
-
-    this.allHymns = newHymns;
-    this.rebuildSectionIndex();
-    this.notifyListeners();
-  }
-
-  /**
-   * Manually remove a hymn from memory and notify listeners.
-   */
-  removeLocalHymn(hymnId) {
-    this.allHymns = this.allHymns.filter(h => h.id.toString() !== hymnId.toString());
-    this.rebuildSectionIndex();
-    this.notifyListeners();
   }
 
   mergeOverrides(baseList, overrideList) {
@@ -137,7 +94,7 @@ class DataService {
       if (count > 8) lengthType = 'LONG_FILTER';
     }
 
-    const rawSearchText = (item.title + ' ' + (item.lyrics || '') + ' ' + item.id).toLowerCase();
+    const rawSearchText = `${item.title} ${item.lyrics || ''} ${item.id}`.toLowerCase();
     const searchText = normalizeAmharic(rawSearchText);
 
     return { ...item, lengthType, searchText };
@@ -149,6 +106,10 @@ class DataService {
 
   getAll() {
     return this.allHymns;
+  }
+
+  getById(id) {
+    return this.allHymns.find(h => h.id.toString() === id.toString());
   }
 
   getBySection(sectionId) {
@@ -165,11 +126,10 @@ class DataService {
   getSections() {
     return Object.keys(this.hymnsBySection).map(s => ({
       id: s,
-      label: s
+      label: s,
     }));
   }
 }
 
 const dataServiceInstance = new DataService();
 module.exports = dataServiceInstance;
-

@@ -2,7 +2,6 @@ const React = require('react');
 const { useState, useEffect, memo } = React;
 const { XStack, YStack, Text } = require('tamagui');
 const Slider = require('@react-native-community/slider').default || require('@react-native-community/slider');
-const { useAudio } = require('../context/GlobalAudioState.js');
 
 /**
  * A highly optimized slider that decouples its state from the main screen
@@ -55,5 +54,6 @@ const SmoothSlider = memo(({ position, duration, onSeek, theme, isCurrentPlaying
     </YStack>
   );
 });
+SmoothSlider.displayName = 'SmoothSlider';
 
 module.exports = SmoothSlider;

@@ -1,7 +1,7 @@
 const React = require('react');
 const { useState } = React;
 const { FlatList, TouchableOpacity, StyleSheet, Alert, Modal, TextInput } = require('react-native');
-const { YStack, XStack, Text, Button, Circle, Theme, Separator } = require('tamagui');
+const { YStack, XStack, Text, Button, Circle } = require('tamagui');
 const { Ionicons } = require('../utils/icons');
 const ScreenHeader = require('../components/ScreenHeader');
 const { useSafeAreaInsets } = require('react-native-safe-area-context');
