@@ -21,12 +21,10 @@ const MENU_ITEMS = [
   { id: 3, labelKey: 'calendar', icon: 'calendar-outline', activeIcon: 'calendar', screen: 'Calendar', navigator: 'Tabs' },
   { id: 4, labelKey: 'favorites', icon: 'heart-outline', activeIcon: 'heart', screen: 'Favorites', navigator: 'Drawer' },
   { id: 5, labelKey: 'myPlaylists', icon: 'list-outline', activeIcon: 'list', screen: 'PlaylistList', navigator: 'Drawer' },
-  { id: 10, labelKey: 'adminDashboard', icon: 'shield-checkmark-outline', activeIcon: 'shield-checkmark', screen: 'Admin', navigator: 'Drawer', adminOnly: true },
 ];
 
 const SECONDARY_ITEMS = [
   { id: 6, labelKey: 'settings', icon: 'settings-outline', activeIcon: 'settings', screen: 'Settings', navigator: 'Drawer' },
-  { id: 7, labelKey: 'feedback', icon: 'chatbubbles-outline', activeIcon: 'chatbubbles', screen: 'Feedback', navigator: 'Root' },
   { id: 8, labelKey: 'aboutUs', icon: 'information-circle-outline', activeIcon: 'information-circle', screen: 'About', navigator: 'Drawer' },
 ];
 
@@ -136,7 +134,7 @@ const MenuItem = memo(({ item, t, navigation, isActive, primaryColor, textColor,
 const Sidebar = (props) => {
   const { theme } = useAppTheme();
   const { t } = useLanguage();
-  const { user, profileData, isAuthenticated, isAnonymous, isAdmin } = useAuth();
+  const { user, profileData } = useAuth();
   const rawInsets = useSafeAreaInsets();
   const navigation = props.navigation;
 
@@ -154,17 +152,11 @@ const Sidebar = (props) => {
   });
 
   const userInfo = useMemo(() => {
-    if (isAuthenticated && (user?.displayName || profileData?.displayName)) {
-      return { name: profileData?.displayName || user.displayName, subtitle: user.email || t('viewProfile') };
-    } else if (isAnonymous) {
-      return { name: t('guestUser'), subtitle: t('signInToSync') };
-    } else {
-      return { name: t('user'), subtitle: t('viewProfile') };
-    }
-  }, [isAuthenticated, user?.displayName, profileData?.displayName, isAnonymous, t]);
+    const name = profileData?.displayName || user?.displayName || t('user');
+    return { name, subtitle: t('offlineAppTagline') };
+  }, [user?.displayName, profileData?.displayName, t]);
 
   const renderItem = useCallback(item => {
-    if (item.adminOnly && !isAdmin) return null;
     const isActive = activeRoute === item.screen;
 
     return (

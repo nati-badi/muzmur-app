@@ -3,87 +3,66 @@ const { YStack, XStack, Text, Button } = require('tamagui');
 const { useSafeAreaInsets } = require('react-native-safe-area-context');
 const { Ionicons } = require('../utils/icons');
 const { useAppTheme } = require('../context/ThemeContext');
+const { useLanguage } = require('../context/LanguageContext');
 const AsyncStorage = require('@react-native-async-storage/async-storage').default || require('@react-native-async-storage/async-storage');
 
 const WelcomeScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const { theme } = useAppTheme();
+  const { t } = useLanguage();
 
-  const handleGetStarted = async () => {
-    await AsyncStorage.setItem('hasSeenWelcome', 'true');
-    navigation.replace('Auth');
-  };
-
-  const handleContinueWithoutAccount = async () => {
+  const handleContinue = async () => {
     await AsyncStorage.setItem('hasSeenWelcome', 'true');
     navigation.replace('Drawer');
   };
 
   return (
     <YStack f={1} backgroundColor={theme.background} paddingTop={insets.top}>
-      {/* Header */}
       <YStack f={1} alignItems="center" justifyContent="center" space="$6" paddingHorizontal="$8">
         <Ionicons name="musical-notes" size={120} color={theme.primary} opacity={0.9} />
-        
+
         <YStack space="$2" alignItems="center">
           <Text fontFamily="$ethiopicSerif" fontSize="$10" fontWeight="800" color={theme.primary} textAlign="center">
-            ቅዱስ ዜማ
+            {t('appTitle')}
           </Text>
           <Text fontFamily="$ethiopicSerif" fontSize="$5" color={theme.textSecondary} opacity={0.8} textAlign="center">
-            Ethiopian Orthodox Hymns
+            {t('appTagline')}
           </Text>
         </YStack>
 
         <YStack space="$3" alignItems="center" marginTop="$4">
           <XStack space="$2" alignItems="center">
-            <Ionicons name="cloud-upload-outline" size={20} color={theme.accent} />
+            <Ionicons name="book-outline" size={20} color={theme.accent} />
             <Text fontFamily="$ethiopic" fontSize="$3" color={theme.text}>
-              Sync across devices
+              {t('offlineFeatureLyrics')}
             </Text>
           </XStack>
           <XStack space="$2" alignItems="center">
             <Ionicons name="heart-outline" size={20} color={theme.accent} />
             <Text fontFamily="$ethiopic" fontSize="$3" color={theme.text}>
-              Save your favorites
+              {t('offlineFeatureFavorites')}
             </Text>
           </XStack>
           <XStack space="$2" alignItems="center">
-            <Ionicons name="person-circle-outline" size={20} color={theme.accent} />
-            <Text fontFamily="$ethiopic" fontSize="$3" color={theme.text}>
-              Personalized experience
+            <Ionicons name="phone-portrait-outline" size={20} color={theme.accent} />
+            <Text fontFamily="$ethiopic" fontSize="$3" color={theme.text} textAlign="center">
+              {t('offlineFeatureNoAccount')}
             </Text>
           </XStack>
         </YStack>
       </YStack>
 
-      {/* Action Buttons */}
-      <YStack paddingHorizontal="$6" paddingVertical="$6" space="$3" marginBottom={insets.bottom}>
+      <YStack paddingHorizontal="$6" paddingVertical="$6" marginBottom={insets.bottom}>
         <Button
           size="$5"
           backgroundColor={theme.primary}
-          onPress={handleGetStarted}
+          onPress={handleContinue}
           pressStyle={{ opacity: 0.8, scale: 0.98 }}
           elevation="$4"
         >
           <Text fontFamily="$ethiopicSerif" fontSize="$5" fontWeight="800" color="white">
-            Get Started
+            {t('continue')}
           </Text>
-        </Button>
-
-        <Button
-          size="$4"
-          backgroundColor="transparent"
-          borderWidth={1}
-          borderColor={theme.borderColor}
-          onPress={handleContinueWithoutAccount}
-          pressStyle={{ opacity: 0.8 }}
-        >
-          <XStack space="$2" alignItems="center">
-            <Ionicons name="play-circle-outline" size={20} color={theme.textSecondary} />
-            <Text fontFamily="$ethiopic" fontSize="$3" color={theme.textSecondary}>
-              Continue without account
-            </Text>
-          </XStack>
         </Button>
       </YStack>
     </YStack>

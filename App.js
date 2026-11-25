@@ -1,5 +1,5 @@
 const React = require('react');
-const { useEffect, useCallback } = React;
+const { useCallback } = React;
 const { SafeAreaProvider } = require('react-native-safe-area-context');
 const AppNavigator = require('./src/navigation/AppNavigator').default || require('./src/navigation/AppNavigator');
 const { StatusBar } = require('expo-status-bar');
@@ -11,47 +11,33 @@ const { NotoSerifEthiopic_400Regular, NotoSerifEthiopic_700Bold } = require('@ex
 const { ThemeProvider } = require('./src/context/ThemeContext');
 const { LanguageProvider } = require('./src/context/LanguageContext');
 const { FavoritesProvider } = require('./src/context/FavoritesContext');
-const { AuthProvider, useAuth } = require('./src/context/AuthContext');
+const { AuthProvider } = require('./src/context/AuthContext');
 const { AudioProvider } = require('./src/context/GlobalAudioState.js');
 const { PlaylistProvider } = require('./src/context/PlaylistContext');
 const SplashScreen = require('expo-splash-screen');
 
-// Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync().catch(() => { });
 
 const { useAppTheme } = require('./src/context/ThemeContext');
 
-// Internal component to handle dynamic status bar based on theme
 const DynamicStatusBar = () => {
   const { theme } = useAppTheme();
-  // If the theme background is dark (Midnight), use 'light' icons, otherwise 'dark'
   const statusBarStyle = theme.id === 'midnight' ? 'light' : 'dark';
   return <StatusBar style={statusBarStyle} />;
 };
 
-const SyncService = require('./src/services/SyncService');
-const OfflineStatusHeader = require('./src/components/OfflineStatusHeader');
-
-// Wrapper to pass theme and other providers to AppNavigator
 const AppContent = ({ onLayoutRootView }) => {
-  const { user, isAnonymous } = useAuth();
-  const { theme, isLoaded: themeLoaded } = useAppTheme();
-
-  useEffect(() => {
-    SyncService.start();
-    return () => SyncService.stop();
-  }, []);
+  const { theme } = useAppTheme();
 
   return (
     <TamaguiProvider config={config} theme={theme.id === 'midnight' ? 'dark' : 'light'}>
       <PortalProvider>
         <LanguageProvider>
           <AudioProvider>
-            <FavoritesProvider userId={user?.uid} isAnonymous={isAnonymous}>
-              <PlaylistProvider userId={user?.uid} isAnonymous={isAnonymous}>
+            <FavoritesProvider>
+              <PlaylistProvider>
                 <SafeAreaProvider onLayout={onLayoutRootView}>
                   <DynamicStatusBar />
-                  <OfflineStatusHeader />
                   <AppNavigator />
                 </SafeAreaProvider>
               </PlaylistProvider>
@@ -75,7 +61,6 @@ function App() {
   });
 
   const onLayoutRootView = useCallback(async () => {
-    // We only hide splash when fonts are ready AND the component layout fires
     if (fontsLoaded || fontError) {
       await SplashScreen.hideAsync();
     }

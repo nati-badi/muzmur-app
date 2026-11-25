@@ -27,8 +27,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.badi_nati.muzmurapp",
-      "googleServicesFile": "./src/google-services.json"
+      "package": "com.badi_nati.muzmurapp"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -36,7 +35,6 @@
     "plugins": [
       "expo-font",
       "expo-audio",
-      "@react-native-google-signin/google-signin",
       "expo-asset",
       [
         "expo-build-properties",

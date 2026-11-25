@@ -26,7 +26,6 @@ const DrawerNavigator = () => {
       <Drawer.Screen name="PlaylistList" component={PlaylistListScreen} />
       <Drawer.Screen name="Settings" component={SettingsScreen} />
       <Drawer.Screen name="About" component={AboutScreen} />
-      <Drawer.Screen name="Admin" component={require('./AdminNavigator').default || require('./AdminNavigator')} />
     </Drawer.Navigator>
   );
 };

@@ -18,14 +18,9 @@ const ProfileScreen = ({ navigation }) => {
   const { theme } = useAppTheme();
   const { t } = useLanguage();
   const { favoritesCount } = useFavorites();
-  const { user, profileData, isAuthenticated, isAnonymous, logOut, updateProfilePicture } = useAuth();
+  const { user, profileData, updateProfilePicture } = useAuth();
   const [uploading, setUploading] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const handleSignOut = async () => {
-    await logOut();
-    navigation.replace('Auth');
-  };
 
   const handleShare = async () => {
     try {
@@ -46,11 +41,6 @@ const ProfileScreen = ({ navigation }) => {
   };
 
   const pickImage = async () => {
-    if (!isAuthenticated) {
-      Alert.alert(t('signInRequired'), t('signInToUpload'));
-      return;
-    }
-
     try {
       // Request permission
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -194,34 +184,30 @@ const ProfileScreen = ({ navigation }) => {
               </Circle>
 
               {/* Edit Icon Overlay */}
-              {isAuthenticated && (
-                <Circle
-                  size={36}
-                  backgroundColor={theme.primary}
-                  position="absolute"
-                  bottom={4}
-                  right={4}
-                  elevation="$2"
-                  borderWidth={3}
-                  borderColor={theme.background}
-                  justifyContent="center"
-                  alignItems="center"
-                >
-                  <Ionicons name="camera" size={18} color="white" />
-                </Circle>
-              )}
+              <Circle
+                size={36}
+                backgroundColor={theme.primary}
+                position="absolute"
+                bottom={4}
+                right={4}
+                elevation="$2"
+                borderWidth={3}
+                borderColor={theme.background}
+                justifyContent="center"
+                alignItems="center"
+              >
+                <Ionicons name="camera" size={18} color="white" />
+              </Circle>
             </TouchableOpacity>
           </YStack>
 
           <YStack alignItems="center" marginTop="$4" space="$1">
             <Text fontFamily="$ethiopic" fontSize="$6" fontWeight="700" color={theme.text}>
-              {isAuthenticated ? (user.displayName || t('user')) : isAnonymous ? t('guestUser') : t('user')}
+              {profileData?.displayName || user?.displayName || t('user')}
             </Text>
-            {isAuthenticated && (
-              <Text fontFamily="$body" fontSize="$2" color={theme.textSecondary} opacity={0.8}>
-                {user.email}
-              </Text>
-            )}
+            <Text fontFamily="$body" fontSize="$2" color={theme.textSecondary} opacity={0.8}>
+              {t('offlineAppTagline')}
+            </Text>
           </YStack>
         </YStack>
 
@@ -327,31 +313,6 @@ const ProfileScreen = ({ navigation }) => {
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={isAuthenticated ? handleSignOut : () => navigation.replace('Auth')}
-          >
-            <View style={{
-              backgroundColor: 'transparent',
-              padding: 16,
-              borderRadius: 12,
-              borderWidth: 1,
-              borderColor: theme.error,
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-              <Ionicons name={isAuthenticated ? "log-out" : "log-in"} size={20} color={theme.error} style={{ marginRight: 12 }} />
-              <Text
-                fontFamily="$ethiopic"
-                fontSize="$4"
-                fontWeight="600"
-                color={theme.error}
-              >
-                {isAuthenticated ? t('logout') : t('signIn')}
-              </Text>
-            </View>
-          </TouchableOpacity>
         </YStack>
       </ScrollView>
     </YStack >

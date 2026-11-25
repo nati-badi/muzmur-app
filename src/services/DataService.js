@@ -66,10 +66,7 @@ class DataService {
       this.rebuildSectionIndex();
 
       this.isReady = true;
-      console.log('DataService: Initialization complete. App is ready.');
-
-      // 3. Trigger background sync
-      this.syncWithCloud();
+      console.log('DataService: Initialization complete. App is ready (offline).');
 
       return true;
     } catch (error) {
@@ -79,49 +76,9 @@ class DataService {
     }
   }
 
-  /**
-   * Fetches new updates from Firestore using a smart manifest-first approach.
-   * If the manifest timestamp matches our last sync, we skip the heavy Firestore query.
-   */
+  /** Offline app: no cloud hymn sync. */
   async syncWithCloud() {
-    try {
-      const AdminService = require('./AdminService');
-
-      // 1. Check Magic Manifest (Cloud Versioning)
-      // In a real app, this would be a single small document or a headers check.
-      // Here we check if any document exists newer than our last sync.
-      const result = await AdminService.syncMezmurs(this.lastSyncTime ? new Date(this.lastSyncTime) : null);
-
-      if (result.success && result.updates.length > 0) {
-        const storedOverrides = await AsyncStorage.getItem(STORAGE_KEYS.MEZMUR_OVERRIDES);
-        const currentOverrides = storedOverrides ? JSON.parse(storedOverrides) : {};
-
-        // Add new updates to overrides map
-        result.updates.forEach(update => {
-          currentOverrides[update.id] = this.processHymn(update);
-        });
-
-        // Update state and persistence
-        await AsyncStorage.setItem(STORAGE_KEYS.MEZMUR_OVERRIDES, JSON.stringify(currentOverrides));
-
-        const latestUpdate = result.updates[result.updates.length - 1];
-        if (latestUpdate.updatedAt) {
-          const newSyncTime = latestUpdate.updatedAt.toMillis ? latestUpdate.updatedAt.toMillis() : Date.now();
-          this.lastSyncTime = newSyncTime;
-          await AsyncStorage.setItem(STORAGE_KEYS.LAST_SYNC_TIME, newSyncTime.toString());
-        }
-
-        // Hot reload the in-memory data
-        this.allHymns = this.mergeOverrides(this.allHymns, Object.values(currentOverrides));
-        this.rebuildSectionIndex();
-        this.notifyListeners();
-        console.log(`Synced ${result.updates.length} mezmurs from cloud.`);
-      } else {
-        console.log('Manifest up to date. No new hymns to patch.');
-      }
-    } catch (error) {
-      console.error('DataService sync error:', error);
-    }
+    return { success: true, updates: [] };
   }
 
   /**

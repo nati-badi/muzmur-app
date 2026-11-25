@@ -3,6 +3,7 @@ const {
     query,
     where,
     getDocs,
+    getDoc,
     addDoc,
     setDoc,
     updateDoc,
@@ -11,9 +12,11 @@ const {
     serverTimestamp,
     orderBy,
     limit,
-    startAfter
+    startAfter,
+    runTransaction,
 } = require('firebase/firestore');
 const { db } = require('../config/firebase.config');
+const DataService = require('./DataService');
 
 class AdminService {
     /**
@@ -198,6 +201,151 @@ class AdminService {
             return { success: true, feedback, lastVisible };
         } catch (error) {
             console.error('Error fetching feedback:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    /**
+     * User mezmur submissions (review queue)
+     */
+    static suggestNextMezmurId() {
+        const all = DataService.getAll();
+        let max = 0;
+        all.forEach((h) => {
+            const id = parseInt(String(h.id).replace(/^oro_/, ''), 10);
+            if (!Number.isNaN(id) && id > max) {
+                max = id;
+            }
+        });
+        return String(max + 1);
+    }
+
+    static async getSubmissionsPaginated(statusFilter = null, lastDoc = null, pageSize = 20) {
+        try {
+            const submissionsRef = collection(db, 'mezmur_submissions');
+            let q;
+            const constraints = [orderBy('createdAt', 'desc'), limit(pageSize)];
+            if (statusFilter) {
+                constraints.unshift(where('status', '==', statusFilter));
+            }
+            if (lastDoc) {
+                constraints.splice(constraints.length - 1, 0, startAfter(lastDoc));
+            }
+            q = query(submissionsRef, ...constraints);
+
+            const querySnapshot = await getDocs(q);
+            const submissions = [];
+            const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+            querySnapshot.forEach((snap) => {
+                submissions.push({ id: snap.id, ...snap.data() });
+            });
+
+            return { success: true, submissions, lastVisible };
+        } catch (error) {
+            console.error('Error fetching submissions:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    static async getSubmissionById(submissionId) {
+        try {
+            const snap = await getDoc(doc(db, 'mezmur_submissions', submissionId));
+            if (!snap.exists()) {
+                return { success: false, error: 'Not found' };
+            }
+            return { success: true, submission: { id: snap.id, ...snap.data() } };
+        } catch (error) {
+            console.error('Error fetching submission:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    static async approveSubmission(submissionId, adminUid, options = {}) {
+        const { assignedMezmurId, duration = '0:00', preferCdn = false } = options;
+        if (!assignedMezmurId) {
+            return { success: false, error: 'Mezmur ID required' };
+        }
+
+        try {
+            const submissionRef = doc(db, 'mezmur_submissions', submissionId);
+            const mezmurRef = doc(db, 'mezmurs', String(assignedMezmurId));
+
+            let mezmurPayload;
+            await runTransaction(db, async (transaction) => {
+                const submissionSnap = await transaction.get(submissionRef);
+                if (!submissionSnap.exists()) {
+                    throw new Error('Submission not found');
+                }
+                const submission = submissionSnap.data();
+                if (submission.status !== 'pending') {
+                    throw new Error('Submission is not pending');
+                }
+
+                const cdnUrl = `https://cdn.jsdelivr.net/gh/nati-badi/muzmur-assets@main/${assignedMezmurId}.m4a`;
+                const audioUrl = preferCdn
+                    ? cdnUrl
+                    : (submission.audioDownloadUrl || cdnUrl);
+
+                mezmurPayload = {
+                    id: String(assignedMezmurId),
+                    title: submission.title,
+                    lyrics: submission.lyrics,
+                    translation: submission.translation || '',
+                    section: submission.section,
+                    duration,
+                    audioUrl,
+                    sourceSubmissionId: submissionId,
+                };
+
+                transaction.set(
+                    mezmurRef,
+                    {
+                        ...mezmurPayload,
+                        createdAt: serverTimestamp(),
+                        updatedAt: serverTimestamp(),
+                    },
+                    { merge: true }
+                );
+
+                transaction.update(submissionRef, {
+                    status: 'approved',
+                    assignedMezmurId: String(assignedMezmurId),
+                    reviewedBy: adminUid,
+                    reviewedAt: serverTimestamp(),
+                    updatedAt: serverTimestamp(),
+                });
+            });
+
+            return { success: true, mezmur: mezmurPayload };
+        } catch (error) {
+            console.error('Error approving submission:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    static async rejectSubmission(submissionId, adminUid, rejectionReason) {
+        if (!rejectionReason?.trim()) {
+            return { success: false, error: 'Rejection reason required' };
+        }
+        try {
+            const submissionRef = doc(db, 'mezmur_submissions', submissionId);
+            const snap = await getDoc(submissionRef);
+            if (!snap.exists()) {
+                return { success: false, error: 'Not found' };
+            }
+            if (snap.data().status !== 'pending') {
+                return { success: false, error: 'Submission is not pending' };
+            }
+            await updateDoc(submissionRef, {
+                status: 'rejected',
+                rejectionReason: rejectionReason.trim(),
+                reviewedBy: adminUid,
+                reviewedAt: serverTimestamp(),
+                updatedAt: serverTimestamp(),
+            });
+            return { success: true };
+        } catch (error) {
+            console.error('Error rejecting submission:', error);
             return { success: false, error: error.message };
         }
     }

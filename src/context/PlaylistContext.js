@@ -1,21 +1,16 @@
 const React = require('react');
 const { createContext, useState, useContext, useEffect, useCallback, useMemo } = React;
 const AsyncStorage = require('@react-native-async-storage/async-storage').default || require('@react-native-async-storage/async-storage');
-const UserProfileService = require('../services/UserProfileService');
-const SyncService = require('../services/SyncService');
-
 const PlaylistContext = createContext();
 
-const PLAYLISTS_STORAGE_KEY = 'user_playlists';
+const PLAYLISTS_STORAGE_KEY = 'user_playlists_local';
 
-const PlaylistProvider = ({ children, userId, isAnonymous }) => {
+const PlaylistProvider = ({ children }) => {
   const [playlists, setPlaylists] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Storage key is user-specific
-  const getStorageKey = useCallback(() => {
-    return isAnonymous ? `${PLAYLISTS_STORAGE_KEY}_guest` : `${PLAYLISTS_STORAGE_KEY}_${userId}`;
-  }, [userId, isAnonymous]);
+  const getStorageKey = useCallback(() => PLAYLISTS_STORAGE_KEY, []);
 
   useEffect(() => {
     loadPlaylists();
@@ -41,20 +36,6 @@ const PlaylistProvider = ({ children, userId, isAnonymous }) => {
     try {
       const key = getStorageKey();
       await AsyncStorage.setItem(key, JSON.stringify(newList));
-
-      // Sync to cloud if authenticated
-      if (!isAnonymous && userId) {
-        const { isConnected } = SyncService.getSyncStatus();
-
-        if (isConnected) {
-          await UserProfileService.syncPlaylists(userId, newList);
-        } else {
-          await UserProfileService.queueSync({
-            type: 'playlists',
-            data: newList
-          });
-        }
-      }
     } catch (e) {
       console.error('Failed to persist playlists:', e);
     }

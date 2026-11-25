@@ -78,6 +78,13 @@ const AdminDashboardScreen = ({ navigation }) => {
                         onPress={() => navigation.navigate('AdminFeedback')}
                         subtitle="Read and reply to user feedback"
                     />
+                    <AdminCard
+                        title={t('reviewSubmissions')}
+                        icon="cloud-upload-outline"
+                        color="#9b59b6"
+                        onPress={() => navigation.navigate('ManageSubmissions')}
+                        subtitle={t('reviewSubmissionsSubtitle')}
+                    />
                 </YStack>
             </ScrollView>
         </YStack>

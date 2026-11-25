@@ -8,21 +8,19 @@ const { Ionicons } = require('../utils/icons');
 const { THEMES } = require('../constants/theme');
 const { useAppTheme } = require('../context/ThemeContext');
 const { useLanguage } = require('../context/LanguageContext');
-const { useAuth } = require('../context/AuthContext');
 const ScreenHeader = require('../components/ScreenHeader');
+const { Alert } = require('react-native');
 
 const SettingsScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const { theme, themeMode, setTheme } = useAppTheme();
   const { language, changeLanguage, t } = useLanguage();
   const systemColorScheme = useColorScheme();
-  const { isAuthenticated, logOut } = useAuth();
   const [showThemes, setShowThemes] = useState(false);
   const [showLanguages, setShowLanguages] = useState(false);
 
-  const handleLogout = async () => {
-    await logOut();
-    navigation.replace('Auth');
+  const handleFeedback = () => {
+    Alert.alert(t('feedbackAlertTitle'), t('feedbackAlertMessage'), [{ text: t('ok') }]);
   };
 
   const themeOptions = useMemo(() => {
@@ -201,11 +199,7 @@ const SettingsScreen = ({ navigation }) => {
           )}
 
           <SettingRow icon="notifications-outline" label={t('notifications')} disabled={true} />
-          <SettingRow
-            icon="chatbubbles-outline"
-            label={t('feedback')}
-            onPress={() => navigation.navigate('Feedback')}
-          />
+          <SettingRow icon="chatbubbles-outline" label={t('feedback')} onPress={handleFeedback} />
           <SettingRow icon="help-circle-outline" label={t('helpSupport')} disabled={true} />
 
           <YStack alignItems="center" marginTop="$8" opacity={0.3}>
