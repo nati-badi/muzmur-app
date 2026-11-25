@@ -1,7 +1,7 @@
 const React = require('react');
 const { ScrollView, useWindowDimensions, Keyboard, TouchableWithoutFeedback } = require('react-native');
 const { YStack, XStack, Text, Card, Circle, Button, Input, Image } = require('tamagui');
-const { Ionicons } = require('@expo/vector-icons');
+const { Ionicons } = require('../utils/icons');
 const ScreenHeader = require('../components/ScreenHeader');
 const { useSafeAreaInsets } = require('react-native-safe-area-context');
 const { useAppTheme } = require('../context/ThemeContext');
@@ -24,7 +24,7 @@ const SECTIONS_DATA = (t) => [
   { id: SECTIONS.GEBRE_MENFES_KIDUS, label: t('የአቡነ ገብረ መንፈስ ቅዱስ'), image: require('../../assets/sections/gebre_menfes.jpg') },
   { id: SECTIONS.CHURCH, label: t('ስለ ቤተ ክርስቲያን'), image: require('../../assets/sections/church.jpg') },
   { id: SECTIONS.ARSEMA, label: t('የቅድስት አርሴማ'), image: require('../../assets/sections/arsema.jpg') },
-  { id: SECTIONS.AFAN_OROMO, label: t('Afan Oromo Mezmurs'), image: require('../../assets/sections/afan_oromo.png') },
+  { id: SECTIONS.AFAN_OROMO, label: t('Afan Oromo Mezmurs'), image: require('../../assets/sections/afan_oromo.webp') },
   { id: SECTIONS.NEW_YEAR, label: t('የዐውደ ዓመት'), image: require('../../assets/sections/lidet.jpg') },
 ];
 

@@ -1,6 +1,6 @@
 const React = require('react');
 const { XStack, Input, Button, Circle } = require('tamagui');
-const { Ionicons } = require('@expo/vector-icons');
+const { Ionicons } = require('../utils/icons');
 const { useAppTheme } = require('../context/ThemeContext');
 
 /**

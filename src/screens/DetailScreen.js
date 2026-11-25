@@ -8,7 +8,7 @@ const { useAppTheme } = require('../context/ThemeContext');
 const { useLanguage } = require('../context/LanguageContext');
 const { useFavorites } = require('../context/FavoritesContext');
 const { useAudio, useAudioProgress } = require('../context/GlobalAudioState.js');
-const { Ionicons } = require('@expo/vector-icons');
+const { Ionicons } = require('../utils/icons');
 const { useSafeAreaInsets } = require('react-native-safe-area-context');
 const SmoothSlider = require('../components/SmoothSlider');
 

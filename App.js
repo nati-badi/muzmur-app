@@ -74,9 +74,6 @@ function App() {
     NotoSerifEthiopic_700Bold,
   });
 
-  // Use a ref to track if theme is ready
-  const themeReadyRef = React.useRef(false);
-
   const onLayoutRootView = useCallback(async () => {
     // We only hide splash when fonts are ready AND the component layout fires
     if (fontsLoaded || fontError) {

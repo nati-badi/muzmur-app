@@ -3,7 +3,7 @@ const { useState, useEffect } = React;
 const { YStack, XStack, Text, Input, Button } = require('tamagui');
 const { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, TouchableWithoutFeedback, Keyboard, Image } = require('react-native');
 const { useSafeAreaInsets } = require('react-native-safe-area-context');
-const { Ionicons } = require('@expo/vector-icons');
+const { Ionicons } = require('../utils/icons');
 const { useAppTheme } = require('../context/ThemeContext');
 const { useAuth } = require('../context/AuthContext');
 

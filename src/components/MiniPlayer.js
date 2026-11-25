@@ -1,7 +1,7 @@
 const React = require('react');
 const { memo } = React;
 const { YStack, XStack, Text, Button, Circle, Theme } = require('tamagui');
-const { Ionicons } = require('@expo/vector-icons');
+const { Ionicons } = require('../utils/icons');
 const { useAudio, useAudioProgress } = require('../context/GlobalAudioState.js');
 const { useAppTheme } = require('../context/ThemeContext');
 const { useLanguage } = require('../context/LanguageContext');

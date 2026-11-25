@@ -1,7 +1,7 @@
 const React = require('react');
 const { memo } = React;
 const { YStack, XStack, Text, Button } = require('tamagui');
-const { Ionicons } = require('@expo/vector-icons');
+const { Ionicons } = require('../utils/icons');
 const { useLanguage } = require('../context/LanguageContext');
 
 const MezmurListCard = memo(({ item, isFavorite, onToggleFavorite, onPress, getStatusColor, theme, rightAction }) => {

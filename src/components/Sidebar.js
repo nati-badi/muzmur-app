@@ -1,7 +1,7 @@
 const React = require('react');
 const { useMemo, memo, useCallback } = React;
 const { YStack, XStack, Text, Circle, Button, Separator } = require('tamagui');
-const { Ionicons } = require('@expo/vector-icons');
+const { Ionicons } = require('../utils/icons');
 const { DrawerContentScrollView } = require('@react-navigation/drawer');
 const { useNavigationState, getFocusedRouteNameFromRoute, TabActions } = require('@react-navigation/native');
 const { useAppTheme } = require('../context/ThemeContext');

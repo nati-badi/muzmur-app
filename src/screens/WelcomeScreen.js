@@ -1,7 +1,7 @@
 const React = require('react');
 const { YStack, XStack, Text, Button } = require('tamagui');
 const { useSafeAreaInsets } = require('react-native-safe-area-context');
-const { Ionicons } = require('@expo/vector-icons');
+const { Ionicons } = require('../utils/icons');
 const { useAppTheme } = require('../context/ThemeContext');
 const AsyncStorage = require('@react-native-async-storage/async-storage').default || require('@react-native-async-storage/async-storage');
 

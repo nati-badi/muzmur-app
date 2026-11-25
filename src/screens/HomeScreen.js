@@ -3,7 +3,7 @@ const { useState, useEffect, useCallback, useMemo, memo } = React;
 const { FlatList, Modal, ScrollView, StyleSheet, ActivityIndicator, useWindowDimensions, Share, Alert, TouchableWithoutFeedback, View, Image: RNImage } = require('react-native');
 const { YStack, XStack, Text, Input, Button, Circle, Theme, Separator } = require('tamagui');
 const { useSafeAreaInsets } = require('react-native-safe-area-context');
-const { Ionicons } = require('@expo/vector-icons');
+const { Ionicons } = require('../utils/icons');
 const AsyncStorage = require('@react-native-async-storage/async-storage').default || require('@react-native-async-storage/async-storage');
 const { useFocusEffect } = require('@react-navigation/native');
 const { useAppTheme } = require('../context/ThemeContext');
@@ -191,7 +191,7 @@ const HomeScreen = ({ navigation, route }) => {
       { id: SECTION_ALL_ID, label: t('all') },
       ...sections.map(s => ({ id: s.id, label: t(s.label) || s.label }))
     ];
-  }, [t]);
+  }, [t, dataVersion]);
 
   // Update visibleCount if screen height changes
   useEffect(() => {

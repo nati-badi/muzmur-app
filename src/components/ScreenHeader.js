@@ -1,6 +1,6 @@
 const React = require('react');
 const { XStack, Text, Button, Circle, View } = require('tamagui');
-const { Ionicons } = require('@expo/vector-icons');
+const { Ionicons } = require('../utils/icons');
 const { TouchableOpacity } = require('react-native');
 
 /**

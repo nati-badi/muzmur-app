@@ -7,6 +7,10 @@ node_modules/
 .expo/
 dist/
 web-build/
+.expo-export-test/
+.expo-export-test2/
+.apk-analysis/
+dist/
 expo-env.d.ts
 
 # Native

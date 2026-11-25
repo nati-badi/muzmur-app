@@ -1,4 +1,4 @@
-const { doc, getDoc, setDoc, updateDoc, serverTimestamp } = require('firebase/firestore');
+const { doc, getDoc, setDoc, serverTimestamp } = require('firebase/firestore');
 const { db } = require('../config/firebase.config');
 const AsyncStorage = require('@react-native-async-storage/async-storage').default || require('@react-native-async-storage/async-storage');
 
@@ -61,80 +61,28 @@ class UserProfileService {
    * Sync favorites to cloud (batched for efficiency)
    */
   static async syncFavorites(userId, favorites) {
-    try {
-      const docRef = doc(db, 'users', userId);
-      await updateDoc(docRef, {
-        favorites,
-        lastSync: serverTimestamp()
-      });
-
-      return { success: true };
-    } catch (error) {
-      // If document doesn't exist, create it
-      if (error.code === 'not-found') {
-        return await this.saveProfile(userId, { favorites });
-      }
-      console.error('Error syncing favorites:', error);
-      return { success: false, error: error.message };
-    }
+    return this.saveProfile(userId, { favorites });
   }
 
   /**
    * Sync theme preference to cloud
    */
   static async syncTheme(userId, themeId) {
-    try {
-      const docRef = doc(db, 'users', userId);
-      await updateDoc(docRef, {
-        theme: themeId,
-        lastSync: serverTimestamp()
-      });
-
-      return { success: true };
-    } catch (error) {
-      console.error('Error syncing theme:', error);
-      return { success: false, error: error.message };
-    }
+    return this.saveProfile(userId, { theme: themeId });
   }
 
   /**
    * Sync language preference to cloud
    */
   static async syncLanguage(userId, language) {
-    try {
-      const docRef = doc(db, 'users', userId);
-      await updateDoc(docRef, {
-        language,
-        lastSync: serverTimestamp()
-      });
-
-      return { success: true };
-    } catch (error) {
-      console.error('Error syncing language:', error);
-      return { success: false, error: error.message };
-    }
+    return this.saveProfile(userId, { language });
   }
 
   /**
    * Sync playlists to cloud
    */
   static async syncPlaylists(userId, playlists) {
-    try {
-      const docRef = doc(db, 'users', userId);
-      await updateDoc(docRef, {
-        playlists,
-        lastSync: serverTimestamp()
-      });
-
-      return { success: true };
-    } catch (error) {
-      // If document doesn't exist, create it
-      if (error.code === 'not-found') {
-        return await this.saveProfile(userId, { playlists });
-      }
-      console.error('Error syncing playlists:', error);
-      return { success: false, error: error.message };
-    }
+    return this.saveProfile(userId, { playlists });
   }
 
   /**

@@ -1,5 +1,5 @@
 const React = require('react');
-const { Ionicons } = require('@expo/vector-icons');
+const { Ionicons } = require('../utils/icons');
 const { Text, XStack, YStack } = require('tamagui');
 const { useSafeAreaInsets } = require('react-native-safe-area-context');
 

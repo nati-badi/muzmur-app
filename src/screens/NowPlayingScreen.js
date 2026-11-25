@@ -9,7 +9,7 @@ const { useAppTheme } = require('../context/ThemeContext');
 const { useLanguage } = require('../context/LanguageContext');
 const { useFavorites } = require('../context/FavoritesContext');
 const { useAudio, useAudioProgress } = require('../context/GlobalAudioState.js');
-const { Ionicons } = require('@expo/vector-icons');
+const { Ionicons } = require('../utils/icons');
 const ScreenHeader = require('../components/ScreenHeader');
 const SmoothSlider = require('../components/SmoothSlider');
 
@@ -141,7 +141,6 @@ const HymnPlayerScreen = ({ navigation }) => {
         insets={insets}
       />
     </YStack>
-    </YStack >
   );
 };
 

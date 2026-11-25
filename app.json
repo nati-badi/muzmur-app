@@ -14,7 +14,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.badi_nati.muzmurapp",
+      "bundleIdentifier": "com.badinati.muzmurapp",
       "infoPlist": {
         "UIBackgroundModes": [
           "audio"
@@ -36,7 +36,18 @@
     "plugins": [
       "expo-font",
       "expo-audio",
-      "@react-native-google-signin/google-signin"
+      "@react-native-google-signin/google-signin",
+      "expo-asset",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableMinifyInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true,
+            "reactNativeArchitectures": ["arm64-v8a"]
+          }
+        }
+      ]
     ],
     "extra": {
       "eas": {

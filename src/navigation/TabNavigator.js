@@ -1,6 +1,6 @@
 const React = require('react');
 const { createMaterialTopTabNavigator } = require('@react-navigation/material-top-tabs');
-const { Ionicons } = require('@expo/vector-icons');
+const { Ionicons } = require('../utils/icons');
 const { Text, XStack, YStack } = require('tamagui');
 const { useSafeAreaInsets } = require('react-native-safe-area-context');
 

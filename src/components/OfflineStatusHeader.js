@@ -1,7 +1,7 @@
 const React = require('react');
 const { useState, useEffect } = React;
 const { XStack, YStack, Text, Circle, AnimatePresence } = require('tamagui');
-const { Ionicons } = require('@expo/vector-icons');
+const { Ionicons } = require('../utils/icons');
 const SyncService = require('../services/SyncService');
 const { useAppTheme } = require('../context/ThemeContext');
 const { useLanguage } = require('../context/LanguageContext');
